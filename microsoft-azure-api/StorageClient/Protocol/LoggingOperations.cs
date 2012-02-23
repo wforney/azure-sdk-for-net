@@ -23,33 +23,33 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System;
 
     /// <summary>
-    /// Enumeration representing the state of logging in a service.
+    ///   Enumeration representing the state of logging in a service.
     /// </summary>
     [Flags]
     public enum LoggingOperations
     {
         /// <summary>
-        /// Logging is disabled.
+        ///   Logging is disabled.
         /// </summary>
         None = 0x0,
 
         /// <summary>
-        /// Log read operations.
+        ///   Log read operations.
         /// </summary>
         Read = 0x1,
 
         /// <summary>
-        /// Log write operations.
+        ///   Log write operations.
         /// </summary>
         Write = 0x2,
 
         /// <summary>
-        /// Log delete operations.
+        ///   Log delete operations.
         /// </summary>
         Delete = 0x4,
 
         /// <summary>
-        /// Log all operations.
+        ///   Log all operations.
         /// </summary>
         All = 0x7
     }

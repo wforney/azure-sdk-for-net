@@ -21,21 +21,29 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     /// <summary>
-    /// Represents a container item returned in the XML response for a container listing operation.
+    ///   Represents a container item returned in the XML response for a container listing operation.
     /// </summary>
     public class BlobContainerEntry
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="BlobContainerEntry"/> class.
+        ///   Initializes a new instance of the <see cref="BlobContainerEntry" /> class.
         /// </summary>
         internal BlobContainerEntry()
         {
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets the attributes for this container item.
+        ///   Gets the attributes for this container item.
         /// </summary>
-        /// <value>The container item's attributes.</value>
+        /// <value> The container item's attributes. </value>
         public BlobContainerAttributes Attributes { get; internal set; }
+
+        #endregion
     }
 }

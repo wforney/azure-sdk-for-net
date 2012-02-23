@@ -23,15 +23,17 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System;
 
     /// <summary>
-    /// Represents the credentials used to sign a request against the storage services.
+    ///   Represents the credentials used to sign a request against the storage services.
     /// </summary>
     public class Credentials
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="Credentials"/> class.
+        ///   Initializes a new instance of the <see cref="Credentials" /> class.
         /// </summary>
-        /// <param name="accountName">The storage account name.</param>
-        /// <param name="key">The access key.</param>
+        /// <param name="accountName"> The storage account name. </param>
+        /// <param name="key"> The access key. </param>
         public Credentials(string accountName, byte[] key)
         {
             if (String.IsNullOrEmpty(accountName))
@@ -49,42 +51,56 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Credentials"/> class.
+        ///   Initializes a new instance of the <see cref="Credentials" /> class.
         /// </summary>
-        /// <param name="accountName">The storage account name.</param>
-        /// <param name="base64EncodedKey">The access key, as a Base64-encoded string.</param>
+        /// <param name="accountName"> The storage account name. </param>
+        /// <param name="base64EncodedKey"> The access key, as a Base64-encoded string. </param>
         public Credentials(string accountName, string base64EncodedKey)
             : this(accountName, Convert.FromBase64String(base64EncodedKey))
         {
         }
 
-        /// <summary>
-        /// Gets the account name to be used in signing the request.
-        /// </summary>
-        /// <value>The name of the account.</value>
-        public string AccountName { get; private set; }
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// Gets the access key to be used in signing the request.
+        ///   Gets the account name to be used in signing the request.
+        /// </summary>
+        /// <value> The name of the account. </value>
+        public string AccountName { get; private set; }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///   Gets the access key to be used in signing the request.
         /// </summary>
         internal StorageKey Key { get; private set; }
 
+        #endregion
+
+        #region Public Methods and Operators
+
         /// <summary>
-        /// Exports the value of the access key to an array of bytes.
+        ///   Exports the value of the access key to a Base64-encoded string.
         /// </summary>
-        /// <returns>The account access key.</returns>
+        /// <returns> The account access key. </returns>
+        public string ExportBase64EncodedKey()
+        {
+            return this.Key.GetBase64EncodedKey();
+        }
+
+        /// <summary>
+        ///   Exports the value of the access key to an array of bytes.
+        /// </summary>
+        /// <returns> The account access key. </returns>
         public byte[] ExportKey()
         {
             return this.Key.GetKey();
         }
 
-        /// <summary>
-        /// Exports the value of the access key to a Base64-encoded string.
-        /// </summary>
-        /// <returns>The account access key.</returns>
-        public string ExportBase64EncodedKey()
-        {
-            return this.Key.GetBase64EncodedKey();
-        }
+        #endregion
     }
 }

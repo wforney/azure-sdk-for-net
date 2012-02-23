@@ -24,9 +24,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
     using System.Diagnostics;
 
     /// <summary>
-    /// Represents an asynchronous computation that yields a result of type T.
+    /// Represents an asynchronous computation that yields a resultToSet of type T.
     /// </summary>
-    /// <typeparam name="T">The type of the result of the operation.</typeparam>
+    /// <typeparam name="T">The type of the resultToSet of the operation.</typeparam>
     /// <remarks>
     /// By this contract we:
     ///  1) guarantee that the completion routine is performed, regardless of the outcome of ExecuteStep.
@@ -36,27 +36,17 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
     internal abstract class Task<T> : ITask
     {
         /// <summary>
-        /// Provides information if the task completed synchronously and therefore on the main thread.
-        /// </summary>
-        private bool completedSynchronously;
-
-        /// <summary>
-        /// Contains any exceptions raised by the task.
-        /// </summary>
-        private Exception exception;
-
-        /// <summary>
         /// The action to call once the operation is completed.
         /// </summary>
         private Action completionFunction;
 
         /// <summary>
-        /// The result of the operation.
+        /// The resultToSet of the operation.
         /// </summary>
         private T result;
 
         /// <summary>
-        /// Gets or sets the result of the operation and throws any exceptions raised by the operation.
+        /// Gets or sets the resultToSet of the operation and throws any exceptions raised by the operation.
         /// </summary>
         [DebuggerNonUserCode]
         public T Result
@@ -69,9 +59,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                     throw new InvalidOperationException("the operation is not complete");
                 }
 
-                if (this.exception != null)
+                if (this.Exception != null)
                 {
-                    throw this.exception;
+                    throw this.Exception;
                 }
 
                 return this.result;
@@ -87,37 +77,13 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         /// Gets or sets a value indicating whether the operation was completed synchronously and therefore on main thread.
         /// </summary>
         [DebuggerNonUserCode]
-        public bool CompletedSynchronously
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return this.completedSynchronously;
-            }
-
-            protected set
-            {
-                this.completedSynchronously = value;
-            }
-        }
+        public bool CompletedSynchronously { [DebuggerStepThrough]get; protected set; }
 
         /// <summary>
         /// Gets or sets any exceptions raised during execution.
         /// </summary>
         [DebuggerNonUserCode]
-        public Exception Exception
-        {
-            [DebuggerStepThrough]
-            get
-            {
-                return this.exception;
-            }
-
-            protected set
-            {
-                this.exception = value;
-            }
-        }
+        public Exception Exception { [DebuggerStepThrough]get; protected set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the task is completed.
@@ -125,17 +91,21 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         protected bool Completed { get; set; }
 
         /// <summary>
-        /// Executes the tasks and waits for the result.
+        /// Executes the tasks and waits for the resultToSet.
         /// </summary>
-        /// <returns>The result of the operation.</returns>
+        /// <returns>The resultToSet of the operation.</returns>
         public T ExecuteAndWait()
         {
             TraceHelper.WriteLine("Task, ExecuteAndWait");
 
             // Potential optimization: Make sure that synchronous results are not creating events
-            using (System.Threading.ManualResetEvent evt = new System.Threading.ManualResetEvent(false))
+            using (var evt = new System.Threading.ManualResetEvent(false))
             {
-                this.ExecuteStep(() => { evt.Set(); });
+                this.ExecuteStep(() =>
+                    {
+                        Debug.Assert(evt != null, "evt != null");
+                        evt.Set();
+                    });
                 evt.WaitOne();
             }
 
@@ -145,7 +115,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         /// <summary>
         /// Executes a task, will not wait on a sync task.
         /// </summary>
-        /// <returns>The result of the operation.</returns>
+        /// <returns>The resultToSet of the operation.</returns>
         public T Execute()
         {
             TraceHelper.WriteLine("Task, Execute");
@@ -154,10 +124,8 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                 this.ExecuteInternal();
                 return this.Result;
             }
-            else
-            {
-                return this.ExecuteAndWait();
-            }
+
+            return this.ExecuteAndWait();
         }
 
         /// <summary>
@@ -179,7 +147,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             }
             catch (Exception ex)
             {
-                this.exception = ex;
+                this.Exception = ex;
                 this.Complete(true);
             }
         }
@@ -211,7 +179,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             }
             catch (Exception ex)
             {
-                this.exception = ex;
+                this.Exception = ex;
             }
             finally
             {
@@ -237,19 +205,19 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         protected abstract void ExecuteInternal();
 
         /// <summary>
-        /// Implements a safe way to obtain the result.
+        /// Implements a safe way to obtain the resultToSet.
         /// </summary>
-        /// <param name="result">The function used to get the result value.</param>
+        /// <param name="resultToSet">The function used to get the resultToSet value.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "The exception is stored.")]
         [DebuggerNonUserCode]
-        protected void SetResult(Func<T> result)
+        protected void SetResult(Func<T> resultToSet)
         {
             try
             {
-                this.Result = result();
+                this.Result = resultToSet();
             }
             catch (AccessViolationException)
             {
@@ -257,7 +225,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             }
             catch (Exception ex)
             {
-                this.exception = ex;
+                this.Exception = ex;
             }
         }
 
@@ -269,15 +237,15 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         /// <summary>
         /// The completion return that needs to be called whenever operation completes.
         /// </summary>
-        /// <param name="completedSynchronously">Whether the underlying operation completed synchrnously.</param>
+        /// <param name="completedSynchronouslyParam">Whether the underlying operation completed synchrnously.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage(
             "Microsoft.Design",
             "CA1031:DoNotCatchGeneralExceptionTypes",
             Justification = "Callbacks should never throw exception")]
         [DebuggerNonUserCode]
-        protected void Complete(bool completedSynchronously)
+        protected void Complete(bool completedSynchronouslyParam)
         {
-            TraceHelper.WriteLine("Task, Complete completedSynchronously {0}", completedSynchronously);
+            TraceHelper.WriteLine("Task, Complete completedSynchronouslyParam {0}", completedSynchronouslyParam);
             lock (this)
             {
                 if (this.Completed)
@@ -286,7 +254,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                     return;
                 }
 
-                this.CompletedSynchronously = completedSynchronously;
+                this.CompletedSynchronously = completedSynchronouslyParam;
                 this.Completed = true;
             }
 

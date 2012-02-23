@@ -27,77 +27,73 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System.Xml;
 
     /// <summary>
-    /// Provides methods for parsing the response from a container listing operation.
+    ///   Provides methods for parsing the response from a container listing operation.
     /// </summary>
     public class ListContainersResponse : ResponseParsingBase<BlobContainerEntry>
     {
-        /// <summary>
-        /// Stores the container prefix.
-        /// </summary>
-        private string prefix;
+        #region Constants and Fields
 
         /// <summary>
-        /// Signals when the container prefix can be consumed.
-        /// </summary>
-        private bool prefixConsumable;
-
-        /// <summary>
-        /// Stores the marker.
+        ///   Stores the marker.
         /// </summary>
         private string marker;
 
         /// <summary>
-        /// Signals when the marker can be consumed.
+        ///   Signals when the marker can be consumed.
         /// </summary>
         private bool markerConsumable;
 
         /// <summary>
-        /// Stores the max results.
+        ///   Stores the max results.
         /// </summary>
         private int maxResults;
 
         /// <summary>
-        /// Signals when the max results can be consumed.
+        ///   Signals when the max results can be consumed.
         /// </summary>
         private bool maxResultsConsumable;
 
         /// <summary>
-        /// Stores the next marker.
+        ///   Stores the next marker.
         /// </summary>
         private string nextMarker;
 
         /// <summary>
-        /// Signals when the next marker can be consumed.
+        ///   Signals when the next marker can be consumed.
         /// </summary>
         private bool nextMarkerConsumable;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListContainersResponse"/> class.
+        ///   Stores the container prefix.
         /// </summary>
-        /// <param name="stream">The stream to be parsed.</param>
-        internal ListContainersResponse(Stream stream) : base(stream)
+        private string prefix;
+
+        /// <summary>
+        ///   Signals when the container prefix can be consumed.
+        /// </summary>
+        private bool prefixConsumable;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="ListContainersResponse" /> class.
+        /// </summary>
+        /// <param name="stream"> The stream to be parsed. </param>
+        internal ListContainersResponse(Stream stream)
+            : base(stream)
         {
         }
 
-        /// <summary>
-        /// Gets the listing context from the XML response.
-        /// </summary>
-        /// <value>A set of parameters for the listing operation.</value>
-        public ListingContext ListingContext
-        {
-            get
-            {
-                // Force a parsing in order
-                ListingContext listingContext = new ListingContext(this.Prefix, this.MaxResults);
-                listingContext.Marker = this.NextMarker;
-                return listingContext;
-            }
-        }
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// Gets an enumerable collection of <see cref="BlobContainerEntry"/> objects from the response.
+        ///   Gets an enumerable collection of <see cref="BlobContainerEntry" /> objects from the response.
         /// </summary>
-        /// <value>An enumerable collection of <see cref="BlobContainerEntry"/> objects.</value>
+        /// <value> An enumerable collection of <see cref="BlobContainerEntry" /> objects. </value>
         public IEnumerable<BlobContainerEntry> Containers
         {
             get
@@ -107,23 +103,23 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the Prefix value provided for the listing operation from the XML response.
+        ///   Gets the listing context from the XML response.
         /// </summary>
-        /// <value>The Prefix value.</value>
-        public string Prefix
+        /// <value> A set of parameters for the listing operation. </value>
+        public ListingContext ListingContext
         {
             get
             {
-                this.Variable(ref this.prefixConsumable);
-
-                return this.prefix;
+                // Force a parsing in order
+                var listingContext = new ListingContext(this.Prefix, this.MaxResults) { Marker = this.NextMarker };
+                return listingContext;
             }
         }
 
         /// <summary>
-        /// Gets the Marker value provided for the listing operation from the XML response.
+        ///   Gets the Marker value provided for the listing operation from the XML response.
         /// </summary>
-        /// <value>The Marker value.</value>
+        /// <value> The Marker value. </value>
         public string Marker
         {
             get
@@ -135,9 +131,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the MaxResults value provided for the listing operation from the XML response.
+        ///   Gets the MaxResults value provided for the listing operation from the XML response.
         /// </summary>
-        /// <value>The MaxResults value.</value>
+        /// <value> The MaxResults value. </value>
         public int MaxResults
         {
             get
@@ -149,9 +145,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the NextMarker value from the XML response, if the listing was not complete.
+        ///   Gets the NextMarker value from the XML response, if the listing was not complete.
         /// </summary>
-        /// <value>The NextMarker value.</value>
+        /// <value> The NextMarker value. </value>
         public string NextMarker
         {
             get
@@ -163,16 +159,34 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Parses the response XML for a container listing operation.
+        ///   Gets the Prefix value provided for the listing operation from the XML response.
         /// </summary>
-        /// <returns>An enumerable collection of <see cref="BlobContainerEntry"/> objects.</returns>
+        /// <value> The Prefix value. </value>
+        public string Prefix
+        {
+            get
+            {
+                this.Variable(ref this.prefixConsumable);
+
+                return this.prefix;
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        ///   Parses the response XML for a container listing operation.
+        /// </summary>
+        /// <returns> An enumerable collection of <see cref="BlobContainerEntry" /> objects. </returns>
         protected override IEnumerable<BlobContainerEntry> ParseXml()
         {
-            bool needToRead = true;
+            var needToRead = true;
 
             while (true)
             {
-                if (needToRead && !reader.Read())
+                if (needToRead && !this.Reader.Read())
                 {
                     break;
                 }
@@ -180,39 +194,40 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 needToRead = true;
 
                 // Run through the stream until we find what we are looking for.  Retain what we've found.
-                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
+                if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement)
                 {
-                    switch (reader.Name)
+                    switch (this.Reader.Name)
                     {
                         case Constants.MarkerElement:
                             needToRead = false;
-                            this.marker = reader.ReadElementContentAsString();
+                            this.marker = this.Reader.ReadElementContentAsString();
                             this.markerConsumable = true;
                             yield return null;
                             break;
                         case Constants.NextMarkerElement:
                             needToRead = false;
-                            this.nextMarker = reader.ReadElementContentAsString();
+                            this.nextMarker = this.Reader.ReadElementContentAsString();
                             this.nextMarkerConsumable = true;
                             yield return null;
                             break;
                         case Constants.MaxResultsElement:
                             needToRead = false;
-                            this.maxResults = reader.ReadElementContentAsInt();
+                            this.maxResults = this.Reader.ReadElementContentAsInt();
                             this.maxResultsConsumable = true;
                             yield return null;
                             break;
                         case Constants.PrefixElement:
                             needToRead = false;
-                            this.prefix = reader.ReadElementContentAsString();
+                            this.prefix = this.Reader.ReadElementContentAsString();
                             this.prefixConsumable = true;
                             yield return null;
                             break;
                         case Constants.ContainersElement:
-                            while (reader.Read())
+                            while (this.Reader.Read())
                             {
                                 // We found a container.
-                                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.ContainerElement)
+                                if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement
+                                    && this.Reader.Name == Constants.ContainerElement)
                                 {
                                     BlobContainerAttributes container = null;
                                     Uri uri = null;
@@ -222,48 +237,48 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                                     NameValueCollection metadata = null;
 
                                     // Go until we are out of the container.
-                                    bool containersNeedToRead = true;
+                                    var containersNeedToRead = true;
                                     while (true)
                                     {
-                                        if (containersNeedToRead && !reader.Read())
+                                        if (containersNeedToRead && !this.Reader.Read())
                                         {
                                             break;
                                         }
 
                                         containersNeedToRead = true;
 
-                                        if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
+                                        if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement)
                                         {
-                                            switch (reader.Name)
+                                            switch (this.Reader.Name)
                                             {
                                                 case Constants.UrlElement:
-                                                    string url = reader.ReadElementContentAsString();
+                                                    var url = this.Reader.ReadElementContentAsString();
                                                     containersNeedToRead = false;
                                                     Uri.TryCreate(url, UriKind.Absolute, out uri);
                                                     break;
                                                 case Constants.LastModifiedElement:
-                                                    lastModifiedTime = reader.ReadElementContentAsString().ToUTCTime();
+                                                    lastModifiedTime =
+                                                        this.Reader.ReadElementContentAsString().ToUTCTime();
                                                     containersNeedToRead = false;
                                                     break;
                                                 case Constants.EtagElement:
-                                                    etag = reader.ReadElementContentAsString();
+                                                    etag = this.Reader.ReadElementContentAsString();
                                                     containersNeedToRead = false;
                                                     break;
                                                 case Constants.NameElement:
-                                                    name = reader.ReadElementContentAsString();
+                                                    name = this.Reader.ReadElementContentAsString();
                                                     containersNeedToRead = false;
                                                     break;
                                                 case Constants.MetadataElement:
-                                                    metadata = Response.ParseMetadata(reader);
+                                                    metadata = Response.ParseMetadata(this.Reader);
                                                     containersNeedToRead = false;
                                                     break;
                                             }
                                         }
-                                        else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.ContainerElement)
+                                        else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                                 && this.Reader.Name == Constants.ContainerElement)
                                         {
-                                            container = new BlobContainerAttributes();
-                                            container.Name = name;
-                                            container.Uri = uri;
+                                            container = new BlobContainerAttributes { Name = name, Uri = uri };
 
                                             if (metadata != null)
                                             {
@@ -282,14 +297,12 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                                         }
                                     }
 
-                                    yield return new BlobContainerEntry
-                                    {
-                                        Attributes = container
-                                    };
+                                    yield return new BlobContainerEntry { Attributes = container };
                                 }
-                                else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.ContainersElement)
+                                else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                         && this.Reader.Name == Constants.ContainersElement)
                                 {
-                                    this.allObjectsParsed = true;
+                                    this.AllObjectsParsed = true;
                                     break;
                                 }
                             }
@@ -299,5 +312,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 }
             }
         }
+
+        #endregion
     }
 }

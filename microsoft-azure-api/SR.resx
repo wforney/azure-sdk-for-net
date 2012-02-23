@@ -286,4 +286,31 @@
   <data name="SnapshotTimePassedTwice" xml:space="preserve">
     <value>Snapshot query parameter is already defined in the blobUri. Either pass in a snapshotTime parameter or use a full URL with a snapshot query parameter.</value>
   </data>
+    <data name="SmallBlockMemoryStream_Reserve_The_size_must_be_positive">
+        <value xml:space="preserve">The size must be positive</value>
+    </data>
+    <data name="SmallBlockMemoryStream_Write_Offset_subtracted_from_the_buffer_length_is_less_than_count">
+        <value xml:space="preserve">Offset subtracted from the buffer length is less than count</value>
+    </data>
+    <data name="Count_must_be_positive">
+        <value xml:space="preserve">Count must be positive</value>
+    </data>
+    <data name="Write_Offset_must_be_positive">
+        <value xml:space="preserve">Offset must be positive</value>
+    </data>
+    <data name="Attempting_to_seek_past_the_end_of_the_stream">
+        <value xml:space="preserve">Attempting to seek past the end of the stream</value>
+    </data>
+    <data name="Attempting_to_seek_before_the_start_of_the_stream">
+        <value xml:space="preserve">Attempting to seek before the start of the stream</value>
+    </data>
+    <data name="Offset_and_count_are_beyond_the_buffer_size">
+        <value xml:space="preserve">Offset and count are beyond the buffer size</value>
+    </data>
+    <data name="BlockSize_must_be_a_positive__non_zero_value">
+        <value xml:space="preserve">BlockSize must be a positive, non-zero value</value>
+    </data>
+    <data name="Calls_to_UpdateMessage_must_include_the_Visibility_flag">
+        <value xml:space="preserve">Calls to UpdateMessage must include the Visibility flag.</value>
+    </data>
 </root>

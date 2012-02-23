@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="SynchronousTask.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,53 +20,62 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
 {
     using System;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
 
-    /// <summary>
-    /// A task that obtains a result synchronously.
-    /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.StyleCop.CSharp.MaintainabilityRules",
-        "SA1402:FileMayOnlyContainASingleClass",
+    /// <summary>A task that obtains a result synchronously.</summary>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", 
         Justification = "Other class is a generic class with the same name.")]
     internal class SynchronousTask : SynchronousTask<NullTaskReturn>
     {
-        /// <summary>
-        /// Initializes a new instance of the SynchronousTask class.
-        /// </summary>
-        /// <param name="operation">The function to execute.</param>
+        #region Constructors and Destructors
+
+        /// <summary>Initializes a new instance of the SynchronousTask class.</summary>
+        /// <param name="operation">The function to execute. </param>
         public SynchronousTask(Action operation)
-            : base(() => { operation(); return NullTaskReturn.Value; })
+            : base(() =>
+                {
+                    operation();
+                    return NullTaskReturn.Value;
+                })
         {
         }
+
+        #endregion
     }
 
-    /// <summary>
-    /// A task that obtains a result synchronously.
-    /// </summary>
-    /// <typeparam name="T">The type of the result of the operation.</typeparam>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.StyleCop.CSharp.MaintainabilityRules",
-        "SA1402:FileMayOnlyContainASingleClass",
+    /// <summary>A task that obtains a result synchronously.</summary>
+    /// <typeparam name="T">The type of the result of the operation. </typeparam>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", 
         Justification = "Other class is a non-generic specialization with the same name.")]
     internal class SynchronousTask<T> : Task<T>
     {
-        /// <summary>
-        /// The function to be executed.
-        /// </summary>
-        private Func<T> func;
+        #region Constants and Fields
 
-        /// <summary>
-        /// Initializes a new instance of the SynchronousTask class.
-        /// </summary>
-        /// <param name="operation">The function to execute.</param>
+        /// <summary>The function to be executed.</summary>
+        private readonly Func<T> func;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>Initializes a new instance of the <see cref="SynchronousTask{T}"/> class. Initializes a new instance of the SynchronousTask class.</summary>
+        /// <param name="operation">The function to execute. </param>
         public SynchronousTask(Func<T> operation)
         {
             this.func = operation;
         }
 
-        /// <summary>
-        /// Performs the task and marks it as completed.
-        /// </summary>
+        #endregion
+
+        #region Methods
+
+        /// <summary>Implements abort as NoOp.</summary>
+        [DebuggerNonUserCode]
+        protected override void AbortInternal()
+        {
+        }
+
+        /// <summary>Performs the task and marks it as completed.</summary>
         [DebuggerNonUserCode]
         protected override void ExecuteInternal()
         {
@@ -76,12 +83,6 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             this.Complete(true);
         }
 
-        /// <summary>
-        /// Implements abort as NoOp.
-        /// </summary>
-        [DebuggerNonUserCode]
-        protected override void AbortInternal()
-        {
-        }
+        #endregion
     }
 }

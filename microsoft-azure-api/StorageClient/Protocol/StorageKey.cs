@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="StorageKey.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -20,6 +18,7 @@
 
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
+    using System;
     using System.Security.Cryptography;
     using System.Text;
 
@@ -31,70 +30,102 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     /// </remarks>
     internal class StorageKey
     {
+        #region Constructors and Destructors
+
         /// <summary>
         /// Initializes a new instance of the <see cref="StorageKey"/> class.
         /// </summary>
-        /// <param name="key">The storage key.</param>
+        /// <param name="key">
+        /// The storage key. 
+        /// </param>
         public StorageKey(byte[] key)
         {
             this.Key = key;
         }
 
+        #endregion
+
+        #region Properties
+
         /// <summary>
         /// Gets or sets the key.
         /// </summary>
-        /// <value>The storage key.</value>
+        /// <value>
+        /// The storage key. 
+        /// </value>
         private byte[] Key { get; set; }
+
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Computes the mac sha256.
         /// </summary>
-        /// <param name="storageKey">The storage key.</param>
-        /// <param name="canonicalizedString">The canonicalized string.</param>
-        /// <returns>The computed hash.</returns>
+        /// <param name="storageKey">
+        /// The storage key. 
+        /// </param>
+        /// <param name="canonicalizedString">
+        /// The canonicalized string. 
+        /// </param>
+        /// <returns>
+        /// The computed hash. 
+        /// </returns>
         internal static string ComputeMacSha256(StorageKey storageKey, string canonicalizedString)
         {
-            byte[] dataToMAC = Encoding.UTF8.GetBytes(canonicalizedString);
+            var dataToMac = Encoding.UTF8.GetBytes(canonicalizedString);
 
-            using (HMACSHA256 hmacsha1 = new HMACSHA256(storageKey.Key))
+            using (var hmacsha1 = new HMACSHA256(storageKey.Key))
             {
-                return System.Convert.ToBase64String(hmacsha1.ComputeHash(dataToMAC));
+                return Convert.ToBase64String(hmacsha1.ComputeHash(dataToMac));
             }
         }
 
         /// <summary>
         /// Computes the mac sha512.
         /// </summary>
-        /// <param name="storageKey">The storage key.</param>
-        /// <param name="canonicalizedString">The canonicalized string.</param>
-        /// <returns>The computed hash.</returns>
+        /// <param name="storageKey">
+        /// The storage key. 
+        /// </param>
+        /// <param name="canonicalizedString">
+        /// The canonicalized string. 
+        /// </param>
+        /// <returns>
+        /// The computed hash. 
+        /// </returns>
         internal static string ComputeMacSha512(StorageKey storageKey, string canonicalizedString)
         {
-            byte[] dataToMAC = Encoding.UTF8.GetBytes(canonicalizedString);
+            var dataToMac = Encoding.UTF8.GetBytes(canonicalizedString);
 
-            using (HMACSHA512 hmacsha1 = new HMACSHA512(storageKey.Key))
+            using (var hmacsha1 = new HMACSHA512(storageKey.Key))
             {
-                return System.Convert.ToBase64String(hmacsha1.ComputeHash(dataToMAC));
+                return Convert.ToBase64String(hmacsha1.ComputeHash(dataToMac));
             }
         }
 
         /// <summary>
         /// Gets the base64 encoded key.
         /// </summary>
-        /// <returns>The base64 encoded key.</returns>
+        /// <returns>
+        /// The base64 encoded key. 
+        /// </returns>
         internal string GetBase64EncodedKey()
         {
-            return System.Convert.ToBase64String(this.Key);
+            return Convert.ToBase64String(this.Key);
         }
 
         /// <summary>
         /// Gets the key.
         /// </summary>
-        /// <returns>The storage key.</returns>
+        /// <returns>
+        /// The storage key. 
+        /// </returns>
         internal byte[] GetKey()
         {
-            byte[] keyCopy = (byte[])this.Key.Clone();
+            var keyCopy = (byte[])this.Key.Clone();
             return keyCopy;
         }
+
+        #endregion
     }
 }

@@ -22,24 +22,29 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     using System;
     using System.Collections.Generic;
-    using System.Linq;
     using System.Text;
 
     /// <summary>
-    /// A <see cref="UriBuilder"/> style class for creating Uri query strings.
+    ///   A <see cref="UriBuilder" /> style class for creating Uri query strings.
     /// </summary>
     internal class UriQueryBuilder
     {
-        /// <summary>
-        /// Stores the query parameters.
-        /// </summary>
-        private Dictionary<string, string> parameters = new Dictionary<string, string>();
+        #region Constants and Fields
 
         /// <summary>
-        /// Add the value with Uri escaping.
+        ///   Stores the query parameters.
         /// </summary>
-        /// <param name="name">The query name.</param>
-        /// <param name="value">The query value.</param>
+        private readonly Dictionary<string, string> parameters = new Dictionary<string, string>();
+
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>
+        ///   Add the value with Uri escaping.
+        /// </summary>
+        /// <param name="name"> The query name. </param>
+        /// <param name="value"> The query value. </param>
         public void Add(string name, string value)
         {
             if (value != null)
@@ -51,15 +56,13 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Returns a <see cref="System.String"/> that represents this instance.
+        ///   Returns a <see cref="System.String" /> that represents this instance.
         /// </summary>
-        /// <returns>
-        /// A <see cref="System.String"/> that represents this instance.
-        /// </returns>
+        /// <returns> A <see cref="System.String" /> that represents this instance. </returns>
         public override string ToString()
         {
-            StringBuilder sb = new StringBuilder();
-            bool first = true;
+            var sb = new StringBuilder();
+            var first = true;
 
             foreach (var pair in this.parameters)
             {
@@ -84,22 +87,26 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
             return sb.ToString();
         }
 
+        #endregion
+
+        #region Methods
+
         /// <summary>
-        /// Add query parameter to an existing Uri. This takes care of any existing query parameters in the Uri.
+        ///   Add query parameter to an existing Uri. This takes care of any existing query parameters in the Uri.
         /// </summary>
-        /// <param name="uri">Original Uri which may contain query parameters already.</param>
-        /// <returns>The appended Uri.</returns>
+        /// <param name="uri"> Original Uri which may contain query parameters already. </param>
+        /// <returns> The appended Uri. </returns>
         internal Uri AddToUri(Uri uri)
         {
             // The correct way to add query parameters to a Uri http://msdn.microsoft.com/en-us/library/system.uribuilder.query.aspx
-            string queryToAppend = this.ToString();
+            var queryToAppend = this.ToString();
 
             if (queryToAppend.Length > 1)
             {
                 queryToAppend = queryToAppend.Substring(1);
             }
 
-            UriBuilder baseUri = new UriBuilder(uri);
+            var baseUri = new UriBuilder(uri);
 
             if (baseUri.Query != null && baseUri.Query.Length > 1)
             {
@@ -112,5 +119,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
 
             return baseUri.Uri;
         }
+
+        #endregion
     }
 }

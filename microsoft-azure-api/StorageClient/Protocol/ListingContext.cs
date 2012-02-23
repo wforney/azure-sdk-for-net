@@ -21,15 +21,17 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     /// <summary>
-    /// Represents the listing context for enumeration operations.
+    ///   Represents the listing context for enumeration operations.
     /// </summary>
     public class ListingContext
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListingContext"/> class.
+        ///   Initializes a new instance of the <see cref="ListingContext" /> class.
         /// </summary>
-        /// <param name="prefix">The resource name prefix.</param>
-        /// <param name="maxResults">The maximum number of resources to return in a single operation, up to the per-operation limit of 5000.</param>
+        /// <param name="prefix"> The resource name prefix. </param>
+        /// <param name="maxResults"> The maximum number of resources to return in a single operation, up to the per-operation limit of 5000. </param>
         public ListingContext(string prefix, int? maxResults)
         {
             this.Prefix = prefix;
@@ -37,22 +39,28 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
             this.Marker = null;
         }
 
-        /// <summary>
-        /// Gets or sets the Prefix value.
-        /// </summary>
-        /// <value>The Prefix value.</value>
-        public string Prefix { get; set; }
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// Gets or sets the MaxResults value.
+        ///   Gets or sets the Marker value.
         /// </summary>
-        /// <value>The MaxResults value.</value>
+        /// <value> The Marker value. </value>
+        public string Marker { get; set; }
+
+        /// <summary>
+        ///   Gets or sets the MaxResults value.
+        /// </summary>
+        /// <value> The MaxResults value. </value>
         public int? MaxResults { get; set; }
 
         /// <summary>
-        /// Gets or sets the Marker value.
+        ///   Gets or sets the Prefix value.
         /// </summary>
-        /// <value>The Marker value.</value>
-        public string Marker { get; set; }
+        /// <value> The Prefix value. </value>
+        public string Prefix { get; set; }
+
+        #endregion
     }
 }

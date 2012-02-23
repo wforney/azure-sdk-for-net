@@ -24,6 +24,7 @@ using System.Runtime.CompilerServices;
 using System.Security;
 
 #if UNSIGNED
+
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.StorageClient.Internal")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.StorageClient.ConvenienceTests")]
 [assembly: InternalsVisibleTo("Microsoft.WindowsAzure.StorageClient.Protocol.Tests")]
@@ -90,7 +91,8 @@ using System.Security;
     "08055da9")]
 
 #endif
+
 [assembly: CLSCompliant(true)]
 [assembly: AllowPartiallyTrustedCallers]
 [assembly: SecurityTransparent]
-[assembly: NeutralResourcesLanguageAttribute("en-US")]
+[assembly: NeutralResourcesLanguage("en-US")]

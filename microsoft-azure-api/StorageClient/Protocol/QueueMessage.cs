@@ -21,62 +21,67 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
 
     /// <summary>
-    /// Represents a message retrieved from a queue.
+    ///   Represents a message retrieved from a queue.
     /// </summary>
     public class QueueMessage
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueueMessage"/> class.
+        ///   Initializes a new instance of the <see cref="QueueMessage" /> class.
         /// </summary>
         internal QueueMessage()
         {
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets the message expiration time.
+        ///   Gets the number of times this message has been dequeued.
         /// </summary>
-        /// <value>The message expiration time.</value>
+        /// <value> The dequeue count. </value>
+        public int DequeueCount { get; internal set; }
+
+        /// <summary>
+        ///   Gets the message expiration time.
+        /// </summary>
+        /// <value> The message expiration time. </value>
         public DateTime ExpirationTime { get; internal set; }
 
         /// <summary>
-        /// Gets the message ID.
+        ///   Gets the message ID.
         /// </summary>
-        /// <value>The message ID.</value>
+        /// <value> The message ID. </value>
         public string Id { get; internal set; }
 
         /// <summary>
-        /// Gets the time the message was added to the queue.
+        ///   Gets the time the message was added to the queue.
         /// </summary>
-        /// <value>The message insertion time.</value>
+        /// <value> The message insertion time. </value>
         public DateTime InsertionTime { get; internal set; }
 
         /// <summary>
-        /// Gets the time the message is next visible.
+        ///   Gets the pop receipt for the message.
         /// </summary>
-        /// <value>The time the message is next visible.</value>
-        public DateTime? TimeNextVisible { get; internal set; }
-
-        /// <summary>
-        /// Gets the pop receipt for the message.
-        /// </summary>
-        /// <value>The message's pop receipt.</value>
+        /// <value> The message's pop receipt. </value>
         public string PopReceipt { get; internal set; }
 
         /// <summary>
-        /// Gets the text of the message.
+        ///   Gets the text of the message.
         /// </summary>
-        /// <value>The message text.</value>
+        /// <value> The message text. </value>
         public string Text { get; internal set; }
 
         /// <summary>
-        /// Gets the number of times this message has been dequeued.
+        ///   Gets the time the message is next visible.
         /// </summary>
-        /// <value>The dequeue count.</value>
-        public int DequeueCount { get; internal set; }
+        /// <value> The time the message is next visible. </value>
+        public DateTime? TimeNextVisible { get; internal set; }
+
+        #endregion
     }
 }

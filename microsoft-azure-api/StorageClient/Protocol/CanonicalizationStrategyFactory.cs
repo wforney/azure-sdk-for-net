@@ -21,152 +21,107 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     using System;
-    using System.Collections;
-    using System.Collections.Generic;
-    using System.Collections.Specialized;
     using System.Globalization;
-    using System.Linq;
     using System.Net;
-    using System.Text;
-    using System.Web;
-    using Microsoft.WindowsAzure.StorageClient;
 
     /// <summary>
-    /// Retrieve appropriate version of CanonicalizationStrategy based on the webrequest
-    /// for Blob Queue and Table.
+    ///   Retrieve appropriate version of CanonicalizationStrategy based on the webrequest for Blob Queue and Table.
     /// </summary>
     internal static class CanonicalizationStrategyFactory
     {
+        #region Constants and Fields
+
         /// <summary>
-        /// Stores the version 1 blob/queue full signing strategy.
+        ///   Stores the version 1 blob/queue full signing strategy.
         /// </summary>
         private static SharedKeyLiteCanonicalizer blobQueueFullVer1;
 
         /// <summary>
-        /// Stores the version 1 table lite signing strategy.
-        /// </summary>
-        private static SharedKeyLiteTableCanonicalizer tableLiteVer1;
-
-        /// <summary>
-        /// Stores the version 2 blob/queue full signing strategy.
+        ///   Stores the version 2 blob/queue full signing strategy.
         /// </summary>
         private static SharedKeyCanonicalizer blobQueueFullVer2;
 
         /// <summary>
-        /// Stores the version 1 table full signing strategy.
+        ///   Stores the version 1 table full signing strategy.
         /// </summary>
         private static SharedKeyTableCanonicalizer tableFullVer1;
 
         /// <summary>
-        /// Gets the BLOB queue full ver1.
+        ///   Stores the version 1 table lite signing strategy.
         /// </summary>
-        /// <value>The BLOB queue full ver1.</value>
+        private static SharedKeyLiteTableCanonicalizer tableLiteVer1;
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///   Gets the BLOB queue full ver1.
+        /// </summary>
+        /// <value> The BLOB queue full ver1. </value>
         private static SharedKeyLiteCanonicalizer BlobQueueFullVer1
         {
             get
             {
-                if (blobQueueFullVer1 == null)
-                {
-                    blobQueueFullVer1 = new SharedKeyLiteCanonicalizer();
-                }
-
-                return blobQueueFullVer1;
+                return blobQueueFullVer1 ?? (blobQueueFullVer1 = new SharedKeyLiteCanonicalizer());
             }
         }
 
         /// <summary>
-        /// Gets the table lite ver1.
+        ///   Gets the BLOB queue full ver2.
         /// </summary>
-        /// <value>The table lite ver1.</value>
-        private static SharedKeyLiteTableCanonicalizer TableLiteVer1
-        {
-            get
-            {
-                if (tableLiteVer1 == null)
-                {
-                    tableLiteVer1 = new SharedKeyLiteTableCanonicalizer();
-                }
-
-                return tableLiteVer1;
-            }
-        }
-
-        /// <summary>
-        /// Gets the table full ver1.
-        /// </summary>
-        /// <value>The table full ver1.</value>
-        private static SharedKeyTableCanonicalizer TableFullVer1
-        {
-            get
-            {
-                if (tableFullVer1 == null)
-                {
-                    tableFullVer1 = new SharedKeyTableCanonicalizer();
-                }
-
-                return tableFullVer1;
-            }
-        }
-
-        /// <summary>
-        /// Gets the BLOB queue full ver2.
-        /// </summary>
-        /// <value>The BLOB queue full ver2.</value>
+        /// <value> The BLOB queue full ver2. </value>
         private static SharedKeyCanonicalizer BlobQueueFullVer2
         {
             get
             {
-                if (blobQueueFullVer2 == null)
-                {
-                    blobQueueFullVer2 = new SharedKeyCanonicalizer();
-                }
-
-                return blobQueueFullVer2;
+                return blobQueueFullVer2 ?? (blobQueueFullVer2 = new SharedKeyCanonicalizer());
             }
         }
 
         /// <summary>
-        /// Gets canonicalization strategy for Blob and Queue SharedKey Authentication.
+        ///   Gets the table full ver1.
         /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>The canonicalization strategy.</returns>
+        /// <value> The table full ver1. </value>
+        private static SharedKeyTableCanonicalizer TableFullVer1
+        {
+            get
+            {
+                return tableFullVer1 ?? (tableFullVer1 = new SharedKeyTableCanonicalizer());
+            }
+        }
+
+        /// <summary>
+        ///   Gets the table lite ver1.
+        /// </summary>
+        /// <value> The table lite ver1. </value>
+        private static SharedKeyLiteTableCanonicalizer TableLiteVer1
+        {
+            get
+            {
+                return tableLiteVer1 ?? (tableLiteVer1 = new SharedKeyLiteTableCanonicalizer());
+            }
+        }
+
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>
+        ///   Gets canonicalization strategy for Blob and Queue SharedKey Authentication.
+        /// </summary>
+        /// <param name="request"> The request. </param>
+        /// <returns> The canonicalization strategy. </returns>
         public static CanonicalizationStrategy GetBlobQueueFullCanonicalizationStrategy(HttpWebRequest request)
         {
-            if (IsTargetVersion2(request))
-            {
-                return BlobQueueFullVer2;
-            }
-            else
-            {
-                return BlobQueueFullVer1;
-            }
+            return IsTargetVersion2(request) ? (CanonicalizationStrategy)BlobQueueFullVer2 : BlobQueueFullVer1;
         }
 
         /// <summary>
-        /// Get canonicalization strategy for Tables for SharedKeyLite Authentication.
+        ///   Gets the BLOB queue lite canonicalization strategy.
         /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>The canonicalization strategy.</returns>
-        public static CanonicalizationStrategy GetTableLiteCanonicalizationStrategy(HttpWebRequest request)
-        {
-            return TableLiteVer1;
-        }
-
-        /// <summary>
-        /// Gets the table full canonicalization strategy.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>The canonicalization strategy.</returns>
-        public static CanonicalizationStrategy GetTableFullCanonicalizationStrategy(HttpWebRequest request)
-        {
-            return TableFullVer1;
-        }
-
-        /// <summary>
-        /// Gets the BLOB queue lite canonicalization strategy.
-        /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>The canonicalization strategy.</returns>
+        /// <param name="request"> The request. </param>
+        /// <returns> The canonicalization strategy. </returns>
         public static CanonicalizationStrategy GetBlobQueueLiteCanonicalizationStrategy(HttpWebRequest request)
         {
             if (IsTargetVersion2(request))
@@ -174,37 +129,59 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 // Old SharedKey Authentication is the new SharedKeyLite Authentication
                 return BlobQueueFullVer1;
             }
-            else
-            {
-                string errorMessage = string.Format(CultureInfo.CurrentCulture, SR.BlobQSharedKeyLiteUnsuppported, request.Headers[Constants.HeaderConstants.StorageVersionHeader]);
-                throw new NotSupportedException(errorMessage);
-            }
+            
+            var errorMessage = string.Format(
+                CultureInfo.CurrentCulture,
+                SR.BlobQSharedKeyLiteUnsuppported,
+                request.Headers[Constants.HeaderConstants.StorageVersionHeader]);
+            throw new NotSupportedException(errorMessage);
         }
 
         /// <summary>
-        /// Determines whether [is target version2] [the specified request].
+        ///   Gets the table full canonicalization strategy.
         /// </summary>
-        /// <param name="request">The request.</param>
-        /// <returns>
-        /// Returns <c>true</c> if [is target version2] [the specified request]; otherwise, <c>false</c>.
-        /// </returns>
+        /// <param name="request"> The request. </param>
+        /// <returns> The canonicalization strategy. </returns>
+        public static CanonicalizationStrategy GetTableFullCanonicalizationStrategy(HttpWebRequest request)
+        {
+            return TableFullVer1;
+        }
+
+        /// <summary>
+        ///   Get canonicalization strategy for Tables for SharedKeyLite Authentication.
+        /// </summary>
+        /// <param name="request"> The request. </param>
+        /// <returns> The canonicalization strategy. </returns>
+        public static CanonicalizationStrategy GetTableLiteCanonicalizationStrategy(HttpWebRequest request)
+        {
+            return TableLiteVer1;
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        ///   Determines whether [is target version2] [the specified request].
+        /// </summary>
+        /// <param name="request"> The request. </param>
+        /// <returns> Returns <c>true</c> if [is target version2] [the specified request]; otherwise, <c>false</c> . </returns>
         private static bool IsTargetVersion2(HttpWebRequest request)
         {
-            string version = request.Headers[Constants.HeaderConstants.StorageVersionHeader];
+            var version = request.Headers[Constants.HeaderConstants.StorageVersionHeader];
             DateTime versionTime;
 
             if (DateTime.TryParse(
-                version,
-                CultureInfo.InvariantCulture,
-                DateTimeStyles.AdjustToUniversal,
-                out versionTime))
+                version, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal, out versionTime))
             {
-                DateTime canonicalizationVer2Date = new DateTime(2009, 09, 19);
+                var canonicalizationVer2Date = new DateTime(2009, 09, 19);
 
                 return versionTime.Date >= canonicalizationVer2Date;
             }
 
             return version.Equals("2009-09-19");
         }
+
+        #endregion
     }
 }

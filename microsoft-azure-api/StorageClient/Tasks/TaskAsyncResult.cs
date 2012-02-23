@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="TaskAsyncResult.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,54 +22,43 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
     using System.Diagnostics;
     using System.Threading;
 
-    /// <summary>
-    /// An implementation of IAsyncResult that encapsulates a task.
-    /// </summary>
-    /// <typeparam name="T">The type of the resulting value.</typeparam>
-    /// <remarks>Refer to http://csdweb/sites/oslo/engsys/DesignGuidelines/Wiki%20Pages/IAsyncResult.aspx and 
-    /// http://www.bluebytesoftware.com/blog/2006/05/31/ImplementingAHighperfIAsyncResultLockfreeLazyAllocation.aspx for IAsyncResult details</remarks>
+    /// <summary>An implementation of IAsyncResult that encapsulates a task.</summary>
+    /// <typeparam name="T">The type of the resulting value. </typeparam>
+    /// <remarks>Refer to http://csdweb/sites/oslo/engsys/DesignGuidelines/Wiki%20Pages/IAsyncResult.aspx and http://www.bluebytesoftware.com/blog/2006/05/31/ImplementingAHighperfIAsyncResultLockfreeLazyAllocation.aspx for IAsyncResult details.</remarks>
     internal class TaskAsyncResult<T> : IAsyncResult, IDisposable
     {
-        /// <summary>
-        /// The underlying task for the async operation.
-        /// </summary>
-        private Task<T> realTask;
+        #region Constants and Fields
 
-        /// <summary>
-        /// The callback provided by the user.
-        /// </summary>
-        private AsyncCallback userCallback;
+        /// <summary>The underlying task for the async operation.</summary>
+        private readonly Task<T> realTask;
 
-        /// <summary>
-        /// The state for the callback.
-        /// </summary>
-        private object userState;
+        /// <summary>The callback provided by the user.</summary>
+        private readonly AsyncCallback userCallback;
 
-        /// <summary>
-        /// Indicates whether a task is completed.
-        /// </summary>
-        private volatile bool isCompleted;
+        /// <summary>The state for the callback.</summary>
+        private readonly object userState;
 
-        /// <summary>
-        /// Indicates whether task completed synchronously.
-        /// </summary>
-        private bool completedSynchronously;
-
-        /// <summary>
-        /// The event for blocking on this task's completion.
-        /// </summary>
+        /// <summary>The event for blocking on this task's completion.</summary>
         private ManualResetEvent asyncWaitEvent;
 
-        /// <summary>
-        /// Initializes a new instance of the TaskAsyncResult class.
-        /// </summary>
-        /// <param name="async">The task to be executed.</param>
-        /// <param name="callback">The callback method to be used on completion.</param>
-        /// <param name="state">The state for the callback.</param>
+        /// <summary>Indicates whether task completed synchronously.</summary>
+        private bool completedSynchronously;
+
+        /// <summary>Indicates whether a task is completed.</summary>
+        private volatile bool isCompleted;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>Initializes a new instance of the <see cref="TaskAsyncResult{T}"/> class. Initializes a new instance of the TaskAsyncResult class.</summary>
+        /// <param name="asyncTask">The task to be executed. </param>
+        /// <param name="callback">The callback method to be used on completion. </param>
+        /// <param name="state">The state for the callback. </param>
         [DebuggerNonUserCode]
-        public TaskAsyncResult(Task<T> async, AsyncCallback callback, object state)
+        public TaskAsyncResult(Task<T> asyncTask, AsyncCallback callback, object state)
         {
-            this.realTask = async;
+            this.realTask = asyncTask;
             this.userCallback = callback;
             this.userState = state;
 
@@ -80,47 +67,68 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
 
             this.realTask.ExecuteStep(this.OnComplete);
         }
-        
-        /// <summary>
-        /// Gets A user-defined object that contains information about the asynchronous operation.
-        /// </summary>
+
+        #endregion
+
+        #region Explicit Interface Properties
+
+        /// <summary>Gets A user-defined object that contains information about the asynchronous operation.</summary>
+        /// <value>The async state.</value>
         [DebuggerNonUserCode]
         object IAsyncResult.AsyncState
         {
-            get { return this.userState; }
+            get
+            {
+                return this.userState;
+            }
         }
 
-        /// <summary>
-        ///  Gets a System.Threading.WaitHandle that is used to wait for an asynchronous operation to complete.
-        /// </summary>
+        /// <summary>Gets a System.Threading.WaitHandle that is used to wait for an asynchronous operation to complete.</summary>
+        /// <value>The async wait handle.</value>
         [DebuggerNonUserCode]
         WaitHandle IAsyncResult.AsyncWaitHandle
         {
-            get { return this.LazyCreateWaitHandle(); }
+            get
+            {
+                return this.LazyCreateWaitHandle();
+            }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the asynchronous operation completed synchronously.
-        /// </summary>
+        /// <summary>Gets a value indicating whether the asynchronous operation completed synchronously.</summary>
+        /// <value>The completed synchronously.</value>
         [DebuggerNonUserCode]
         bool IAsyncResult.CompletedSynchronously
         {
-            get { return this.completedSynchronously; }
+            get
+            {
+                return this.completedSynchronously;
+            }
         }
 
-        /// <summary>
-        /// Gets a value indicating whether the asynchronous operation has completed.
-        /// </summary>
+        /// <summary>Gets a value indicating whether the asynchronous operation has completed.</summary>
+        /// <value>The is completed.</value>
         [DebuggerNonUserCode]
         bool IAsyncResult.IsCompleted
         {
-            get { return this.isCompleted; }
+            get
+            {
+                return this.isCompleted;
+            }
         }
-        
-        /// <summary>
-        /// Provides a convenient function for waiting for completion and getting the result.
-        /// </summary>
-        /// <returns>The result of the operation.</returns>
+
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>We implement the dispose only to allow the explicit closing of the event.</summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>Provides a convenient function for waiting for completion and getting the result.</summary>
+        /// <returns>The result of the operation. </returns>
         public T EndInvoke()
         {
             // We haven't completed yet, so we should wait. (Only single thread may call this)
@@ -136,19 +144,12 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             return this.realTask.Result;
         }
 
-        /// <summary>
-        /// We implement the dispose only to allow the explicit closing of the event.
-        /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+        #endregion
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing">Set to <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        #region Methods
+
+        /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
+        /// <param name="disposing">Set to <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources. </param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposing)
@@ -161,10 +162,8 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             }
         }
 
-        /// <summary>
-        /// Provides the lazy initialization of the WaitHandle (based on Joe Duffy's blog).
-        /// </summary>
-        /// <returns>The WaitHandle to use for waiting on completion.</returns>
+        /// <summary>Provides the lazy initialization of the WaitHandle (based on Joe Duffy's blog).</summary>
+        /// <returns>The WaitHandle to use for waiting on completion. </returns>
         private WaitHandle LazyCreateWaitHandle()
         {
             if (this.asyncWaitEvent != null)
@@ -172,7 +171,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                 return this.asyncWaitEvent;
             }
 
-            ManualResetEvent newHandle = new ManualResetEvent(false);
+            var newHandle = new ManualResetEvent(false);
             if (Interlocked.CompareExchange(ref this.asyncWaitEvent, newHandle, null) != null)
             {
                 // We lost the race. Release the handle we created, it's garbage.
@@ -192,10 +191,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             return this.asyncWaitEvent;
         }
 
-        /// <summary>
-        /// Called on completion of the async operation to notify the user
-        /// (Based on Joe Duffy's lockless design).
-        /// </summary>
+        /// <summary>Called on completion of the async operation to notify the user (Based on Joe Duffy's lockless design).</summary>
         [DebuggerNonUserCode]
         private void OnComplete()
         {
@@ -220,5 +216,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                 this.userCallback(this);
             }
         }
+
+        #endregion
     }
 }

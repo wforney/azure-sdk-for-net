@@ -21,17 +21,17 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     /// <summary>
-    /// Describes actions that may be used for writing to a page blob or clearing a set of pages.
+    ///   Describes actions that may be used for writing to a page blob or clearing a set of pages.
     /// </summary>
     public enum PageWrite
     {
         /// <summary>
-        /// Update the page with new data.
+        ///   Update the page with new data.
         /// </summary>
         Update,
 
         /// <summary>
-        /// Clear the page.
+        ///   Clear the page.
         /// </summary>
         Clear
     }

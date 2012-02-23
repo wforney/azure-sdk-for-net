@@ -239,6 +239,7 @@
     <Compile Include="StorageCredentialsAccountAndKey.cs" />
     <Compile Include="StorageCredentialsAnonymous.cs" />
     <Compile Include="StorageCredentialsSharedAccessSignature.cs" />
+    <Compile Include="XElementExtensions.cs" />
     <EmbeddedResource Include="SR.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>SR.Designer.cs</LastGenOutput>

@@ -21,27 +21,27 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     /// <summary>
-    /// Describes actions that can be performed on a lease.
+    ///   Describes actions that can be performed on a lease.
     /// </summary>
     public enum LeaseAction
     {
         /// <summary>
-        /// Acquire the lease.
+        ///   Acquire the lease.
         /// </summary>
         Acquire,
 
         /// <summary>
-        /// Renew the lease.
+        ///   Renew the lease.
         /// </summary>
         Renew,
 
         /// <summary>
-        /// Release the lease.
+        ///   Release the lease.
         /// </summary>
         Release,
 
         /// <summary>
-        /// Break the lease.
+        ///   Break the lease.
         /// </summary>
         Break
     }

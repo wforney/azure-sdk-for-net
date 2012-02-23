@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="AccessCondition.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,96 +21,107 @@ namespace Microsoft.WindowsAzure.StorageClient
     using System;
     using System.Globalization;
     using System.Net;
-    using Protocol;
 
-    /// <summary>
-    /// Represents a set of access conditions to be used for operations against the storage services.
-    /// </summary>
+    using Microsoft.WindowsAzure.StorageClient.Protocol;
+
+    /// <summary>Represents a set of access conditions to be used for operations against the storage services.</summary>
     public struct AccessCondition
     {
-        /// <summary>
-        /// Indicates that no access condition is set.
-        /// </summary>
-        public static readonly AccessCondition None = new AccessCondition();
+        #region Constants and Fields
 
-        /// <summary>
-        /// Gets or sets the header of the request to be set.
-        /// </summary>
-        /// <value>The access condition header.</value>
+        /// <summary>Indicates that no access condition is set.</summary>
+        public static readonly AccessCondition None;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>Initializes static members of the <see cref="AccessCondition"/> struct.</summary>
+        static AccessCondition()
+        {
+            None = new AccessCondition();
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>Gets or sets the header of the request to be set.</summary>
+        /// <value>The access condition header. </value>
         private HttpRequestHeader? AccessConditionHeader { get; set; }
 
-        /// <summary>
-        /// Gets or sets the value of the access condition header.
-        /// </summary>
-        /// <value>The access condition header value.</value>
+        /// <summary>Gets or sets the value of the access condition header.</summary>
+        /// <value>The access condition header value. </value>
         private string AccessConditionValue { get; set; }
 
-        /// <summary>
-        /// Returns an access condition such that an operation will be performed only if the resource has been modified since the specified time.
-        /// </summary>
-        /// <param name="lastModifiedUtc">The last-modified time for the resource, expressed as a UTC value.</param>
-        /// <returns>A structure specifying the if-modified-since condition.</returns>
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>Returns an access condition such that an operation will be performed only if the resource's ETag value matches the ETag value provided.</summary>
+        /// <param name="etag">The ETag value to check. </param>
+        /// <returns>A structure specifying the if-match condition. </returns>
+        public static AccessCondition IfMatch(string etag)
+        {
+            return new AccessCondition
+                {
+                   AccessConditionHeader = HttpRequestHeader.IfMatch, AccessConditionValue = etag 
+                };
+        }
+
+        /// <summary>Returns an access condition such that an operation will be performed only if the resource has been modified since the specified time.</summary>
+        /// <param name="lastModifiedUtc">The last-modified time for the resource, expressed as a UTC value. </param>
+        /// <returns>A structure specifying the if-modified-since condition. </returns>
         public static AccessCondition IfModifiedSince(DateTime lastModifiedUtc)
         {
             lastModifiedUtc = lastModifiedUtc.ToUniversalTime();
             return new AccessCondition
-            {
-                AccessConditionHeader = HttpRequestHeader.IfModifiedSince,
+                {
+                    AccessConditionHeader = HttpRequestHeader.IfModifiedSince, 
 
-                // convert Date to String using RFC 1123 pattern
-                AccessConditionValue = lastModifiedUtc.ToString("R", CultureInfo.InvariantCulture)
-            };
+                    // convert Date to String using RFC 1123 pattern
+                    AccessConditionValue = lastModifiedUtc.ToString("R", CultureInfo.InvariantCulture)
+                };
         }
 
-        /// <summary>
-        /// Returns an access condition such that an operation will be performed only if the resource has not been modified since the specified time.
-        /// </summary>
-        /// <param name="lastModifiedUtc">The last-modified time for the resource, expressed as a UTC value.</param>
-        /// <returns>A structure specifying the if-not-modified-since condition.</returns>
+        /// <summary>Returns an access condition such that an operation will be performed only if the resource's ETag value does not match the ETag value provided.</summary>
+        /// <param name="etag">The ETag value to check. </param>
+        /// <returns>A structure specifying the if-none-match condition. </returns>
+        public static AccessCondition IfNoneMatch(string etag)
+        {
+            return new AccessCondition
+                {
+                   AccessConditionHeader = HttpRequestHeader.IfNoneMatch, AccessConditionValue = etag 
+                };
+        }
+
+        /// <summary>Returns an access condition such that an operation will be performed only if the resource has not been modified since the specified time.</summary>
+        /// <param name="lastModifiedUtc">The last-modified time for the resource, expressed as a UTC value. </param>
+        /// <returns>A structure specifying the if-not-modified-since condition. </returns>
         public static AccessCondition IfNotModifiedSince(DateTime lastModifiedUtc)
         {
             lastModifiedUtc = lastModifiedUtc.ToUniversalTime();
             return new AccessCondition
-            {
-                AccessConditionHeader = HttpRequestHeader.IfUnmodifiedSince,
+                {
+                    AccessConditionHeader = HttpRequestHeader.IfUnmodifiedSince, 
 
-                // convert Date to String using RFC 1123 pattern
-                AccessConditionValue = Request.ConvertDateTimeToHttpString(lastModifiedUtc)
-            };
+                    // convert Date to String using RFC 1123 pattern
+                    AccessConditionValue = Request.ConvertDateTimeToHttpString(lastModifiedUtc)
+                };
         }
 
-        /// <summary>
-        /// Returns an access condition such that an operation will be performed only if the resource's ETag value matches the ETag value provided.
-        /// </summary>
-        /// <param name="etag">The ETag value to check.</param>
-        /// <returns>A structure specifying the if-match condition.</returns>
-        public static AccessCondition IfMatch(string etag)
-        {
-            return new AccessCondition { AccessConditionHeader = HttpRequestHeader.IfMatch, AccessConditionValue = etag };
-        }
+        #endregion
 
-        /// <summary>
-        /// Returns an access condition such that an operation will be performed only if the resource's ETag value does not match the ETag value provided.
-        /// </summary>
-        /// <param name="etag">The ETag value to check.</param>
-        /// <returns>A structure specifying the if-none-match condition.</returns>
-        public static AccessCondition IfNoneMatch(string etag)
-        {
-            return new AccessCondition { AccessConditionHeader = HttpRequestHeader.IfNoneMatch, AccessConditionValue = etag };
-        }
+        #region Methods
 
-        /// <summary>
-        /// Converts AccessCondition into a <see cref="ConditionHeaderKind"/> type for use as a source conditional to Copy.
-        /// </summary>
-        /// <param name="condition">The original condition.</param>
-        /// <param name="header">The resulting header for the condition.</param>
-        /// <param name="value">The value for the condition.</param>
+        /// <summary>Converts AccessCondition into a <see cref="ConditionHeaderKind"/> type for use as a source conditional to Copy.</summary>
+        /// <param name="condition">The original condition. </param>
+        /// <param name="header">The resulting header for the condition. </param>
+        /// <param name="value">The value for the condition. </param>
         internal static void GetSourceConditions(
-            AccessCondition condition,
-            out Protocol.ConditionHeaderKind header,
-            out string value)
+            AccessCondition condition, out ConditionHeaderKind header, out string value)
         {
-            header = Protocol.ConditionHeaderKind.None;
+            header = ConditionHeaderKind.None;
             value = null;
 
             if (condition.AccessConditionHeader != null)
@@ -120,16 +129,16 @@ namespace Microsoft.WindowsAzure.StorageClient
                 switch (condition.AccessConditionHeader.GetValueOrDefault())
                 {
                     case HttpRequestHeader.IfMatch:
-                        header = Protocol.ConditionHeaderKind.IfMatch;
+                        header = ConditionHeaderKind.IfMatch;
                         break;
                     case HttpRequestHeader.IfNoneMatch:
-                        header = Protocol.ConditionHeaderKind.IfNoneMatch;
+                        header = ConditionHeaderKind.IfNoneMatch;
                         break;
                     case HttpRequestHeader.IfModifiedSince:
-                        header = Protocol.ConditionHeaderKind.IfModifiedSince;
+                        header = ConditionHeaderKind.IfModifiedSince;
                         break;
                     case HttpRequestHeader.IfUnmodifiedSince:
-                        header = Protocol.ConditionHeaderKind.IfUnmodifiedSince;
+                        header = ConditionHeaderKind.IfUnmodifiedSince;
                         break;
                     default:
                         CommonUtils.ArgumentOutOfRange("condition", condition);
@@ -140,10 +149,8 @@ namespace Microsoft.WindowsAzure.StorageClient
             }
         }
 
-        /// <summary>
-        /// Applies the condition to the web request.
-        /// </summary>
-        /// <param name="request">The request to be modified.</param>
+        /// <summary>Applies the condition to the web request.</summary>
+        /// <param name="request">The request to be modified. </param>
         internal void ApplyCondition(HttpWebRequest request)
         {
             if (this.AccessConditionHeader != null)
@@ -152,9 +159,7 @@ namespace Microsoft.WindowsAzure.StorageClient
                 {
                     // Not using this property will cause Restricted property exception to be thrown
                     request.IfModifiedSince = DateTime.Parse(
-                        this.AccessConditionValue,
-                        CultureInfo.InvariantCulture,
-                        DateTimeStyles.AdjustToUniversal);
+                        this.AccessConditionValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                 }
                 else
                 {
@@ -163,35 +168,29 @@ namespace Microsoft.WindowsAzure.StorageClient
             }
         }
 
-        /// <summary>
-        /// Verifies the condition is satisfied.
-        /// </summary>
-        /// <param name="etag">The ETag to check.</param>
-        /// <param name="lastModifiedTimeUtc">The last modified time UTC.</param>
-        /// <returns><c>true</c> if the condition is satisfied, otherwise <c>false</c>.</returns>
+        /// <summary>Verifies the condition is satisfied.</summary>
+        /// <param name="etag">The ETag to check. </param>
+        /// <param name="lastModifiedTimeUtc">The last modified time UTC. </param>
+        /// <returns><c>true</c> if the condition is satisfied, otherwise <c>false</c> . </returns>
         internal bool VerifyConditionHolds(string etag, DateTime lastModifiedTimeUtc)
         {
             switch (this.AccessConditionHeader.GetValueOrDefault())
             {
                 case HttpRequestHeader.IfMatch:
-                    return this.AccessConditionValue == etag || String.Equals(this.AccessConditionValue, "*");
+                    return this.AccessConditionValue == etag || string.Equals(this.AccessConditionValue, "*");
                 case HttpRequestHeader.IfNoneMatch:
                     return this.AccessConditionValue != etag;
                 case HttpRequestHeader.IfModifiedSince:
                     {
                         var conditional = DateTime.Parse(
-                            this.AccessConditionValue,
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AdjustToUniversal);
+                            this.AccessConditionValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                         return lastModifiedTimeUtc > conditional;
                     }
 
                 case HttpRequestHeader.IfUnmodifiedSince:
                     {
                         var conditional = DateTime.Parse(
-                            this.AccessConditionValue,
-                            CultureInfo.InvariantCulture,
-                            DateTimeStyles.AdjustToUniversal);
+                            this.AccessConditionValue, CultureInfo.InvariantCulture, DateTimeStyles.AdjustToUniversal);
                         return lastModifiedTimeUtc <= conditional;
                     }
 
@@ -200,5 +199,7 @@ namespace Microsoft.WindowsAzure.StorageClient
                     return false;
             }
         }
+
+        #endregion
     }
 }

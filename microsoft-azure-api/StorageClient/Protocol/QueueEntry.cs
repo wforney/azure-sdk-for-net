@@ -20,35 +20,40 @@
 
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
-    using System;
-    using System.Collections.Specialized;
-
     /// <summary>
-    /// Represents a queue item returned in the XML response for a queue listing operation.
+    ///   Represents a queue item returned in the XML response for a queue listing operation.
     /// </summary>
     public class QueueEntry
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="QueueEntry"/> class.
+        ///   Initializes a new instance of the <see cref="QueueEntry" /> class.
         /// </summary>
-        /// <param name="name">The name of the queue.</param>
-        /// <param name="attributes">The queue's attributes.</param>
+        /// <param name="name"> The name of the queue. </param>
+        /// <param name="attributes"> The queue's attributes. </param>
         internal QueueEntry(string name, QueueAttributes attributes)
         {
             this.Name = name;
             this.Attributes = attributes;
         }
 
-        /// <summary>
-        /// Gets the name of the queue.
-        /// </summary>
-        /// <value>The queue name.</value>
-        public string Name { get; private set; }
+        #endregion
+
+        #region Public Properties
 
         /// <summary>
-        /// Gets the queue's attributes.
+        ///   Gets the queue's attributes.
         /// </summary>
-        /// <value>The queue's attributes.</value>
+        /// <value> The queue's attributes. </value>
         public QueueAttributes Attributes { get; internal set; }
+
+        /// <summary>
+        ///   Gets the name of the queue.
+        /// </summary>
+        /// <value> The queue name. </value>
+        public string Name { get; private set; }
+
+        #endregion
     }
 }

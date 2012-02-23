@@ -24,24 +24,31 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System.Collections.Generic;
     using System.IO;
     using System.Xml;
-    
+
     /// <summary>
-    /// Parses the response XML from an operation to set the access policy for a container.
+    ///   Parses the response XML from an operation to set the access policy for a container.
     /// </summary>
     public class AccessPolicyResponse : ResponseParsingBase<KeyValuePair<string, SharedAccessPolicy>>
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessPolicyResponse"/> class.
+        ///   Initializes a new instance of the <see cref="AccessPolicyResponse" /> class.
         /// </summary>
-        /// <param name="stream">The stream to be parsed.</param>
-        internal AccessPolicyResponse(Stream stream) : base(stream)
+        /// <param name="stream"> The stream to be parsed. </param>
+        internal AccessPolicyResponse(Stream stream)
+            : base(stream)
         {
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets an enumerable collection of container-level access policy identifiers.
+        ///   Gets an enumerable collection of container-level access policy identifiers.
         /// </summary>
-        /// <value>An enumerable collection of container-level access policy identifiers.</value>
+        /// <value> An enumerable collection of container-level access policy identifiers. </value>
         public IEnumerable<KeyValuePair<string, SharedAccessPolicy>> AccessIdentifiers
         {
             get
@@ -50,87 +57,114 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
             }
         }
 
+        #endregion
+
+        #region Methods
+
         /// <summary>
-        /// Parses the response XML from a Set Container ACL operation to retrieve container-level access policy data.
+        ///   Parses the response XML from a Set Container ACL operation to retrieve container-level access policy data.
         /// </summary>
-        /// <returns>A list of enumerable key-value pairs.</returns>
+        /// <returns> A list of enumerable key-value pairs. </returns>
         protected override IEnumerable<KeyValuePair<string, SharedAccessPolicy>> ParseXml()
         {
-            bool needToRead = true;
+            var needToRead = true;
             while (true)
             {
-                if (needToRead && !reader.Read())
+                if (needToRead && !this.Reader.Read())
                 {
                     break;
                 }
 
                 needToRead = true;
 
-                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.SignedIdentifiers)
+                if (this.Reader.NodeType != XmlNodeType.Element || this.Reader.IsEmptyElement
+                    || this.Reader.Name != Constants.SignedIdentifiers)
                 {
-                    while (reader.Read())
+                    continue;
+                }
+
+                while (this.Reader.Read())
+                {
+                    if (this.Reader.NodeType != XmlNodeType.Element || this.Reader.IsEmptyElement
+                        || this.Reader.Name != Constants.SignedIdentifier)
                     {
-                        if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.SignedIdentifier)
+                        continue;
+                    }
+                    
+                    while (this.Reader.Read())
+                    {
+                        if (this.Reader.NodeType != XmlNodeType.Element || this.Reader.IsEmptyElement
+                            || this.Reader.Name != Constants.Id)
                         {
-                            while (reader.Read())
+                            continue;
+                        }
+                        
+                        var id = this.Reader.ReadElementContentAsString();
+                        var identifier = new SharedAccessPolicy();
+                        var needToReadItem = true;
+
+                        do
+                        {
+                            if (this.Reader.NodeType != XmlNodeType.Element || this.Reader.IsEmptyElement
+                                || this.Reader.Name != Constants.AccessPolicy)
                             {
-                                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.Id)
+                                continue;
+                            }
+                            
+                            var needToReadElement = true;
+
+                            while (true)
+                            {
+                                if (needToReadElement && !this.Reader.Read())
                                 {
-                                    string id = reader.ReadElementContentAsString();
-                                    SharedAccessPolicy identifier = new SharedAccessPolicy();
-                                    bool needToReadItem = true;
+                                    break;
+                                }
 
-                                    do
+                                needToReadElement = true;
+
+                                if (this.Reader.NodeType == XmlNodeType.Element
+                                    && !this.Reader.IsEmptyElement)
+                                {
+                                    switch (this.Reader.Name)
                                     {
-                                        if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement
-                                            && reader.Name == Constants.AccessPolicy)
-                                        {
-                                            bool needToReadElement = true;
-
-                                            while (true)
-                                            {
-                                                if (needToReadElement && !reader.Read())
-                                                {
-                                                    break;
-                                                }
-
-                                                needToReadElement = true;
-
-                                                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
-                                                {
-                                                    switch (reader.Name)
-                                                    {
-                                                        case Constants.Start:
-                                                            identifier.SharedAccessStartTime = Uri.UnescapeDataString(reader.ReadElementContentAsString()).ToUTCTime();
-                                                            needToReadElement = false;
-                                                            break;
-                                                        case Constants.Expiry:
-                                                            identifier.SharedAccessExpiryTime = Uri.UnescapeDataString(reader.ReadElementContentAsString()).ToUTCTime();
-                                                            needToReadElement = false;
-                                                            break;
-                                                        case Constants.Permission:
-                                                            identifier.Permissions = SharedAccessPolicy.PermissionsFromString(reader.ReadElementContentAsString());
-                                                            needToReadElement = false;
-                                                            break;
-                                                    }
-                                                }
-                                                else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.AccessPolicy)
-                                                {
-                                                    needToReadItem = false;
-                                                    break;
-                                                }
-                                            }
-                                        }
+                                        case Constants.Start:
+                                            identifier.SharedAccessStartTime =
+                                                Uri.UnescapeDataString(
+                                                    this.Reader.ReadElementContentAsString()).ToUTCTime(
+                                                    );
+                                            needToReadElement = false;
+                                            break;
+                                        case Constants.Expiry:
+                                            identifier.SharedAccessExpiryTime =
+                                                Uri.UnescapeDataString(
+                                                    this.Reader.ReadElementContentAsString()).ToUTCTime(
+                                                    );
+                                            needToReadElement = false;
+                                            break;
+                                        case Constants.Permission:
+                                            identifier.Permissions =
+                                                SharedAccessPolicy.PermissionsFromString(
+                                                    this.Reader.ReadElementContentAsString());
+                                            needToReadElement = false;
+                                            break;
                                     }
-                                    while (needToReadItem && reader.Read());
-
-                                    yield return new KeyValuePair<string, SharedAccessPolicy>(id, identifier);
+                                }
+                                else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                         && this.Reader.Name == Constants.AccessPolicy)
+                                {
+                                    needToReadItem = false;
+                                    break;
                                 }
                             }
                         }
+                        while (needToReadItem && this.Reader.Read());
+
+                        yield return new KeyValuePair<string, SharedAccessPolicy>(id, identifier);
                     }
                 }
             }
         }
+
+        #endregion
     }
 }

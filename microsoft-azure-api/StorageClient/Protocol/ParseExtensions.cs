@@ -21,23 +21,25 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     using System;
+    using System.Globalization;
 
     /// <summary>
-    /// A class to help with parsing.
+    ///   A class to help with parsing.
     /// </summary>
     internal static class ParseExtensions
     {
+        #region Methods
+
         /// <summary>
-        /// Converts a string to UTC time.
+        ///   Converts a string to UTC time.
         /// </summary>
-        /// <param name="str">The string to convert.</param>
-        /// <returns>A UTC representation of the string.</returns>
+        /// <param name="str"> The string to convert. </param>
+        /// <returns> A UTC representation of the string. </returns>
         internal static DateTime ToUTCTime(this string str)
         {
-            return DateTime.Parse(
-                str,
-                System.Globalization.DateTimeFormatInfo.InvariantInfo,
-                System.Globalization.DateTimeStyles.AdjustToUniversal);
+            return DateTime.Parse(str, DateTimeFormatInfo.InvariantInfo, DateTimeStyles.AdjustToUniversal);
         }
+
+        #endregion
     }
 }

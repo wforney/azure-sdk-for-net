@@ -26,7 +26,6 @@ namespace Microsoft.WindowsAzure.StorageClient
     using System.Diagnostics;
     using System.Linq;
     using System.Reflection;
-    using System.Text.RegularExpressions;
 
     /// <summary>
     /// Helper functions for table service.
@@ -47,23 +46,14 @@ namespace Microsoft.WindowsAzure.StorageClient
             // 1) 't' has at least one key column
             // 2) there is a top level IQueryable<T> property in the context where T is 't' or a supertype of 't'
             // Non-primitive types that are not entity types become nested structures ("complex types" in EDM)
-            if (!t.GetProperties().Any(p => IsKeyColumn(p)))
+            if (!t.GetProperties().Any(IsKeyColumn))
             {
                 return false;
             }
 
-            foreach (PropertyInfo pi in contextType.GetProperties())
-            {
-                if (typeof(IQueryable).IsAssignableFrom(pi.PropertyType))
-                {
-                    if (pi.PropertyType.GetGenericArguments()[0].IsAssignableFrom(t))
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return
+                contextType.GetProperties().Where(pi => typeof(IQueryable).IsAssignableFrom(pi.PropertyType)).Any(
+                    pi => pi.PropertyType.GetGenericArguments()[0].IsAssignableFrom(t));
         }
 
         /// <summary>
@@ -79,25 +69,21 @@ namespace Microsoft.WindowsAzure.StorageClient
             // 1) try the DataServiceKey attribute
             // 2) if not attribute, try <typename>ID
             // 3) finally, try just ID
-            object[] attribs = pi.DeclaringType.GetCustomAttributes(typeof(DataServiceKeyAttribute), true);
-            if (attribs != null && attribs.Length > 0)
+            Debug.Assert(pi.DeclaringType != null, "pi.DeclaringType != null");
+            var attribs = pi.DeclaringType.GetCustomAttributes(typeof(DataServiceKeyAttribute), true);
+            if (attribs.Length > 0)
             {
                 Debug.Assert(attribs.Length == 1, "There must only be one attribute.");
 
                 return ((DataServiceKeyAttribute)attribs[0]).KeyNames.Contains(pi.Name);
             }
 
-            if (pi.Name.Equals(pi.DeclaringType.Name + "ID", System.StringComparison.OrdinalIgnoreCase))
+            if (pi.Name.Equals(pi.DeclaringType.Name + "ID", StringComparison.OrdinalIgnoreCase))
             {
                 return true;
             }
 
-            if (pi.Name == "ID")
-            {
-                return true;
-            }
-
-            return false;
+            return pi.Name == "ID";
         }
 
         /// <summary>
@@ -107,15 +93,9 @@ namespace Microsoft.WindowsAzure.StorageClient
         /// <returns>A list of the entity set properties.</returns>
         public static IEnumerable<PropertyInfo> EnumerateEntitySetProperties(Type contextType)
         {
-            foreach (PropertyInfo prop in contextType.GetProperties())
-            {
-                if (typeof(IQueryable).IsAssignableFrom(prop.PropertyType) &&
-                    prop.PropertyType.GetGenericArguments().Length > 0 &&
-                    IsEntityType(prop.PropertyType.GetGenericArguments()[0], contextType))
-                {
-                    yield return prop;
-                }
-            }
+            return contextType.GetProperties().Where(prop => typeof(IQueryable).IsAssignableFrom(prop.PropertyType) &&
+                                                             prop.PropertyType.GetGenericArguments().Length > 0 &&
+                                                             IsEntityType(prop.PropertyType.GetGenericArguments()[0], contextType));
         }
 
         /// <summary>
@@ -137,7 +117,7 @@ namespace Microsoft.WindowsAzure.StorageClient
         {
             if (string.IsNullOrEmpty(tableName))
             {
-                throw new ArgumentException(String.Format(SR.TableNameInvalid, tableName), argName);
+                throw new ArgumentException(string.Format(SR.TableNameInvalid, tableName), argName);
             }
         }        
     }

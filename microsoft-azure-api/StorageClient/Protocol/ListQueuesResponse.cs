@@ -27,105 +27,88 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System.Xml;
 
     /// <summary>
-    /// Provides methods for parsing the response from a queue listing operation.
+    ///   Provides methods for parsing the response from a queue listing operation.
     /// </summary>
     public class ListQueuesResponse : ResponseParsingBase<QueueEntry>
     {
-        /// <summary>
-        /// Stores the prefix.
-        /// </summary>
-        private string prefix;
+        #region Constants and Fields
 
         /// <summary>
-        /// Signals when the prefix can be consumed.
-        /// </summary>
-        private bool prefixConsumable;
-
-        /// <summary>
-        /// Stores the marker.
+        ///   Stores the marker.
         /// </summary>
         private string marker;
 
         /// <summary>
-        /// Signals when the marker can be consumed.
+        ///   Signals when the marker can be consumed.
         /// </summary>
         private bool markerConsumable;
 
         /// <summary>
-        /// Stores the max results.
+        ///   Stores the max results.
         /// </summary>
         private int maxResults;
 
         /// <summary>
-        /// Signals when the max results can be consumed.
+        ///   Signals when the max results can be consumed.
         /// </summary>
         private bool maxResultsConsumable;
 
         /// <summary>
-        /// Stores the next marker.
+        ///   Stores the next marker.
         /// </summary>
         private string nextMarker;
 
         /// <summary>
-        /// Signals when the next marker can be consumed.
+        ///   Signals when the next marker can be consumed.
         /// </summary>
         private bool nextMarkerConsumable;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ListQueuesResponse"/> class.
+        ///   Stores the prefix.
         /// </summary>
-        /// <param name="stream">The stream to be parsed.</param>
-        internal ListQueuesResponse(Stream stream) : base(stream)
+        private string prefix;
+
+        /// <summary>
+        ///   Signals when the prefix can be consumed.
+        /// </summary>
+        private bool prefixConsumable;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>
+        ///   Initializes a new instance of the <see cref="ListQueuesResponse" /> class.
+        /// </summary>
+        /// <param name="stream"> The stream to be parsed. </param>
+        internal ListQueuesResponse(Stream stream)
+            : base(stream)
         {
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets the listing context from the XML response.
+        ///   Gets the listing context from the XML response.
         /// </summary>
-        /// <value>A set of parameters for the listing operation.</value>
+        /// <value> A set of parameters for the listing operation. </value>
         public ListingContext ListingContext
         {
             get
             {
                 // Force a parsing in order
-                ListingContext listingContext = new ListingContext(this.Prefix, this.MaxResults);
-
-                listingContext.Marker = this.NextMarker;
-
+                var listingContext = new ListingContext(this.Prefix, this.MaxResults) { Marker = this.NextMarker };
+                
                 return listingContext;
             }
         }
 
         /// <summary>
-        /// Gets an enumerable collection of <see cref="QueueEntry"/> objects from the response.
+        ///   Gets the Marker value provided for the listing operation from the XML response.
         /// </summary>
-        /// <value>An enumerable collection of <see cref="QueueEntry"/> objects.</value>
-        public IEnumerable<QueueEntry> Queues
-        {
-            get
-            {
-                return this.ObjectsToParse;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Prefix value provided for the listing operation from the XML response.
-        /// </summary>
-        /// <value>The Prefix value.</value>
-        public string Prefix
-        {
-            get
-            {
-                this.Variable(ref this.prefixConsumable);
-
-                return this.prefix;
-            }
-        }
-
-        /// <summary>
-        /// Gets the Marker value provided for the listing operation from the XML response.
-        /// </summary>
-        /// <value>The Marker value.</value>
+        /// <value> The Marker value. </value>
         public string Marker
         {
             get
@@ -137,9 +120,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the MaxResults value provided for the listing operation from the XML response.
+        ///   Gets the MaxResults value provided for the listing operation from the XML response.
         /// </summary>
-        /// <value>The MaxResults value.</value>
+        /// <value> The MaxResults value. </value>
         public int MaxResults
         {
             get
@@ -151,9 +134,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the NextMarker value from the XML response, if the listing was not complete.
+        ///   Gets the NextMarker value from the XML response, if the listing was not complete.
         /// </summary>
-        /// <value>The NextMarker value.</value>
+        /// <value> The NextMarker value. </value>
         public string NextMarker
         {
             get
@@ -165,15 +148,45 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Parses the response XML for a queue listing operation.
+        ///   Gets the Prefix value provided for the listing operation from the XML response.
         /// </summary>
-        /// <returns>An enumerable collection of <see cref="QueueEntry"/> objects.</returns>
+        /// <value> The Prefix value. </value>
+        public string Prefix
+        {
+            get
+            {
+                this.Variable(ref this.prefixConsumable);
+
+                return this.prefix;
+            }
+        }
+
+        /// <summary>
+        ///   Gets an enumerable collection of <see cref="QueueEntry" /> objects from the response.
+        /// </summary>
+        /// <value> An enumerable collection of <see cref="QueueEntry" /> objects. </value>
+        public IEnumerable<QueueEntry> Queues
+        {
+            get
+            {
+                return this.ObjectsToParse;
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        ///   Parses the response XML for a queue listing operation.
+        /// </summary>
+        /// <returns> An enumerable collection of <see cref="QueueEntry" /> objects. </returns>
         protected override IEnumerable<QueueEntry> ParseXml()
         {
-            bool needToRead = true;
+            var needToRead = true;
             while (true)
             {
-                if (needToRead && !reader.Read())
+                if (needToRead && !this.Reader.Read())
                 {
                     break;
                 }
@@ -181,40 +194,41 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 needToRead = true;
 
                 // Run through the stream until we find what we are looking for.  Retain what we've found.
-                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
+                if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement)
                 {
-                    switch (reader.Name)
+                    switch (this.Reader.Name)
                     {
                         case Constants.MarkerElement:
                             needToRead = false;
-                            this.marker = reader.ReadElementContentAsString();
+                            this.marker = this.Reader.ReadElementContentAsString();
                             this.markerConsumable = true;
                             yield return null;
                             break;
                         case Constants.NextMarkerElement:
                             needToRead = false;
-                            this.nextMarker = reader.ReadElementContentAsString();
+                            this.nextMarker = this.Reader.ReadElementContentAsString();
                             this.nextMarkerConsumable = true;
                             yield return null;
                             break;
                         case Constants.MaxResultsElement:
                             needToRead = false;
-                            this.maxResults = reader.ReadElementContentAsInt();
+                            this.maxResults = this.Reader.ReadElementContentAsInt();
                             this.maxResultsConsumable = true;
                             yield return null;
                             break;
                         case Constants.PrefixElement:
                             needToRead = false;
-                            this.prefix = reader.ReadElementContentAsString();
+                            this.prefix = this.Reader.ReadElementContentAsString();
                             this.prefixConsumable = true;
                             yield return null;
                             break;
                         case Constants.QueuesElement:
                             // While we're still in the queues section.
-                            while (reader.Read())
+                            while (this.Reader.Read())
                             {
                                 // We found a queue.
-                                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.QueueElement)
+                                if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement
+                                    && this.Reader.Name == Constants.QueueElement)
                                 {
                                     QueueEntry queue = null;
                                     Uri uri = null;
@@ -222,48 +236,56 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                                     NameValueCollection metadata = null;
 
                                     // Go until we are out of the queue.
-                                    bool queuesNeedToRead = true;
+                                    var queuesNeedToRead = true;
                                     while (true)
                                     {
-                                        if (queuesNeedToRead && !reader.Read())
+                                        if (queuesNeedToRead && !this.Reader.Read())
                                         {
                                             break;
                                         }
 
                                         queuesNeedToRead = true;
 
-                                        if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
+                                        if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement)
                                         {
-                                            switch (reader.Name)
+                                            switch (this.Reader.Name)
                                             {
                                                 case Constants.UrlElement:
-                                                    string url = reader.ReadElementContentAsString();
+                                                    var url = this.Reader.ReadElementContentAsString();
                                                     queuesNeedToRead = false;
                                                     Uri.TryCreate(url, UriKind.Absolute, out uri);
                                                     break;
                                                 case Constants.QueueNameElement:
                                                 case Constants.QueueNameElementVer2:
-                                                    name = reader.ReadElementContentAsString();
+                                                    name = this.Reader.ReadElementContentAsString();
                                                     queuesNeedToRead = false;
                                                     break;
                                                 case Constants.MetadataElement:
-                                                    metadata = Response.ParseMetadata(reader);
+                                                    metadata = Response.ParseMetadata(this.Reader);
                                                     queuesNeedToRead = false;
                                                     break;
                                             }
                                         }
-                                        else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.QueueElement)
+                                        else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                                 && this.Reader.Name == Constants.QueueElement)
                                         {
-                                            queue = new QueueEntry(name, new QueueAttributes() { Uri = uri, Metadata = metadata ?? (new NameValueCollection()) });
+                                            queue = new QueueEntry(
+                                                name,
+                                                new QueueAttributes
+                                                    {
+                                                        Uri = uri,
+                                                        Metadata = metadata ?? (new NameValueCollection())
+                                                    });
                                             break;
                                         }
                                     }
 
                                     yield return queue;
                                 }
-                                else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.QueuesElement)
+                                else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                         && this.Reader.Name == Constants.QueuesElement)
                                 {
-                                    this.allObjectsParsed = true;
+                                    this.AllObjectsParsed = true;
                                     break;
                                 }
                             }
@@ -273,5 +295,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 }
             }
         }
+
+        #endregion
     }
 }

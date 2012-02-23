@@ -21,22 +21,22 @@
 namespace Microsoft.WindowsAzure.StorageClient.Protocol
 {
     /// <summary>
-    /// Enumeration representing the state of metrics collection in a service.
+    ///   Enumeration representing the state of metrics collection in a service.
     /// </summary>
     public enum MetricsLevel
     {
         /// <summary>
-        /// Metrics collection is disabled.
+        ///   Metrics collection is disabled.
         /// </summary>
         None = 0,
 
         /// <summary>
-        /// Service-level metrics collection is enabled.
+        ///   Service-level metrics collection is enabled.
         /// </summary>
         Service,
 
         /// <summary>
-        /// Service-level and API metrics collection are enabled.
+        ///   Service-level and API metrics collection are enabled.
         /// </summary>
         ServiceAndApi
     }

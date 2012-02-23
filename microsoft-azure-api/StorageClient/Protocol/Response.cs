@@ -28,66 +28,100 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System.Xml.Linq;
 
     /// <summary>
-    /// Implements the common parsing between all the responses.
+    ///   Implements the common parsing between all the responses.
     /// </summary>
     internal static class Response
     {
+        #region Methods
+
         /// <summary>
-        /// Gets the error details from the response object.
+        ///   Gets the error details from the response object.
         /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <returns>An extended error information parsed from the input.</returns>
+        /// <param name="response"> The response from server. </param>
+        /// <returns> An extended error information parsed from the input. </returns>
         internal static StorageExtendedErrorInformation GetError(HttpWebResponse response)
         {
-            Stream stream = response.GetResponseStream();
+            var stream = response.GetResponseStream();
 
             return Utilities.GetExtendedErrorDetailsFromResponse(stream, response.ContentLength);
         }
 
         /// <summary>
-        /// Gets the headers (metadata or properties).
+        ///   Gets the headers (metadata or properties).
         /// </summary>
-        /// <param name="response">The response from sever.</param>
-        /// <returns>A <see cref="NameValueCollection"/> of all the headers.</returns>
+        /// <param name="response"> The response from sever. </param>
+        /// <returns> A <see cref="NameValueCollection" /> of all the headers. </returns>
         internal static NameValueCollection GetHeaders(HttpWebResponse response)
         {
             return GetMetadataOrProperties(response, string.Empty);
         }
 
         /// <summary>
-        /// Gets the user-defined metadata.
+        ///   Gets the user-defined metadata.
         /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <returns>A <see cref="NameValueCollection"/> of the metadata.</returns>
+        /// <param name="response"> The response from server. </param>
+        /// <returns> A <see cref="NameValueCollection" /> of the metadata. </returns>
         internal static NameValueCollection GetMetadata(HttpWebResponse response)
         {
             return GetMetadataOrProperties(response, Constants.HeaderConstants.PrefixForStorageMetadata);
         }
 
         /// <summary>
-        /// Gets a specific user-defined metadata.
+        ///   Gets a specific user-defined metadata.
         /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <param name="name">The metadata header requested.</param>
-        /// <returns>An array of the values for the metadata.</returns>
+        /// <param name="response"> The response from server. </param>
+        /// <param name="name"> The metadata header requested. </param>
+        /// <returns> An array of the values for the metadata. </returns>
         internal static string[] GetMetadata(HttpWebResponse response, string name)
         {
             return response.Headers.GetValues(Constants.HeaderConstants.PrefixForStorageMetadata + name);
         }
 
         /// <summary>
-        /// Parses the metadata.
+        ///   Gets the storage properties.
         /// </summary>
-        /// <param name="reader">The reader.</param>
-        /// <returns>A <see cref="NameValueCollection"/> of metadata.</returns>
+        /// <param name="response"> The response from server. </param>
+        /// <returns> A <see cref="NameValueCollection" /> of the properties. </returns>
+        internal static NameValueCollection GetProperties(HttpWebResponse response)
+        {
+            return GetMetadataOrProperties(response, Constants.HeaderConstants.PrefixForStorageProperties);
+        }
+
+        /// <summary>
+        ///   Gets a specific storage property.
+        /// </summary>
+        /// <param name="response"> The response from server. </param>
+        /// <param name="name"> The property requested. </param>
+        /// <returns> An array of the values for the property. </returns>
+        internal static string[] GetProperties(HttpWebResponse response, string name)
+        {
+            return response.Headers.GetValues(Constants.HeaderConstants.PrefixForStorageProperties + name);
+        }
+
+        /// <summary>
+        ///   Gets the request id.
+        /// </summary>
+        /// <param name="response"> The response from server. </param>
+        /// <returns> The request ID. </returns>
+        internal static string GetRequestId(HttpWebResponse response)
+        {
+            var values = response.Headers.GetValues(Constants.HeaderConstants.RequestIdHeader);
+
+            return values == null || values.Length != 1 ? null : values[0];
+        }
+
+        /// <summary>
+        ///   Parses the metadata.
+        /// </summary>
+        /// <param name="reader"> The reader. </param>
+        /// <returns> A <see cref="NameValueCollection" /> of metadata. </returns>
         /// <remarks>
-        /// Precondition: reader at &lt;Metadata&gt;
-        /// Postcondition: reader after &lt;/Metadata&gt; (&lt;Metadata/&gt; consumed)
+        ///   Precondition: reader at &lt;Metadata&gt; Postcondition: reader after &lt;/Metadata&gt; (&lt;Metadata/&gt; consumed)
         /// </remarks>
         internal static NameValueCollection ParseMetadata(XmlReader reader)
         {
-            NameValueCollection metadata = new NameValueCollection();
-            bool needToRead = true;
+            var metadata = new NameValueCollection();
+            var needToRead = true;
             while (true)
             {
                 if (needToRead && !reader.Read())
@@ -98,13 +132,13 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
                 if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
                 {
                     needToRead = false;
-                    string elementName = reader.Name;
-                    string elementValue = reader.ReadElementContentAsString();
+                    var elementName = reader.Name;
+                    var elementValue = reader.ReadElementContentAsString();
                     if (elementName != Constants.InvalidMetadataName)
                     {
                         metadata.Add(elementName, elementValue);
                     }
-                } 
+                }
                 else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.MetadataElement)
                 {
                     reader.Read();
@@ -114,89 +148,58 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
         }
 
         /// <summary>
-        /// Gets the storage properties.
+        ///   Reads service properties from a stream.
         /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <returns>A <see cref="NameValueCollection"/> of the properties.</returns>
-        internal static NameValueCollection GetProperties(HttpWebResponse response)
-        {
-            return GetMetadataOrProperties(response, Constants.HeaderConstants.PrefixForStorageProperties);
-        }
-
-        /// <summary>
-        /// Gets a specific storage property.
-        /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <param name="name">The property requested.</param>
-        /// <returns>An array of the values for the property.</returns>
-        internal static string[] GetProperties(HttpWebResponse response, string name)
-        {
-            return response.Headers.GetValues(Constants.HeaderConstants.PrefixForStorageProperties + name);
-        }
-
-        /// <summary>
-        /// Gets the request id.
-        /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <returns>The request ID.</returns>
-        internal static string GetRequestId(HttpWebResponse response)
-        {
-            string[] values = response.Headers.GetValues(Constants.HeaderConstants.RequestIdHeader);
-
-            if (values.Length == 1)
-            {
-                return values[0];
-            }
-
-            return null;
-        }
-
-        /// <summary>
-        /// Reads service properties from a stream.
-        /// </summary>
-        /// <param name="inputStream">The stream from which to read the service properties.</param>
-        /// <returns>The service properties stored in the stream.</returns>
+        /// <param name="inputStream"> The stream from which to read the service properties. </param>
+        /// <returns> The service properties stored in the stream. </returns>
         internal static ServiceProperties ReadServiceProperties(Stream inputStream)
         {
-            using (XmlReader reader = XmlReader.Create(inputStream))
+            using (var reader = XmlReader.Create(inputStream))
             {
-                XDocument servicePropertyDocument = XDocument.Load(reader);
+                var servicePropertyDocument = XDocument.Load(reader);
 
                 return ServiceProperties.FromServiceXml(servicePropertyDocument);
             }
         }
 
         /// <summary>
-        /// Gets the metadata or properties.
+        ///   Gets the metadata or properties.
         /// </summary>
-        /// <param name="response">The response from server.</param>
-        /// <param name="prefix">The prefix for all the headers.</param>
-        /// <returns>A <see cref="NameValueCollection"/> of the headers with the prefix.</returns>
+        /// <param name="response"> The response from server. </param>
+        /// <param name="prefix"> The prefix for all the headers. </param>
+        /// <returns> A <see cref="NameValueCollection" /> of the headers with the prefix. </returns>
         private static NameValueCollection GetMetadataOrProperties(HttpWebResponse response, string prefix)
         {
-            NameValueCollection nameValues = new NameValueCollection();
-            int prefixLength = prefix.Length;
+            var nameValues = new NameValueCollection();
+            var prefixLength = prefix.Length;
 
-            WebHeaderCollection headers = response.Headers;
+            var headers = response.Headers;
 
-            for (int i = 0; i < headers.Count; i++)
+            for (var i = 0; i < headers.Count; i++)
             {
-                string header = headers.GetKey(i);
+                var header = headers.GetKey(i);
 
                 if (!header.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
                 {
                     continue;
                 }
 
-                string[] values = headers.GetValues(header);
+                var values = headers.GetValues(header);
 
-                for (int j = 0; j < values.Length; j++)
+                if (values == null)
                 {
-                    nameValues.Add(header.Substring(prefixLength), values[j]);
+                    continue;
+                }
+
+                foreach (var t in values)
+                {
+                    nameValues.Add(header.Substring(prefixLength), t);
                 }
             }
 
             return nameValues;
         }
+
+        #endregion
     }
 }

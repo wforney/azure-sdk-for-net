@@ -25,22 +25,29 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
     using System.Xml;
 
     /// <summary>
-    /// Provides methods for parsing the response from an operation to get a range of pages for a page blob.
+    ///   Provides methods for parsing the response from an operation to get a range of pages for a page blob.
     /// </summary>
     public class GetPageRangesResponse : ResponseParsingBase<PageRange>
     {
+        #region Constructors and Destructors
+
         /// <summary>
-        /// Initializes a new instance of the <see cref="GetPageRangesResponse"/> class.
+        ///   Initializes a new instance of the <see cref="GetPageRangesResponse" /> class.
         /// </summary>
-        /// <param name="stream">The stream of page ranges to be parsed.</param>
-        internal GetPageRangesResponse(Stream stream) : base(stream)
+        /// <param name="stream"> The stream of page ranges to be parsed. </param>
+        internal GetPageRangesResponse(Stream stream)
+            : base(stream)
         {
         }
 
+        #endregion
+
+        #region Public Properties
+
         /// <summary>
-        /// Gets an enumerable collection of <see cref="PageRange"/> objects from the response.
+        ///   Gets an enumerable collection of <see cref="PageRange" /> objects from the response.
         /// </summary>
-        /// <value>An enumerable collection of <see cref="PageRange"/> objects.</value>
+        /// <value> An enumerable collection of <see cref="PageRange" /> objects. </value>
         public IEnumerable<PageRange> PageRanges
         {
             get
@@ -49,48 +56,54 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
             }
         }
 
+        #endregion
+
+        #region Methods
+
         /// <summary>
-        /// Parses the XML response for an operation to get a range of pages for a page blob.
+        ///   Parses the XML response for an operation to get a range of pages for a page blob.
         /// </summary>
-        /// <returns>An enumerable collection of <see cref="PageRange"/> objects.</returns>
+        /// <returns> An enumerable collection of <see cref="PageRange" /> objects. </returns>
         protected override IEnumerable<PageRange> ParseXml()
         {
             // While we're still in the QueueMessageList section.
-            while (reader.Read())
+            while (this.Reader.Read())
             {
                 // We found a queue message.
-                if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement && reader.Name == Constants.PageRangeElement)
+                if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement
+                    && this.Reader.Name == Constants.PageRangeElement)
                 {
                     PageRange pageRange = null;
-                    long start = 0L;
-                    long end = 0L;
-                    bool needToRead = true;
+                    var start = 0L;
+                    var end = 0L;
+                    var needToRead = true;
 
                     // Go until we are out of the block.
                     while (true)
                     {
-                        if (needToRead && !reader.Read())
+                        if (needToRead && !this.Reader.Read())
                         {
                             break;
                         }
 
                         needToRead = true;
 
-                        if (reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement)
+                        if (this.Reader.NodeType == XmlNodeType.Element && !this.Reader.IsEmptyElement)
                         {
-                            switch (reader.Name)
+                            switch (this.Reader.Name)
                             {
                                 case Constants.StartElement:
-                                    start = reader.ReadElementContentAsLong();
+                                    start = this.Reader.ReadElementContentAsLong();
                                     needToRead = false;
                                     break;
                                 case Constants.EndElement:
-                                    end = reader.ReadElementContentAsLong();
+                                    end = this.Reader.ReadElementContentAsLong();
                                     needToRead = false;
                                     break;
                             }
                         }
-                        else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.PageRangeElement)
+                        else if (this.Reader.NodeType == XmlNodeType.EndElement
+                                 && this.Reader.Name == Constants.PageRangeElement)
                         {
                             pageRange = new PageRange(start, end);
                             break;
@@ -99,11 +112,13 @@ namespace Microsoft.WindowsAzure.StorageClient.Protocol
 
                     yield return pageRange;
                 }
-                else if (reader.NodeType == XmlNodeType.EndElement && reader.Name == Constants.PageListElement)
+                else if (this.Reader.NodeType == XmlNodeType.EndElement && this.Reader.Name == Constants.PageListElement)
                 {
                     break;
                 }
             }
         }
+
+        #endregion
     }
 }

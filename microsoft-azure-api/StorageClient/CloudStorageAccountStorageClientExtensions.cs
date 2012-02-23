@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="CloudStorageAccountStorageClientExtensions.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -22,17 +20,14 @@ namespace Microsoft.WindowsAzure.StorageClient
 {
     using System;
 
-    /// <summary>
-    /// Provides a set of extensions to the <see cref="CloudStorageAccount"/> class that may be used to generate client objects for 
-    /// the Windows Azure storage services.
-    /// </summary>
+    /// <summary>Provides a set of extensions to the <see cref="CloudStorageAccount"/> class that may be used to generate client objects for the Windows Azure storage services.</summary>
     public static class CloudStorageAccountStorageClientExtensions
     {
-        /// <summary>
-        /// Creates a new Blob service client.
-        /// </summary>
-        /// <param name="account">The storage account.</param>
-        /// <returns>A client object that specifies the Blob service endpoint.</returns>
+        #region Public Methods and Operators
+
+        /// <summary>Creates a new Blob service client.</summary>
+        /// <param name="account">The storage account. </param>
+        /// <returns>A client object that specifies the Blob service endpoint. </returns>
         public static CloudBlobClient CreateCloudBlobClient(this CloudStorageAccount account)
         {
             if (account.BlobEndpoint == null)
@@ -48,11 +43,9 @@ namespace Microsoft.WindowsAzure.StorageClient
             return new CloudBlobClient(account.BlobEndpoint, account.Credentials);
         }
 
-        /// <summary>
-        /// Creates a new Queue service client.
-        /// </summary>
-        /// <param name="account">The storage account.</param>
-        /// <returns>A client object that specifies the Queue service endpoint.</returns>
+        /// <summary>Creates a new Queue service client.</summary>
+        /// <param name="account">The storage account. </param>
+        /// <returns>A client object that specifies the Queue service endpoint. </returns>
         public static CloudQueueClient CreateCloudQueueClient(this CloudStorageAccount account)
         {
             if (account.QueueEndpoint == null)
@@ -73,11 +66,9 @@ namespace Microsoft.WindowsAzure.StorageClient
             return new CloudQueueClient(account.QueueEndpoint, account.Credentials);
         }
 
-        /// <summary>
-        /// Creates the Table service client.
-        /// </summary>
-        /// <param name="account">The storage account.</param>
-        /// <returns>A client object that specifies the Table service endpoint.</returns>
+        /// <summary>Creates the Table service client.</summary>
+        /// <param name="account">The storage account. </param>
+        /// <returns>A client object that specifies the Table service endpoint. </returns>
         public static CloudTableClient CreateCloudTableClient(this CloudStorageAccount account)
         {
             if (account.TableEndpoint == null)
@@ -97,5 +88,7 @@ namespace Microsoft.WindowsAzure.StorageClient
 
             return new CloudTableClient(account.TableEndpoint, account.Credentials);
         }
+
+        #endregion
     }
 }

@@ -1,12 +1,10 @@
 ﻿//-----------------------------------------------------------------------
 // <copyright file="InvokeTaskSequenceTask.cs" company="Microsoft">
 //    Copyright 2011 Microsoft Corporation
-//
 //    Licensed under the Apache License, Version 2.0 (the "License");
 //    you may not use this file except in compliance with the License.
 //    You may obtain a copy of the License at
 //      http://www.apache.org/licenses/LICENSE-2.0
-//
 //    Unless required by applicable law or agreed to in writing, software
 //    distributed under the License is distributed on an "AS IS" BASIS,
 //    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -23,58 +21,51 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
     using System;
     using System.Collections.Generic;
     using System.Diagnostics;
+    using System.Diagnostics.CodeAnalysis;
 
     using TaskSequence = System.Collections.Generic.IEnumerable<ITask>;
 
-    /// <summary>
-    /// Invokes a sequence with no return value.
-    /// </summary>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.StyleCop.CSharp.MaintainabilityRules",
-        "SA1402:FileMayOnlyContainASingleClass",
+    /// <summary>Invokes a sequence with no return value.</summary>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", 
         Justification = "Other class is a generic class with the same name.")]
     internal class InvokeTaskSequenceTask : InvokeTaskSequenceTask<NullTaskReturn>
     {
-        /// <summary>
-        /// Initializes a new instance of the InvokeTaskSequenceTask class for sequence without any return value.
-        /// </summary>
-        /// <param name="sequenceFunction">The sequence of actions to be invoked.</param>
+        #region Constructors and Destructors
+
+        /// <summary>Initializes a new instance of the InvokeTaskSequenceTask class for sequence without any return value.</summary>
+        /// <param name="sequenceFunction">The sequence of actions to be invoked. </param>
         [DebuggerNonUserCode]
         public InvokeTaskSequenceTask(Func<TaskSequence> sequenceFunction)
-            : base((a) => sequenceFunction())
+            : base(a => sequenceFunction())
         {
         }
+
+        #endregion
     }
 
-    /// <summary>
-    /// Invokes a sequence of tasks.
-    /// </summary>
-    /// <typeparam name="T">The type of the result of the operation.</typeparam>
-    [System.Diagnostics.CodeAnalysis.SuppressMessage(
-        "Microsoft.StyleCop.CSharp.MaintainabilityRules",
-        "SA1402:FileMayOnlyContainASingleClass",
+    /// <summary>Invokes a sequence of tasks.</summary>
+    /// <typeparam name="T">The type of the result of the operation. </typeparam>
+    [SuppressMessage("Microsoft.StyleCop.CSharp.MaintainabilityRules", "SA1402:FileMayOnlyContainASingleClass", 
         Justification = "Other class is a non-generic specialization with the same name.")]
     internal class InvokeTaskSequenceTask<T> : Task<T>
     {
-        /// <summary>
-        /// Contains the function that generates a squence of tasks to be invoked.
-        /// </summary>
-        private Func<Action<T>, TaskSequence> sequenceGenerator;
+        #region Constants and Fields
 
-        /// <summary>
-        /// The current task that is being invoked.
-        /// </summary>
-        private ITask currentTask;
+        /// <summary>Contains the function that generates a squence of tasks to be invoked.</summary>
+        private readonly Func<Action<T>, TaskSequence> sequenceGenerator;
 
-        /// <summary>
-        /// Controls whether the abort was called.
-        /// </summary>
+        /// <summary>Controls whether the abort was called.</summary>
         private bool aborting;
 
-        /// <summary>
-        /// Initializes a new instance of the InvokeTaskSequenceTask class with a task sequence that returns a value.
-        /// </summary>
-        /// <param name="sequenceFunction">The sequence of actions to be invoked.</param>
+        /// <summary>The current task that is being invoked.</summary>
+        private ITask currentTask;
+
+        #endregion
+
+        #region Constructors and Destructors
+
+        /// <summary>Initializes a new instance of the <see cref="InvokeTaskSequenceTask{T}"/> class. Initializes a new instance of the InvokeTaskSequenceTask class with a task sequence that returns a value.</summary>
+        /// <param name="sequenceFunction">The sequence of actions to be invoked. </param>
         [DebuggerNonUserCode]
         public InvokeTaskSequenceTask(Func<Action<T>, TaskSequence> sequenceFunction)
         {
@@ -82,51 +73,47 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             this.sequenceGenerator = sequenceFunction;
         }
 
-        /// <summary>
-        /// Implements the abort logic by aborting the current task.
-        /// </summary>
+        #endregion
+
+        #region Methods
+
+        /// <summary>Implements the abort logic by aborting the current task.</summary>
         [DebuggerNonUserCode]
         protected override void AbortInternal()
         {
             TraceHelper.WriteLine("InvokeTaskSequenceTask, AbortInternal");
             this.aborting = true;
-            ITask task = this.currentTask;
+            var task = this.currentTask;
             if (task != null)
             {
                 task.Abort();
             }
         }
 
-        /// <summary>
-        /// The starting point for executing a task sequence.
-        /// </summary>
+        /// <summary>The starting point for executing a task sequence.</summary>
         [DebuggerNonUserCode]
         protected override void ExecuteInternal()
         {
             TraceHelper.WriteLine("InvokeTaskSequenceTask, ExecuteInternal");
-            TaskSequence sequence = this.sequenceGenerator((res) => this.Result = res);
-            IEnumerator<ITask> en = sequence.GetEnumerator();
+            var sequence = this.sequenceGenerator((res) => this.Result = res);
+            var en = sequence.GetEnumerator();
             this.ExecuteTaskSequence(en, true);
         }
 
-        /// <summary>
-        /// Executes a task sequence by iterating over all of the items and executing them.
-        /// </summary>
-        /// <param name="taskList">The sequence of tasks to execute.</param>
-        /// <param name="completedSynchronously">Whether the sequence so far has completed synchronously.</param>
+        /// <summary>Executes a task sequence by iterating over all of the items and executing them.</summary>
+        /// <param name="taskList">The sequence of tasks to execute. </param>
+        /// <param name="completedSynchronously">Whether the sequence so far has completed synchronously. </param>
         [DebuggerNonUserCode]
-        [System.Diagnostics.CodeAnalysis.SuppressMessage(
-            "Microsoft.Design",
-            "CA1031:DoNotCatchGeneralExceptionTypes",
+        [SuppressMessage("Microsoft.Design", "CA1031:DoNotCatchGeneralExceptionTypes", 
             Justification = "Exception is saved")]
         private void ExecuteTaskSequence(IEnumerator<ITask> taskList, bool completedSynchronously)
         {
             TraceHelper.WriteLine("InvokeTaskSequenceTask, ExecuteTaskSequence");
-        Run:
+            Run:
             TraceHelper.WriteLine("InvokeTaskSequenceTask, ExecuteTaskSequence Run");
 
             // complete previous task
-            ITask task = taskList.Current;
+            var task = taskList.Current;
 
             // handle abort
             if (this.aborting)
@@ -146,14 +133,14 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
 
                 // If this operation hasn't moved to a background thread, we should throw the exception out.
                 // This is to follow guideline #7 in  http://csdweb/sites/oslo/engsys/DesignGuidelines/Wiki%20Pages/IAsyncResult.aspx:
-                //     "The callback is called exactly once, unless BeginXxx throws, in which case it isn’t called"
+                // "The callback is called exactly once, unless BeginXxx throws, in which case it isn’t called"
                 // It also provides the user with better exception stack trace, faster error notification and saves potential WaitHandle construction
                 if (completedSynchronously)
                 {
                     throw;
                 }
 
-                this.Complete(completedSynchronously);
+                this.Complete(false/*completedSynchronously*/);
                 return;
             }
 
@@ -169,13 +156,19 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             try
             {
                 this.currentTask = task;
-                task.ExecuteStep(() =>
-                    {
-                        if (!task.CompletedSynchronously)
+                var task1 = task;
+                Debug.Assert(task != null, "task != null");
+                task.ExecuteStep(
+                    () =>
                         {
-                            this.currentTask = null; ExecuteTaskSequence(taskList, false);
-                        }
-                    });
+                            if (task1.CompletedSynchronously)
+                            {
+                                return;
+                            }
+
+                            this.currentTask = null;
+                            this.ExecuteTaskSequence(taskList, false);
+                        });
             }
             catch (Exception ex)
             {
@@ -191,5 +184,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
                 goto Run;
             }
         }
+
+        #endregion
     }
 }
