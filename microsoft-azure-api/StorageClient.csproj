@@ -22,7 +22,7 @@
     <OutputType>Library</OutputType>
     <RootNamespace>Microsoft.WindowsAzure</RootNamespace>
     <AssemblyName>Microsoft.WindowsAzure.StorageClient</AssemblyName>
-    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileUpgradeFlags>
     </FileUpgradeFlags>
     <OldToolsVersion>3.5</OldToolsVersion>
@@ -42,6 +42,7 @@
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -219,20 +220,48 @@
     <Compile Include="StorageClient\TableServiceTable.cs" />
     <Compile Include="StorageClient\TableServiceUtilities.cs" />
     <Compile Include="StorageClient\TaskImplHelper.cs" />
-    <Compile Include="StorageClient\Tasks\APMTask.cs" />
-    <Compile Include="StorageClient\Tasks\AsyncResultExtensions.cs" />
-    <Compile Include="StorageClient\Tasks\DelayTask.cs" />
-    <Compile Include="StorageClient\Tasks\InvokeTaskSequenceTask.cs" />
-    <Compile Include="StorageClient\Tasks\ITask.cs" />
-    <Compile Include="StorageClient\Tasks\NullTaskReturn.cs" />
-    <Compile Include="StorageClient\Tasks\RaceTask.cs" />
-    <Compile Include="StorageClient\Tasks\StreamExtensions.cs" />
-    <Compile Include="StorageClient\Tasks\SynchronousTask.cs" />
-    <Compile Include="StorageClient\Tasks\TableServiceExtensions.cs" />
-    <Compile Include="StorageClient\Tasks\Task.cs" />
-    <Compile Include="StorageClient\Tasks\TaskAsyncResult.cs" />
-    <Compile Include="StorageClient\Tasks\TimeoutHelper.cs" />
-    <Compile Include="StorageClient\Tasks\WebRequestExtensions.cs" />
+    <Compile Include="StorageClient\Tasks\APMTask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\AsyncResultExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\DelayTask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\InvokeTaskSequenceTask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\ITask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\NullTaskReturn.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\RaceTask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\StreamExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\SynchronousTask.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\TableServiceExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\Task.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\TaskAsyncResult.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\TimeoutHelper.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="StorageClient\Tasks\WebRequestExtensions.cs">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="StorageClient\TraceHelper.cs" />
     <Compile Include="StorageClient\Utilities.cs" />
     <Compile Include="StorageCredentials.cs" />

@@ -22,7 +22,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
     using System.Threading;
 
     /// <summary>A task class that implements a fixed delay.</summary>
-    internal class DelayTask : Task<NullTaskReturn>, IDisposable
+    internal class DelayTask : Task<NullTaskReturn>
     {
         #region Constants and Fields
 
@@ -53,20 +53,6 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
 
         #endregion
 
-        #region Public Methods and Operators
-
-        /// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-
-            // Use SupressFinalize in case a subclass
-            // of this type implements a finalizer.
-            GC.SuppressFinalize(this);
-        }
-
-        #endregion
-
         #region Methods
 
         /// <summary>The task-specific abort that should be called.</summary>
@@ -81,7 +67,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
 
         /// <summary>Releases unmanaged and - optionally - managed resources.</summary>
         /// <param name="disposing">Set to <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources. </param>
-        protected virtual void Dispose(bool disposing)
+        protected override void Dispose(bool disposing)
         {
             if (!this.disposed)
             {

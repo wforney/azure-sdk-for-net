@@ -18,7 +18,7 @@
 
 namespace Microsoft.WindowsAzure.StorageClient
 {
-    using TaskSequence = System.Collections.Generic.IEnumerable<Microsoft.WindowsAzure.StorageClient.Tasks.ITask>;
+    using TaskSequence = System.Collections.Generic.IEnumerable<Tasks.ITask>;
 
     /// <summary>Represents a block retrieved from the blob's block list.</summary>
     public class ListBlockItem

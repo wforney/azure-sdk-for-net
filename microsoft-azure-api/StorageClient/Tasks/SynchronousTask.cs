@@ -57,10 +57,11 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         #endregion
 
         #region Constructors and Destructors
-
+        
         /// <summary>Initializes a new instance of the <see cref="SynchronousTask{T}"/> class. Initializes a new instance of the SynchronousTask class.</summary>
         /// <param name="operation">The function to execute. </param>
         public SynchronousTask(Func<T> operation)
+            : base(operation)
         {
             this.func = operation;
         }

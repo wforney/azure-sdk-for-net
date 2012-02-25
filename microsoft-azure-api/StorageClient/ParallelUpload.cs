@@ -137,7 +137,9 @@ namespace Microsoft.WindowsAzure.StorageClient
 
                     this.producerTasksCreated++;
 
+// ReSharper disable UnusedVariable
                     var scatch = producerTask.Result;
+// ReSharper restore UnusedVariable
 
                     if (blockAsStream == null)
                     {
@@ -198,7 +200,9 @@ namespace Microsoft.WindowsAzure.StorageClient
             var commitTask = TaskImplHelper.GetRetryableAsyncTask(this.CommitBlob, this.options.RetryPolicy);
 
             yield return commitTask;
+// ReSharper disable UnusedVariable
             var commitTaskResult = commitTask.Result;
+// ReSharper restore UnusedVariable
         }
 
         /// <summary>Completes the asyncresult.</summary>
@@ -272,7 +276,9 @@ namespace Microsoft.WindowsAzure.StorageClient
                     yield return writeTask;
 
                     // Materialize any exceptions
+// ReSharper disable UnusedVariable
                     var scratch = writeTask.Result;
+// ReSharper restore UnusedVariable
 
                     totalCopied += numRead;
                 }

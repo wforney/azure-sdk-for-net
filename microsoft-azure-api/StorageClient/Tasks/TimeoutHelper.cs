@@ -72,7 +72,9 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
             using (var timeoutTask = new DelayTask(timeout))
             {
                 yield return timeoutTask;
+// ReSharper disable UnusedVariable
                 var scratch = timeoutTask.Result;
+// ReSharper restore UnusedVariable
             }
 
             throw ThrowTimeoutError(timeout);

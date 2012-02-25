@@ -95,7 +95,7 @@ namespace Microsoft.WindowsAzure.StorageClient.Tasks
         protected override void ExecuteInternal()
         {
             TraceHelper.WriteLine("InvokeTaskSequenceTask, ExecuteInternal");
-            var sequence = this.sequenceGenerator((res) => this.Result = res);
+            var sequence = this.sequenceGenerator(res => this.Result = res);
             var en = sequence.GetEnumerator();
             this.ExecuteTaskSequence(en, true);
         }

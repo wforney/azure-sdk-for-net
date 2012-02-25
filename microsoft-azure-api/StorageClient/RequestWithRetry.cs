@@ -143,7 +143,9 @@ namespace Microsoft.WindowsAzure.StorageClient
                         yield return delayTask;
 
                         // Materialize exceptions
+// ReSharper disable UnusedVariable
                         var scratch = delayTask.Result;
+// ReSharper restore UnusedVariable
                     }
                 }
             }
