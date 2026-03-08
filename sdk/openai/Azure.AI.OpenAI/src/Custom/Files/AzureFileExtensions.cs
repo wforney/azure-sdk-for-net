@@ -30,9 +30,12 @@ public static partial class AzureFileExtensions
     [Experimental("AOAI001")]
     public static AzureOpenAIFileStatus ToAzureOpenAIFileStatus(this FileStatus fileStatus)
     {
-        if (fileStatus == FileStatus.Uploaded) return AzureOpenAIFileStatus.Uploaded;
-        if (fileStatus == FileStatus.Processed) return AzureOpenAIFileStatus.Processed;
-        if (fileStatus == FileStatus.Error) return AzureOpenAIFileStatus.Error;
+        if (fileStatus == FileStatus.Uploaded)
+            return AzureOpenAIFileStatus.Uploaded;
+        if (fileStatus == FileStatus.Processed)
+            return AzureOpenAIFileStatus.Processed;
+        if (fileStatus == FileStatus.Error)
+            return AzureOpenAIFileStatus.Error;
 
         List<AzureOpenAIFileStatus> otherEncodedStatuses =
             [
@@ -71,13 +74,13 @@ public static partial class AzureFileExtensions
             Purpose = purpose,
             SerializedAdditionalRawData = new ChangeTrackingDictionary<string, BinaryData>
             {
-                ["expires_after"] = ModelReaderWriter.Write(expirationOptions),
+                ["expires_after"] = ModelReaderWriter.Write(expirationOptions, ModelReaderWriterOptions.Json, AzureAIOpenAIContext.Default),
             }
         };
 
         using MultiPartFormDataBinaryContent content = AzureFileClient.CreateMultiPartContentWithMimeType(file, filename, purpose, expirationOptions);
         ClientResult result = await client.UploadFileAsync(content, content.ContentType, cancellationToken.ToRequestOptions()).ConfigureAwait(false);
-        return ClientResult.FromValue((OpenAIFile)result, result.GetRawResponse());
+        return AzureFileClient.GetAzureFileResult(result);
     }
 
     [Experimental("AOAI001")]
@@ -98,13 +101,13 @@ public static partial class AzureFileExtensions
             Purpose = purpose,
             SerializedAdditionalRawData = new ChangeTrackingDictionary<string, BinaryData>
             {
-                ["expires_after"] = ModelReaderWriter.Write(expirationOptions),
+                ["expires_after"] = ModelReaderWriter.Write(expirationOptions, ModelReaderWriterOptions.Json, AzureAIOpenAIContext.Default),
             }
         };
 
         using MultiPartFormDataBinaryContent content = AzureFileClient.CreateMultiPartContentWithMimeType(file, filename, purpose, expirationOptions);
         ClientResult result = client.UploadFile(content, content.ContentType, cancellationToken.ToRequestOptions());
-        return ClientResult.FromValue((OpenAIFile)result, result.GetRawResponse());
+        return AzureFileClient.GetAzureFileResult(result);
     }
 
     [Experimental("AOAI001")]

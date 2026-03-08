@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Contains debugging information that can be used to further explore your search results. </summary>
     public partial class DocumentDebugInfo
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="DocumentDebugInfo"/>. </summary>
         internal DocumentDebugInfo()
         {
@@ -22,17 +27,21 @@ namespace Azure.Search.Documents.Models
         /// <param name="semantic"> Contains debugging information specific to semantic ranking requests. </param>
         /// <param name="vectors"> Contains debugging information specific to vector and hybrid search. </param>
         /// <param name="innerHits"> Contains debugging information specific to vectors matched within a collection of complex types. </param>
-        internal DocumentDebugInfo(SemanticDebugInfo semantic, VectorsDebugInfo vectors, IReadOnlyDictionary<string, IList<QueryResultDocumentInnerHit>> innerHits)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal DocumentDebugInfo(SemanticDebugInfo semantic, VectorsDebugInfo vectors, IReadOnlyDictionary<string, IList<QueryResultDocumentInnerHit>> innerHits, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Semantic = semantic;
             Vectors = vectors;
             InnerHits = innerHits;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Contains debugging information specific to semantic ranking requests. </summary>
         public SemanticDebugInfo Semantic { get; }
+
         /// <summary> Contains debugging information specific to vector and hybrid search. </summary>
         public VectorsDebugInfo Vectors { get; }
+
         /// <summary> Contains debugging information specific to vectors matched within a collection of complex types. </summary>
         public IReadOnlyDictionary<string, IList<QueryResultDocumentInnerHit>> InnerHits { get; }
     }

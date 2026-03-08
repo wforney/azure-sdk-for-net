@@ -1,6 +1,6 @@
 # Release History
 
-## 4.7.0-beta.1 (Unreleased)
+## 4.8.0-beta.1 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,16 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 4.7.0 (2026-03-04)
+
+### Bugs Fixed
+
+- Fixed challenge-based authentication to correctly parse tenant ID from DSTSv2 authority URIs. 
+
+### Other Changes
+
+- The default service version is now `2025-07-01`.
 
 ## 4.6.0 (2025-06-16)
 

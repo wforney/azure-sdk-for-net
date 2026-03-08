@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Models
 {
     /// <summary> TThe query parameters to configure hybrid search behaviors. </summary>
     public partial class HybridSearch
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="HybridSearch"/>. </summary>
         public HybridSearch()
         {
@@ -18,14 +24,17 @@ namespace Azure.Search.Documents.Models
         /// <summary> Initializes a new instance of <see cref="HybridSearch"/>. </summary>
         /// <param name="maxTextRecallSize"> Determines the maximum number of documents to be retrieved by the text query portion of a hybrid search request. Those documents will be combined with the documents matching the vector queries to produce a single final list of results. Choosing a larger maxTextRecallSize value will allow retrieving and paging through more documents (using the top and skip parameters), at the cost of higher resource utilization and higher latency. The value needs to be between 1 and 10,000. Default is 1000. </param>
         /// <param name="countAndFacetMode"> Determines whether the count and facets should includes all documents that matched the search query, or only the documents that are retrieved within the 'maxTextRecallSize' window. </param>
-        internal HybridSearch(int? maxTextRecallSize, HybridCountAndFacetMode? countAndFacetMode)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal HybridSearch(int? maxTextRecallSize, HybridCountAndFacetMode? countAndFacetMode, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             MaxTextRecallSize = maxTextRecallSize;
             CountAndFacetMode = countAndFacetMode;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Determines the maximum number of documents to be retrieved by the text query portion of a hybrid search request. Those documents will be combined with the documents matching the vector queries to produce a single final list of results. Choosing a larger maxTextRecallSize value will allow retrieving and paging through more documents (using the top and skip parameters), at the cost of higher resource utilization and higher latency. The value needs to be between 1 and 10,000. Default is 1000. </summary>
         public int? MaxTextRecallSize { get; set; }
+
         /// <summary> Determines whether the count and facets should includes all documents that matched the search query, or only the documents that are retrieved within the 'maxTextRecallSize' window. </summary>
         public HybridCountAndFacetMode? CountAndFacetMode { get; set; }
     }

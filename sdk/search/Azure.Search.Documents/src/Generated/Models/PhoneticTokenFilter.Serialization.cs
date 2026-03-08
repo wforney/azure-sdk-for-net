@@ -5,16 +5,81 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class PhoneticTokenFilter : IUtf8JsonSerializable
+    /// <summary> Create tokens for phonetic matches. This token filter is implemented using Apache Lucene. </summary>
+    public partial class PhoneticTokenFilter : TokenFilter, IJsonModel<PhoneticTokenFilter>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="PhoneticTokenFilter"/> for deserialization. </summary>
+        internal PhoneticTokenFilter()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<PhoneticTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializePhoneticTokenFilter(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(PhoneticTokenFilter)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<PhoneticTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(PhoneticTokenFilter)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<PhoneticTokenFilter>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        PhoneticTokenFilter IPersistableModel<PhoneticTokenFilter>.Create(BinaryData data, ModelReaderWriterOptions options) => (PhoneticTokenFilter)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<PhoneticTokenFilter>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<PhoneticTokenFilter>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<PhoneticTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(PhoneticTokenFilter)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
             if (Optional.IsDefined(Encoder))
             {
                 writer.WritePropertyName("encoder"u8);
@@ -25,71 +90,74 @@ namespace Azure.Search.Documents.Indexes.Models
                 writer.WritePropertyName("replace"u8);
                 writer.WriteBooleanValue(ReplaceOriginalTokens.Value);
             }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(Name);
-            writer.WriteEndObject();
         }
 
-        internal static PhoneticTokenFilter DeserializePhoneticTokenFilter(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        PhoneticTokenFilter IJsonModel<PhoneticTokenFilter>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (PhoneticTokenFilter)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<PhoneticTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(PhoneticTokenFilter)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializePhoneticTokenFilter(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static PhoneticTokenFilter DeserializePhoneticTokenFilter(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            PhoneticEncoder? encoder = default;
-            bool? replace = default;
-            string odataType = default;
+            string odataType = "#Microsoft.Azure.Search.PhoneticTokenFilter";
             string name = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            PhoneticEncoder? encoder = default;
+            bool? replaceOriginalTokens = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("encoder"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    odataType = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("name"u8))
+                {
+                    name = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("encoder"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    encoder = property.Value.GetString().ToPhoneticEncoder();
+                    encoder = prop.Value.GetString().ToPhoneticEncoder();
                     continue;
                 }
-                if (property.NameEquals("replace"u8))
+                if (prop.NameEquals("replace"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    replace = property.Value.GetBoolean();
+                    replaceOriginalTokens = prop.Value.GetBoolean();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (options.Format != "W")
                 {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new PhoneticTokenFilter(odataType, name, encoder, replace);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new PhoneticTokenFilter FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializePhoneticTokenFilter(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new PhoneticTokenFilter(odataType, name, additionalBinaryDataProperties, encoder, replaceOriginalTokens);
         }
     }
 }

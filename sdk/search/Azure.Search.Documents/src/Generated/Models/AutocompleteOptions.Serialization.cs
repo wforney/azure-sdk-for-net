@@ -5,17 +5,86 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
 using Azure.Core;
 using Azure.Search.Documents.Models;
 
 namespace Azure.Search.Documents
 {
-    public partial class AutocompleteOptions : IUtf8JsonSerializable
+    /// <summary> The AutocompleteOptions. </summary>
+    public partial class AutocompleteOptions : IJsonModel<AutocompleteOptions>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AutocompleteOptions PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AutocompleteOptions>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAutocompleteOptions(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AutocompleteOptions)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AutocompleteOptions>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AutocompleteOptions)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AutocompleteOptions>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AutocompleteOptions IPersistableModel<AutocompleteOptions>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AutocompleteOptions>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="autocompleteOptions"> The <see cref="AutocompleteOptions"/> to serialize into <see cref="RequestContent"/>. </param>
+        public static implicit operator RequestContent(AutocompleteOptions autocompleteOptions)
+        {
+            if (autocompleteOptions == null)
+            {
+                return null;
+            }
+            return RequestContent.Create(autocompleteOptions, ModelSerializationExtensions.WireOptions);
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AutocompleteOptions>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AutocompleteOptions>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AutocompleteOptions)} does not support writing '{format}' format.");
+            }
             writer.WritePropertyName("search"u8);
             writer.WriteStringValue(SearchText);
             if (Optional.IsDefined(Mode))
@@ -60,15 +129,144 @@ namespace Azure.Search.Documents
                 writer.WritePropertyName("top"u8);
                 writer.WriteNumberValue(Size.Value);
             }
-            writer.WriteEndObject();
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
         }
 
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AutocompleteOptions IJsonModel<AutocompleteOptions>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AutocompleteOptions JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
         {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            string format = options.Format == "W" ? ((IPersistableModel<AutocompleteOptions>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AutocompleteOptions)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAutocompleteOptions(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AutocompleteOptions DeserializeAutocompleteOptions(JsonElement element, ModelReaderWriterOptions options)
+        {
+            if (element.ValueKind == JsonValueKind.Null)
+            {
+                return null;
+            }
+            string searchText = default;
+            AutocompleteMode? mode = default;
+            string filter = default;
+            bool? useFuzzyMatching = default;
+            string highlightPostTag = default;
+            string highlightPreTag = default;
+            double? minimumCoverage = default;
+            string searchFieldsRaw = default;
+            string suggesterName = default;
+            int? size = default;
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
+            {
+                if (prop.NameEquals("search"u8))
+                {
+                    searchText = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("autocompleteMode"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    mode = prop.Value.GetString().ToAutocompleteMode();
+                    continue;
+                }
+                if (prop.NameEquals("filter"u8))
+                {
+                    filter = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("fuzzy"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    useFuzzyMatching = prop.Value.GetBoolean();
+                    continue;
+                }
+                if (prop.NameEquals("highlightPostTag"u8))
+                {
+                    highlightPostTag = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("highlightPreTag"u8))
+                {
+                    highlightPreTag = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("minimumCoverage"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    minimumCoverage = prop.Value.GetDouble();
+                    continue;
+                }
+                if (prop.NameEquals("searchFields"u8))
+                {
+                    searchFieldsRaw = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("suggesterName"u8))
+                {
+                    suggesterName = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("top"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    size = prop.Value.GetInt32();
+                    continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
+                }
+            }
+            return new AutocompleteOptions(
+                searchText,
+                mode,
+                filter,
+                useFuzzyMatching,
+                highlightPostTag,
+                highlightPreTag,
+                minimumCoverage,
+                searchFieldsRaw,
+                suggesterName,
+                size,
+                additionalBinaryDataProperties);
         }
     }
 }

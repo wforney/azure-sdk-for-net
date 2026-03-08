@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Contains debugging information specific to query rewrites. </summary>
     public partial class QueryRewritesDebugInfo
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="QueryRewritesDebugInfo"/>. </summary>
         internal QueryRewritesDebugInfo()
         {
@@ -21,14 +26,17 @@ namespace Azure.Search.Documents.Models
         /// <summary> Initializes a new instance of <see cref="QueryRewritesDebugInfo"/>. </summary>
         /// <param name="text"> List of query rewrites generated for the text query. </param>
         /// <param name="vectors"> List of query rewrites generated for the vectorizable text queries. </param>
-        internal QueryRewritesDebugInfo(QueryRewritesValuesDebugInfo text, IReadOnlyList<QueryRewritesValuesDebugInfo> vectors)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal QueryRewritesDebugInfo(QueryRewritesValuesDebugInfo text, IReadOnlyList<QueryRewritesValuesDebugInfo> vectors, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Text = text;
             Vectors = vectors;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> List of query rewrites generated for the text query. </summary>
         public QueryRewritesValuesDebugInfo Text { get; }
+
         /// <summary> List of query rewrites generated for the vectorizable text queries. </summary>
         public IReadOnlyList<QueryRewritesValuesDebugInfo> Vectors { get; }
     }

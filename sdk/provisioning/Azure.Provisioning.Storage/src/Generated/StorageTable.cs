@@ -89,7 +89,7 @@ public partial class StorageTable : ProvisionableResource
     /// </param>
     /// <param name="resourceVersion">Version of the StorageTable.</param>
     public StorageTable(string bicepIdentifier, string? resourceVersion = default)
-        : base(bicepIdentifier, "Microsoft.Storage/storageAccounts/tableServices/tables", resourceVersion ?? "2024-01-01")
+        : base(bicepIdentifier, "Microsoft.Storage/storageAccounts/tableServices/tables", resourceVersion ?? "2025-06-01")
     {
     }
 
@@ -98,6 +98,7 @@ public partial class StorageTable : ProvisionableResource
     /// </summary>
     protected override void DefineProvisionableProperties()
     {
+        base.DefineProvisionableProperties();
         _name = DefineProperty<string>("Name", ["name"], isRequired: true);
         _signedIdentifiers = DefineListProperty<StorageTableSignedIdentifier>("SignedIdentifiers", ["properties", "signedIdentifiers"]);
         _id = DefineProperty<ResourceIdentifier>("Id", ["id"], isOutput: true);
@@ -111,6 +112,11 @@ public partial class StorageTable : ProvisionableResource
     /// </summary>
     public static class ResourceVersions
     {
+        /// <summary>
+        /// 2025-06-01.
+        /// </summary>
+        public static readonly string V2025_06_01 = "2025-06-01";
+
         /// <summary>
         /// 2024-01-01.
         /// </summary>

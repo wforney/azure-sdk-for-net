@@ -6,27 +6,44 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary>
-    /// Base type for tokenizers.
-    /// Please note <see cref="LexicalTokenizer"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-    /// The available derived classes include <see cref="ClassicTokenizer"/>, <see cref="EdgeNGramTokenizer"/>, <see cref="KeywordTokenizer"/>, <see cref="KeywordTokenizer"/>, <see cref="MicrosoftLanguageStemmingTokenizer"/>, <see cref="MicrosoftLanguageTokenizer"/>, <see cref="NGramTokenizer"/>, <see cref="PathHierarchyTokenizer"/>, <see cref="PatternTokenizer"/>, <see cref="LuceneStandardTokenizer"/>, <see cref="LuceneStandardTokenizer"/> and <see cref="UaxUrlEmailTokenizer"/>.
-    /// </summary>
+    /// <summary> Base type for tokenizers. </summary>
     public partial class LexicalTokenizer
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="LexicalTokenizer"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of tokenizer. </param>
+        /// <param name="odataType"> The discriminator for derived types. </param>
         /// <param name="name"> The name of the tokenizer. It must only contain letters, digits, spaces, dashes or underscores, can only start and end with alphanumeric characters, and is limited to 128 characters. </param>
-        internal LexicalTokenizer(string oDataType, string name)
+        /// <exception cref="ArgumentNullException"> <paramref name="odataType"/> or <paramref name="name"/> is null. </exception>
+        public LexicalTokenizer(string odataType, string name)
         {
-            ODataType = oDataType;
+            Argument.AssertNotNull(odataType, nameof(odataType));
+            Argument.AssertNotNull(name, nameof(name));
+
+            OdataType = odataType;
             Name = name;
         }
 
-        /// <summary> A URI fragment specifying the type of tokenizer. </summary>
-        internal string ODataType { get; set; }
+        /// <summary> Initializes a new instance of <see cref="LexicalTokenizer"/>. </summary>
+        /// <param name="odataType"> The discriminator for derived types. </param>
+        /// <param name="name"> The name of the tokenizer. It must only contain letters, digits, spaces, dashes or underscores, can only start and end with alphanumeric characters, and is limited to 128 characters. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal LexicalTokenizer(string odataType, string name, IDictionary<string, BinaryData> additionalBinaryDataProperties)
+        {
+            OdataType = odataType;
+            Name = name;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
+        }
+
+        /// <summary> The discriminator for derived types. </summary>
+        internal string OdataType { get; set; }
+
         /// <summary> The name of the tokenizer. It must only contain letters, digits, spaces, dashes or underscores, can only start and end with alphanumeric characters, and is limited to 128 characters. </summary>
         public string Name { get; set; }
     }

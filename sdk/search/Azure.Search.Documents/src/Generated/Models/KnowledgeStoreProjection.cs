@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Container object for various projection selectors. </summary>
     public partial class KnowledgeStoreProjection
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="KnowledgeStoreProjection"/>. </summary>
         public KnowledgeStoreProjection()
         {
@@ -24,17 +29,21 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="tables"> Projections to Azure Table storage. </param>
         /// <param name="objects"> Projections to Azure Blob storage. </param>
         /// <param name="files"> Projections to Azure File storage. </param>
-        internal KnowledgeStoreProjection(IList<KnowledgeStoreTableProjectionSelector> tables, IList<KnowledgeStoreObjectProjectionSelector> objects, IList<KnowledgeStoreFileProjectionSelector> files)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal KnowledgeStoreProjection(IList<KnowledgeStoreTableProjectionSelector> tables, IList<KnowledgeStoreObjectProjectionSelector> objects, IList<KnowledgeStoreFileProjectionSelector> files, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Tables = tables;
             Objects = objects;
             Files = files;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Projections to Azure Table storage. </summary>
         public IList<KnowledgeStoreTableProjectionSelector> Tables { get; }
+
         /// <summary> Projections to Azure Blob storage. </summary>
         public IList<KnowledgeStoreObjectProjectionSelector> Objects { get; }
+
         /// <summary> Projections to Azure File storage. </summary>
         public IList<KnowledgeStoreFileProjectionSelector> Files { get; }
     }

@@ -7,24 +7,18 @@ using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using Azure.Identity;
-using Azure.ResourceManager;
 
 namespace Azure.Provisioning.Generator.Model;
 
 public abstract partial class Specification : ModelBase
 {
-    /// <summary>
-    /// ArmClient used for talking to the service so it can fetch lists of
-    /// supported versions for resources.
-    /// </summary>
-    private static ArmClient Arm { get; } = new ArmClient(new DefaultAzureCredential());
-
     public Assembly ArmAssembly { get => ArmType!.Assembly; }
 
     // Flag indicating we don't need to clean the output directory
     // because it's merged with another spec that'll handle that for us
     public bool SkipCleaning { get; protected set; } = false;
+
+    public bool ShouldGenerateSchema { get; set; } = true;
 
     public IList<Resource> Resources { get; private set; } = [];
 
@@ -35,7 +29,9 @@ public abstract partial class Specification : ModelBase
     public Dictionary<string, ModelBase> ModelNameMapping { get; } = [];
     public Dictionary<Type, ModelBase> ModelArmTypeMapping { get; } = [];
 
-    public Specification(string name, Type armEntryPoint)
+    internal bool IgnorePropertiesWithoutPath { get; }
+
+    public Specification(string name, Type armEntryPoint, bool ignorePropertiesWithoutPath = false)
         : base(
             name: name,
             ns: $"Azure.Provisioning.{name}",
@@ -44,6 +40,7 @@ public abstract partial class Specification : ModelBase
         Spec = this;
         DocComments = new XmlDocCommentReader(armEntryPoint.Assembly);
         TypeRegistry.Register(this);
+        IgnorePropertiesWithoutPath = ignorePropertiesWithoutPath;
     }
 
     public override string ToString() => $"<Specification {Name}>";
@@ -52,6 +49,8 @@ public abstract partial class Specification : ModelBase
     {
         Analyze();
         Customize();
+        RemovePropertiesWithoutPath();
+        ResolveVersions();
         Lint();
         ContextualException.WithContext(
             $"Generating all types for {Namespace}",
@@ -78,7 +77,31 @@ public abstract partial class Specification : ModelBase
                 {
                     GenerateBuiltInRoles();
                 }
+
+                if (ShouldGenerateSchema)
+                {
+                    GenerateSchema();
+                }
             });
+    }
+
+    /// <summary>
+    /// Remove properties that were marked as needing a path during analysis
+    /// but still have no path after customization.
+    /// </summary>
+    private void RemovePropertiesWithoutPath()
+    {
+        if (!IgnorePropertiesWithoutPath) { return; }
+        foreach (TypeModel model in ModelNameMapping.Values.OfType<TypeModel>())
+        {
+            for (int i = model.Properties.Count - 1; i >= 0; i--)
+            {
+                if (model.Properties[i].Path is null)
+                {
+                    model.Properties.RemoveAt(i);
+                }
+            }
+        }
     }
 
     public override void Lint()

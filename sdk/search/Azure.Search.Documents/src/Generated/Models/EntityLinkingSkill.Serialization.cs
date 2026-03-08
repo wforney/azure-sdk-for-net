@@ -5,173 +5,207 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class EntityLinkingSkill : IUtf8JsonSerializable
+    /// <summary> Using the Text Analytics API, extracts linked entities from text. </summary>
+    public partial class EntityLinkingSkill : SearchIndexerSkill, IJsonModel<EntityLinkingSkill>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="EntityLinkingSkill"/> for deserialization. </summary>
+        internal EntityLinkingSkill()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<EntityLinkingSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeEntityLinkingSkill(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(EntityLinkingSkill)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<EntityLinkingSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(EntityLinkingSkill)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<EntityLinkingSkill>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        EntityLinkingSkill IPersistableModel<EntityLinkingSkill>.Create(BinaryData data, ModelReaderWriterOptions options) => (EntityLinkingSkill)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<EntityLinkingSkill>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<EntityLinkingSkill>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(DefaultLanguageCode))
-            {
-                if (DefaultLanguageCode != null)
-                {
-                    writer.WritePropertyName("defaultLanguageCode"u8);
-                    writer.WriteStringValue(DefaultLanguageCode);
-                }
-                else
-                {
-                    writer.WriteNull("defaultLanguageCode");
-                }
-            }
-            if (Optional.IsDefined(MinimumPrecision))
-            {
-                if (MinimumPrecision != null)
-                {
-                    writer.WritePropertyName("minimumPrecision"u8);
-                    writer.WriteNumberValue(MinimumPrecision.Value);
-                }
-                else
-                {
-                    writer.WriteNull("minimumPrecision");
-                }
-            }
-            if (Optional.IsDefined(ModelVersion))
-            {
-                if (ModelVersion != null)
-                {
-                    writer.WritePropertyName("modelVersion"u8);
-                    writer.WriteStringValue(ModelVersion);
-                }
-                else
-                {
-                    writer.WriteNull("modelVersion");
-                }
-            }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            if (Optional.IsDefined(Name))
-            {
-                writer.WritePropertyName("name"u8);
-                writer.WriteStringValue(Name);
-            }
-            if (Optional.IsDefined(Description))
-            {
-                writer.WritePropertyName("description"u8);
-                writer.WriteStringValue(Description);
-            }
-            if (Optional.IsDefined(Context))
-            {
-                writer.WritePropertyName("context"u8);
-                writer.WriteStringValue(Context);
-            }
-            writer.WritePropertyName("inputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Inputs)
-            {
-                writer.WriteObjectValue<InputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
-            writer.WritePropertyName("outputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Outputs)
-            {
-                writer.WriteObjectValue<OutputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static EntityLinkingSkill DeserializeEntityLinkingSkill(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<EntityLinkingSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(EntityLinkingSkill)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            if (Optional.IsDefined(DefaultLanguageCode))
+            {
+                writer.WritePropertyName("defaultLanguageCode"u8);
+                writer.WriteStringValue(DefaultLanguageCode);
+            }
+            if (Optional.IsDefined(MinimumPrecision))
+            {
+                writer.WritePropertyName("minimumPrecision"u8);
+                writer.WriteNumberValue(MinimumPrecision.Value);
+            }
+            if (Optional.IsDefined(ModelVersion))
+            {
+                writer.WritePropertyName("modelVersion"u8);
+                writer.WriteStringValue(ModelVersion);
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        EntityLinkingSkill IJsonModel<EntityLinkingSkill>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (EntityLinkingSkill)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<EntityLinkingSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(EntityLinkingSkill)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeEntityLinkingSkill(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static EntityLinkingSkill DeserializeEntityLinkingSkill(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            string defaultLanguageCode = default;
-            double? minimumPrecision = default;
-            string modelVersion = default;
-            string odataType = default;
+            string odataType = "#Microsoft.Skills.Text.V3.EntityLinkingSkill";
             string name = default;
             string description = default;
             string context = default;
             IList<InputFieldMappingEntry> inputs = default;
             IList<OutputFieldMappingEntry> outputs = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            string defaultLanguageCode = default;
+            double? minimumPrecision = default;
+            string modelVersion = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("defaultLanguageCode"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        defaultLanguageCode = null;
-                        continue;
-                    }
-                    defaultLanguageCode = property.Value.GetString();
+                    odataType = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("minimumPrecision"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        minimumPrecision = null;
-                        continue;
-                    }
-                    minimumPrecision = property.Value.GetDouble();
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("modelVersion"u8))
+                if (prop.NameEquals("description"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        modelVersion = null;
-                        continue;
-                    }
-                    modelVersion = property.Value.GetString();
+                    description = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (prop.NameEquals("context"u8))
                 {
-                    odataType = property.Value.GetString();
+                    context = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("description"u8))
-                {
-                    description = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("context"u8))
-                {
-                    context = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("inputs"u8))
+                if (prop.NameEquals("inputs"u8))
                 {
                     List<InputFieldMappingEntry> array = new List<InputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item));
+                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item, options));
                     }
                     inputs = array;
                     continue;
                 }
-                if (property.NameEquals("outputs"u8))
+                if (prop.NameEquals("outputs"u8))
                 {
                     List<OutputFieldMappingEntry> array = new List<OutputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item));
+                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item, options));
                     }
                     outputs = array;
                     continue;
+                }
+                if (prop.NameEquals("defaultLanguageCode"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        defaultLanguageCode = null;
+                        continue;
+                    }
+                    defaultLanguageCode = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("minimumPrecision"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    minimumPrecision = prop.Value.GetDouble();
+                    continue;
+                }
+                if (prop.NameEquals("modelVersion"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        modelVersion = null;
+                        continue;
+                    }
+                    modelVersion = prop.Value.GetString();
+                    continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
             return new EntityLinkingSkill(
@@ -181,25 +215,10 @@ namespace Azure.Search.Documents.Indexes.Models
                 context,
                 inputs,
                 outputs,
+                additionalBinaryDataProperties,
                 defaultLanguageCode,
                 minimumPrecision,
                 modelVersion);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new EntityLinkingSkill FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeEntityLinkingSkill(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
         }
     }
 }

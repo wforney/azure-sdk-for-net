@@ -6,12 +6,16 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Specifies the properties for connecting to an AML vectorizer. </summary>
     public partial class AzureMachineLearningParameters
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="AzureMachineLearningParameters"/>. </summary>
         /// <param name="scoringUri"> (Required for no authentication or key authentication) The scoring URI of the AML service to which the JSON payload will be sent. Only the https URI scheme is allowed. </param>
         public AzureMachineLearningParameters(Uri scoringUri)
@@ -26,7 +30,8 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="timeout"> (Optional) When specified, indicates the timeout for the http client making the API call. </param>
         /// <param name="region"> (Optional for token authentication). The region the AML service is deployed in. </param>
         /// <param name="modelName"> The name of the embedding model from the Azure AI Foundry Catalog that is deployed at the provided endpoint. </param>
-        internal AzureMachineLearningParameters(Uri scoringUri, string authenticationKey, string resourceId, TimeSpan? timeout, string region, AIFoundryModelCatalogName? modelName)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal AzureMachineLearningParameters(Uri scoringUri, string authenticationKey, string resourceId, TimeSpan? timeout, string region, AIFoundryModelCatalogName? modelName, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             ScoringUri = scoringUri;
             AuthenticationKey = authenticationKey;
@@ -34,18 +39,24 @@ namespace Azure.Search.Documents.Indexes.Models
             Timeout = timeout;
             Region = region;
             ModelName = modelName;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> (Required for no authentication or key authentication) The scoring URI of the AML service to which the JSON payload will be sent. Only the https URI scheme is allowed. </summary>
         public Uri ScoringUri { get; set; }
+
         /// <summary> (Required for key authentication) The key for the AML service. </summary>
         public string AuthenticationKey { get; set; }
+
         /// <summary> (Required for token authentication). The Azure Resource Manager resource ID of the AML service. It should be in the format subscriptions/{guid}/resourceGroups/{resource-group-name}/Microsoft.MachineLearningServices/workspaces/{workspace-name}/services/{service_name}. </summary>
         public string ResourceId { get; set; }
+
         /// <summary> (Optional) When specified, indicates the timeout for the http client making the API call. </summary>
         public TimeSpan? Timeout { get; set; }
+
         /// <summary> (Optional for token authentication). The region the AML service is deployed in. </summary>
         public string Region { get; set; }
+
         /// <summary> The name of the embedding model from the Azure AI Foundry Catalog that is deployed at the provided endpoint. </summary>
         public AIFoundryModelCatalogName? ModelName { get; set; }
     }

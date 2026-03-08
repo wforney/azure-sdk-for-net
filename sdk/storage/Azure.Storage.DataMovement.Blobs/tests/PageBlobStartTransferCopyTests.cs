@@ -1,25 +1,24 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-extern alias DMBlobs;
 extern alias BaseBlobs;
-
+extern alias DMBlobs;
 using System;
+using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
+using Azure.Core;
+using Azure.Core.TestFramework;
+using Azure.Storage.DataMovement.Tests;
+using Azure.Storage.Shared;
 using Azure.Storage.Test;
 using Azure.Storage.Test.Shared;
-using Azure.Storage.DataMovement.Tests;
-using DMBlobs::Azure.Storage.DataMovement.Blobs;
 using BaseBlobs::Azure.Storage.Blobs;
 using BaseBlobs::Azure.Storage.Blobs.Models;
 using BaseBlobs::Azure.Storage.Blobs.Specialized;
-using System.IO;
-using Azure.Core;
-using Azure.Core.TestFramework;
-using Azure.Storage.Shared;
+using DMBlobs::Azure.Storage.DataMovement.Blobs;
 using NUnit.Framework;
 using Metadata = System.Collections.Generic.IDictionary<string, string>;
-using System.Threading;
 
 namespace Azure.Storage.DataMovement.Blobs.Tests
 {
@@ -251,9 +250,12 @@ namespace Azure.Storage.DataMovement.Blobs.Tests
                 {
                     Assert.That(destinationProperties.AccessTier.ToString(), Is.Not.EqualTo(_defaultAccessTier.ToString()));
                 }
-
-                GetBlobTagResult destinationTags = await destinationClient.GetTagsAsync();
-                Assert.IsEmpty(destinationTags.Tags);
+                else
+                {
+                    // Premium accounts do not support tags
+                    GetBlobTagResult destinationTags = await destinationClient.GetTagsAsync();
+                    Assert.IsEmpty(destinationTags.Tags);
+                }
             }
             else if (transferPropertiesTestType == TransferPropertiesTestType.NewProperties)
             {
@@ -360,7 +362,7 @@ namespace Azure.Storage.DataMovement.Blobs.Tests
                 sourceResource,
                 destinationResource,
                 options);
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            using CancellationTokenSource cancellationTokenSource = new CancellationTokenSource(TimeSpan.FromSeconds(30));
             await TestTransferWithTimeout.WaitForCompletionAsync(
                 transfer,
                 testEventsRaised,

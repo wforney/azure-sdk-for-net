@@ -6,13 +6,70 @@
 #nullable disable
 
 using System.ClientModel.Primitives;
+using Azure;
+using Azure.ResourceManager.ElasticSan.Models;
+using Azure.ResourceManager.Models;
 
 namespace Azure.ResourceManager.ElasticSan
 {
     /// <summary>
     /// Context class which will be filled in by the System.ClientModel.SourceGeneration.
-    /// For more information see 'https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md'
+    /// For more information <see href='https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md' />
     /// </summary>
+    [ModelReaderWriterBuildable(typeof(AutoScaleProperties))]
+    [ModelReaderWriterBuildable(typeof(DiskSnapshotListContent))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanData))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanEncryptionIdentity))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanEncryptionProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanKeyVaultProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanList))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanNetworkRuleSet))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPatch))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPreValidationResult))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateEndpointConnectionData))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateEndpointConnectionListResult))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateEndpointConnectionResource))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateLinkResource))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateLinkResourceListResult))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateLinkResourceProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanPrivateLinkServiceConnectionState))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanResource))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanScaleUpProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSku))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSkuCapability))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSkuInformation))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSkuInformationList))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSkuLocationInfo))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSnapshotData))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanSnapshotResource))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanUpdateProperties))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVirtualNetworkRule))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeData))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeDataSourceInfo))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeGroupData))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeGroupList))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeGroupPatch))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeGroupResource))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeList))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeNameListContent))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumePatch))]
+    [ModelReaderWriterBuildable(typeof(ElasticSanVolumeResource))]
+    [ModelReaderWriterBuildable(typeof(IscsiTargetInfo))]
+    [ModelReaderWriterBuildable(typeof(ManagedByInfo))]
+    [ModelReaderWriterBuildable(typeof(ManagedServiceIdentity))]
+    [ModelReaderWriterBuildable(typeof(PrivateEndpoint))]
+    [ModelReaderWriterBuildable(typeof(PrivateEndpointConnectionProperties))]
+    [ModelReaderWriterBuildable(typeof(ResponseError))]
+    [ModelReaderWriterBuildable(typeof(SnapshotCreationInfo))]
+    [ModelReaderWriterBuildable(typeof(SnapshotList))]
+    [ModelReaderWriterBuildable(typeof(SnapshotProperties))]
+    [ModelReaderWriterBuildable(typeof(SystemData))]
+    [ModelReaderWriterBuildable(typeof(UserAssignedIdentity))]
+    [ModelReaderWriterBuildable(typeof(VolumeGroupProperties))]
+    [ModelReaderWriterBuildable(typeof(VolumeGroupUpdateProperties))]
+    [ModelReaderWriterBuildable(typeof(VolumeProperties))]
+    [ModelReaderWriterBuildable(typeof(VolumeUpdateProperties))]
     public partial class AzureResourceManagerElasticSanContext : ModelReaderWriterContext
     {
     }

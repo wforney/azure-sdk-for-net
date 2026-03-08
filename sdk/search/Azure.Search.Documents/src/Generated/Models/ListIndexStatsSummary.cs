@@ -5,26 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Response from a request to retrieve stats summary of all indexes. If successful, it includes the stats of each index in the service. </summary>
-    public partial class ListIndexStatsSummary
+    internal partial class ListIndexStatsSummary
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ListIndexStatsSummary"/>. </summary>
-        /// <param name="indexesStatistics"> The Statistics summary of all indexes in the Search service. </param>
-        internal ListIndexStatsSummary(IEnumerable<IndexStatisticsSummary> indexesStatistics)
+        internal ListIndexStatsSummary()
         {
-            IndexesStatistics = indexesStatistics.ToList();
+            IndexesStatistics = new ChangeTrackingList<IndexStatisticsSummary>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ListIndexStatsSummary"/>. </summary>
         /// <param name="indexesStatistics"> The Statistics summary of all indexes in the Search service. </param>
-        internal ListIndexStatsSummary(IReadOnlyList<IndexStatisticsSummary> indexesStatistics)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ListIndexStatsSummary(IReadOnlyList<IndexStatisticsSummary> indexesStatistics, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             IndexesStatistics = indexesStatistics;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The Statistics summary of all indexes in the Search service. </summary>

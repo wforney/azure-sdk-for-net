@@ -19,7 +19,7 @@ internal class AzureOpenAIPipelineMessageBuilder
     private string _method;
     private BinaryContent _content;
     private readonly Dictionary<string, string> _headers = [];
-    private  PipelineMessageClassifier _classifier;
+    private PipelineMessageClassifier _classifier;
     private RequestOptions _options;
     private bool? _bufferResponse;
 
@@ -111,7 +111,7 @@ internal class AzureOpenAIPipelineMessageBuilder
 
     public PipelineMessage Build()
     {
-        Argument.AssertNotNullOrWhiteSpace(_method, nameof(_method));
+        Argument.AssertNotNullOrEmpty(_method, nameof(_method));
 
         PipelineMessage message = _pipeline.CreateMessage();
         message.ResponseClassifier = _classifier ?? AzureOpenAIClient.PipelineMessageClassifier;

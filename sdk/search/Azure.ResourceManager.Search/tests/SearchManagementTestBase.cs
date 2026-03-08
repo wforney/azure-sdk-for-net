@@ -1,13 +1,13 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.TestFramework;
 using Azure.Core.TestFramework.Models;
 using Azure.ResourceManager.Resources;
 using Azure.ResourceManager.TestFramework;
 using NUnit.Framework;
-using System.Threading.Tasks;
 
 namespace Azure.ResourceManager.Search.Tests
 {
@@ -15,7 +15,7 @@ namespace Azure.ResourceManager.Search.Tests
     {
         protected ArmClient Client { get; private set; }
 
-        public AzureLocation DefaultLocation => "eastus2euap";
+        public AzureLocation DefaultLocation => "westus";
 
         public SubscriptionResource DefaultLSubscription { get; set; }
 

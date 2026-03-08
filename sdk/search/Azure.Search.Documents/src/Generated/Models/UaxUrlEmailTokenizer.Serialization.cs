@@ -5,76 +5,144 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class UaxUrlEmailTokenizer : IUtf8JsonSerializable
+    /// <summary> Tokenizes urls and emails as one token. This tokenizer is implemented using Apache Lucene. </summary>
+    public partial class UaxUrlEmailTokenizer : LexicalTokenizer, IJsonModel<UaxUrlEmailTokenizer>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="UaxUrlEmailTokenizer"/> for deserialization. </summary>
+        internal UaxUrlEmailTokenizer()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override LexicalTokenizer PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<UaxUrlEmailTokenizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeUaxUrlEmailTokenizer(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(UaxUrlEmailTokenizer)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<UaxUrlEmailTokenizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(UaxUrlEmailTokenizer)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<UaxUrlEmailTokenizer>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        UaxUrlEmailTokenizer IPersistableModel<UaxUrlEmailTokenizer>.Create(BinaryData data, ModelReaderWriterOptions options) => (UaxUrlEmailTokenizer)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<UaxUrlEmailTokenizer>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<UaxUrlEmailTokenizer>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<UaxUrlEmailTokenizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(UaxUrlEmailTokenizer)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
             if (Optional.IsDefined(MaxTokenLength))
             {
                 writer.WritePropertyName("maxTokenLength"u8);
                 writer.WriteNumberValue(MaxTokenLength.Value);
             }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(Name);
-            writer.WriteEndObject();
         }
 
-        internal static UaxUrlEmailTokenizer DeserializeUaxUrlEmailTokenizer(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        UaxUrlEmailTokenizer IJsonModel<UaxUrlEmailTokenizer>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (UaxUrlEmailTokenizer)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override LexicalTokenizer JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<UaxUrlEmailTokenizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(UaxUrlEmailTokenizer)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeUaxUrlEmailTokenizer(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static UaxUrlEmailTokenizer DeserializeUaxUrlEmailTokenizer(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            int? maxTokenLength = default;
-            string odataType = default;
+            string odataType = "#Microsoft.Azure.Search.UaxUrlEmailTokenizer";
             string name = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            int? maxTokenLength = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("maxTokenLength"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    odataType = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("name"u8))
+                {
+                    name = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("maxTokenLength"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    maxTokenLength = property.Value.GetInt32();
+                    maxTokenLength = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (options.Format != "W")
                 {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new UaxUrlEmailTokenizer(odataType, name, maxTokenLength);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new UaxUrlEmailTokenizer FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeUaxUrlEmailTokenizer(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new UaxUrlEmailTokenizer(odataType, name, additionalBinaryDataProperties, maxTokenLength);
         }
     }
 }

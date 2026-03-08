@@ -6,38 +6,43 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary>
     /// Contains configuration options specific to the algorithm used during indexing or querying.
-    /// Please note <see cref="VectorSearchAlgorithmConfiguration"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-    /// The available derived classes include <see cref="ExhaustiveKnnAlgorithmConfiguration"/> and <see cref="HnswAlgorithmConfiguration"/>.
+    /// Please note this is the abstract base class. The derived classes available for instantiation are: <see cref="HnswAlgorithmConfiguration"/> and <see cref="ExhaustiveKnnAlgorithmConfiguration"/>.
     /// </summary>
     public abstract partial class VectorSearchAlgorithmConfiguration
     {
-        /// <summary> Initializes a new instance of <see cref="VectorSearchAlgorithmConfiguration"/>. </summary>
-        /// <param name="name"> The name to associate with this particular configuration. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
-        protected VectorSearchAlgorithmConfiguration(string name)
-        {
-            Argument.AssertNotNull(name, nameof(name));
-
-            Name = name;
-        }
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
 
         /// <summary> Initializes a new instance of <see cref="VectorSearchAlgorithmConfiguration"/>. </summary>
         /// <param name="name"> The name to associate with this particular configuration. </param>
-        /// <param name="kind"> The name of the kind of algorithm being configured for use with vector search. </param>
-        internal VectorSearchAlgorithmConfiguration(string name, VectorSearchAlgorithmKind kind)
+        /// <param name="kind"> Type of VectorSearchAlgorithmConfiguration. </param>
+        private protected VectorSearchAlgorithmConfiguration(string name, VectorSearchAlgorithmKind kind)
         {
             Name = name;
             Kind = kind;
         }
 
+        /// <summary> Initializes a new instance of <see cref="VectorSearchAlgorithmConfiguration"/>. </summary>
+        /// <param name="name"> The name to associate with this particular configuration. </param>
+        /// <param name="kind"> Type of VectorSearchAlgorithmConfiguration. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal VectorSearchAlgorithmConfiguration(string name, VectorSearchAlgorithmKind kind, IDictionary<string, BinaryData> additionalBinaryDataProperties)
+        {
+            Name = name;
+            Kind = kind;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
+        }
+
         /// <summary> The name to associate with this particular configuration. </summary>
         public string Name { get; set; }
-        /// <summary> The name of the kind of algorithm being configured for use with vector search. </summary>
+
+        /// <summary> Type of VectorSearchAlgorithmConfiguration. </summary>
         internal VectorSearchAlgorithmKind Kind { get; set; }
     }
 }

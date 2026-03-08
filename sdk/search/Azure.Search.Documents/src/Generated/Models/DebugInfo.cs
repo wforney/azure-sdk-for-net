@@ -5,21 +5,29 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Contains debugging information that can be used to further explore your search results. </summary>
     public partial class DebugInfo
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="DebugInfo"/>. </summary>
-        internal DebugInfo()
+        public DebugInfo()
         {
         }
 
         /// <summary> Initializes a new instance of <see cref="DebugInfo"/>. </summary>
         /// <param name="queryRewrites"> Contains debugging information specific to query rewrites. </param>
-        internal DebugInfo(QueryRewritesDebugInfo queryRewrites)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal DebugInfo(QueryRewritesDebugInfo queryRewrites, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             QueryRewrites = queryRewrites;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Contains debugging information specific to query rewrites. </summary>

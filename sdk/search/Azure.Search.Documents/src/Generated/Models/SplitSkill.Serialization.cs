@@ -5,28 +5,85 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class SplitSkill : IUtf8JsonSerializable
+    /// <summary> A skill to split a string into chunks of text. </summary>
+    public partial class SplitSkill : SearchIndexerSkill, IJsonModel<SplitSkill>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="SplitSkill"/> for deserialization. </summary>
+        internal SplitSkill()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SplitSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeSplitSkill(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(SplitSkill)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SplitSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(SplitSkill)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<SplitSkill>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SplitSkill IPersistableModel<SplitSkill>.Create(BinaryData data, ModelReaderWriterOptions options) => (SplitSkill)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<SplitSkill>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<SplitSkill>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SplitSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SplitSkill)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
             if (Optional.IsDefined(DefaultLanguageCode))
             {
-                if (DefaultLanguageCode != null)
-                {
-                    writer.WritePropertyName("defaultLanguageCode"u8);
-                    writer.WriteStringValue(DefaultLanguageCode.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("defaultLanguageCode");
-                }
+                writer.WritePropertyName("defaultLanguageCode"u8);
+                writer.WriteStringValue(DefaultLanguageCode.Value.ToString());
             }
             if (Optional.IsDefined(TextSplitMode))
             {
@@ -35,104 +92,63 @@ namespace Azure.Search.Documents.Indexes.Models
             }
             if (Optional.IsDefined(MaximumPageLength))
             {
-                if (MaximumPageLength != null)
-                {
-                    writer.WritePropertyName("maximumPageLength"u8);
-                    writer.WriteNumberValue(MaximumPageLength.Value);
-                }
-                else
-                {
-                    writer.WriteNull("maximumPageLength");
-                }
+                writer.WritePropertyName("maximumPageLength"u8);
+                writer.WriteNumberValue(MaximumPageLength.Value);
             }
             if (Optional.IsDefined(PageOverlapLength))
             {
-                if (PageOverlapLength != null)
-                {
-                    writer.WritePropertyName("pageOverlapLength"u8);
-                    writer.WriteNumberValue(PageOverlapLength.Value);
-                }
-                else
-                {
-                    writer.WriteNull("pageOverlapLength");
-                }
+                writer.WritePropertyName("pageOverlapLength"u8);
+                writer.WriteNumberValue(PageOverlapLength.Value);
             }
             if (Optional.IsDefined(MaximumPagesToTake))
             {
-                if (MaximumPagesToTake != null)
-                {
-                    writer.WritePropertyName("maximumPagesToTake"u8);
-                    writer.WriteNumberValue(MaximumPagesToTake.Value);
-                }
-                else
-                {
-                    writer.WriteNull("maximumPagesToTake");
-                }
+                writer.WritePropertyName("maximumPagesToTake"u8);
+                writer.WriteNumberValue(MaximumPagesToTake.Value);
             }
             if (Optional.IsDefined(Unit))
             {
-                if (Unit != null)
-                {
-                    writer.WritePropertyName("unit"u8);
-                    writer.WriteStringValue(Unit.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("unit");
-                }
+                writer.WritePropertyName("unit"u8);
+                writer.WriteStringValue(Unit.Value.ToString());
             }
             if (Optional.IsDefined(AzureOpenAITokenizerParameters))
             {
-                if (AzureOpenAITokenizerParameters != null)
-                {
-                    writer.WritePropertyName("azureOpenAITokenizerParameters"u8);
-                    writer.WriteObjectValue(AzureOpenAITokenizerParameters);
-                }
-                else
-                {
-                    writer.WriteNull("azureOpenAITokenizerParameters");
-                }
+                writer.WritePropertyName("azureOpenAITokenizerParameters"u8);
+                writer.WriteObjectValue(AzureOpenAITokenizerParameters, options);
             }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            if (Optional.IsDefined(Name))
-            {
-                writer.WritePropertyName("name"u8);
-                writer.WriteStringValue(Name);
-            }
-            if (Optional.IsDefined(Description))
-            {
-                writer.WritePropertyName("description"u8);
-                writer.WriteStringValue(Description);
-            }
-            if (Optional.IsDefined(Context))
-            {
-                writer.WritePropertyName("context"u8);
-                writer.WriteStringValue(Context);
-            }
-            writer.WritePropertyName("inputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Inputs)
-            {
-                writer.WriteObjectValue<InputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
-            writer.WritePropertyName("outputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Outputs)
-            {
-                writer.WriteObjectValue<OutputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
-            writer.WriteEndObject();
         }
 
-        internal static SplitSkill DeserializeSplitSkill(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SplitSkill IJsonModel<SplitSkill>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (SplitSkill)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SplitSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SplitSkill)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeSplitSkill(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static SplitSkill DeserializeSplitSkill(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
+            string odataType = "#Microsoft.Skills.Text.SplitSkill";
+            string name = default;
+            string description = default;
+            string context = default;
+            IList<InputFieldMappingEntry> inputs = default;
+            IList<OutputFieldMappingEntry> outputs = default;
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
             SplitSkillLanguage? defaultLanguageCode = default;
             TextSplitMode? textSplitMode = default;
             int? maximumPageLength = default;
@@ -140,122 +156,119 @@ namespace Azure.Search.Documents.Indexes.Models
             int? maximumPagesToTake = default;
             SplitSkillUnit? unit = default;
             AzureOpenAITokenizerParameters azureOpenAITokenizerParameters = default;
-            string odataType = default;
-            string name = default;
-            string description = default;
-            string context = default;
-            IList<InputFieldMappingEntry> inputs = default;
-            IList<OutputFieldMappingEntry> outputs = default;
-            foreach (var property in element.EnumerateObject())
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("defaultLanguageCode"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        defaultLanguageCode = null;
-                        continue;
-                    }
-                    defaultLanguageCode = new SplitSkillLanguage(property.Value.GetString());
+                    odataType = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("textSplitMode"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        continue;
-                    }
-                    textSplitMode = new TextSplitMode(property.Value.GetString());
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("maximumPageLength"u8))
+                if (prop.NameEquals("description"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        maximumPageLength = null;
-                        continue;
-                    }
-                    maximumPageLength = property.Value.GetInt32();
+                    description = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("pageOverlapLength"u8))
+                if (prop.NameEquals("context"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        pageOverlapLength = null;
-                        continue;
-                    }
-                    pageOverlapLength = property.Value.GetInt32();
+                    context = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("maximumPagesToTake"u8))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        maximumPagesToTake = null;
-                        continue;
-                    }
-                    maximumPagesToTake = property.Value.GetInt32();
-                    continue;
-                }
-                if (property.NameEquals("unit"u8))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        unit = null;
-                        continue;
-                    }
-                    unit = new SplitSkillUnit(property.Value.GetString());
-                    continue;
-                }
-                if (property.NameEquals("azureOpenAITokenizerParameters"u8))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        azureOpenAITokenizerParameters = null;
-                        continue;
-                    }
-                    azureOpenAITokenizerParameters = AzureOpenAITokenizerParameters.DeserializeAzureOpenAITokenizerParameters(property.Value);
-                    continue;
-                }
-                if (property.NameEquals("@odata.type"u8))
-                {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("description"u8))
-                {
-                    description = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("context"u8))
-                {
-                    context = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("inputs"u8))
+                if (prop.NameEquals("inputs"u8))
                 {
                     List<InputFieldMappingEntry> array = new List<InputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item));
+                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item, options));
                     }
                     inputs = array;
                     continue;
                 }
-                if (property.NameEquals("outputs"u8))
+                if (prop.NameEquals("outputs"u8))
                 {
                     List<OutputFieldMappingEntry> array = new List<OutputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item));
+                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item, options));
                     }
                     outputs = array;
                     continue;
+                }
+                if (prop.NameEquals("defaultLanguageCode"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    defaultLanguageCode = new SplitSkillLanguage(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("textSplitMode"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    textSplitMode = new TextSplitMode(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("maximumPageLength"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        maximumPageLength = null;
+                        continue;
+                    }
+                    maximumPageLength = prop.Value.GetInt32();
+                    continue;
+                }
+                if (prop.NameEquals("pageOverlapLength"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        pageOverlapLength = null;
+                        continue;
+                    }
+                    pageOverlapLength = prop.Value.GetInt32();
+                    continue;
+                }
+                if (prop.NameEquals("maximumPagesToTake"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        maximumPagesToTake = null;
+                        continue;
+                    }
+                    maximumPagesToTake = prop.Value.GetInt32();
+                    continue;
+                }
+                if (prop.NameEquals("unit"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        unit = null;
+                        continue;
+                    }
+                    unit = new SplitSkillUnit(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("azureOpenAITokenizerParameters"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        azureOpenAITokenizerParameters = null;
+                        continue;
+                    }
+                    azureOpenAITokenizerParameters = AzureOpenAITokenizerParameters.DeserializeAzureOpenAITokenizerParameters(prop.Value, options);
+                    continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
             return new SplitSkill(
@@ -265,6 +278,7 @@ namespace Azure.Search.Documents.Indexes.Models
                 context,
                 inputs,
                 outputs,
+                additionalBinaryDataProperties,
                 defaultLanguageCode,
                 textSplitMode,
                 maximumPageLength,
@@ -272,22 +286,6 @@ namespace Azure.Search.Documents.Indexes.Models
                 maximumPagesToTake,
                 unit,
                 azureOpenAITokenizerParameters);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new SplitSkill FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeSplitSkill(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
         }
     }
 }

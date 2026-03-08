@@ -5,16 +5,79 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    internal partial class AzureActiveDirectoryApplicationCredentials : IUtf8JsonSerializable
+    internal partial class AzureActiveDirectoryApplicationCredentials : IJsonModel<AzureActiveDirectoryApplicationCredentials>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="AzureActiveDirectoryApplicationCredentials"/> for deserialization. </summary>
+        internal AzureActiveDirectoryApplicationCredentials()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AzureActiveDirectoryApplicationCredentials PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureActiveDirectoryApplicationCredentials>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAzureActiveDirectoryApplicationCredentials(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AzureActiveDirectoryApplicationCredentials)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureActiveDirectoryApplicationCredentials>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AzureActiveDirectoryApplicationCredentials)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AzureActiveDirectoryApplicationCredentials>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureActiveDirectoryApplicationCredentials IPersistableModel<AzureActiveDirectoryApplicationCredentials>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AzureActiveDirectoryApplicationCredentials>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AzureActiveDirectoryApplicationCredentials>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureActiveDirectoryApplicationCredentials>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureActiveDirectoryApplicationCredentials)} does not support writing '{format}' format.");
+            }
             writer.WritePropertyName("applicationId"u8);
             writer.WriteStringValue(ApplicationId);
             if (Optional.IsDefined(ApplicationSecret))
@@ -22,10 +85,43 @@ namespace Azure.Search.Documents.Indexes.Models
                 writer.WritePropertyName("applicationSecret"u8);
                 writer.WriteStringValue(ApplicationSecret);
             }
-            writer.WriteEndObject();
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
         }
 
-        internal static AzureActiveDirectoryApplicationCredentials DeserializeAzureActiveDirectoryApplicationCredentials(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureActiveDirectoryApplicationCredentials IJsonModel<AzureActiveDirectoryApplicationCredentials>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AzureActiveDirectoryApplicationCredentials JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureActiveDirectoryApplicationCredentials>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureActiveDirectoryApplicationCredentials)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAzureActiveDirectoryApplicationCredentials(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AzureActiveDirectoryApplicationCredentials DeserializeAzureActiveDirectoryApplicationCredentials(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -33,36 +129,25 @@ namespace Azure.Search.Documents.Indexes.Models
             }
             string applicationId = default;
             string applicationSecret = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("applicationId"u8))
+                if (prop.NameEquals("applicationId"u8))
                 {
-                    applicationId = property.Value.GetString();
+                    applicationId = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("applicationSecret"u8))
+                if (prop.NameEquals("applicationSecret"u8))
                 {
-                    applicationSecret = property.Value.GetString();
+                    applicationSecret = prop.Value.GetString();
                     continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new AzureActiveDirectoryApplicationCredentials(applicationId, applicationSecret);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static AzureActiveDirectoryApplicationCredentials FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeAzureActiveDirectoryApplicationCredentials(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new AzureActiveDirectoryApplicationCredentials(applicationId, applicationSecret, additionalBinaryDataProperties);
         }
     }
 }

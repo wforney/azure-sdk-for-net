@@ -5,23 +5,25 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> An empty object that represents the default Azure AI service resource for a skillset. </summary>
     public partial class DefaultCognitiveServicesAccount : CognitiveServicesAccount
     {
         /// <summary> Initializes a new instance of <see cref="DefaultCognitiveServicesAccount"/>. </summary>
-        public DefaultCognitiveServicesAccount()
+        public DefaultCognitiveServicesAccount() : base("#Microsoft.Azure.Search.DefaultCognitiveServices")
         {
-            ODataType = "#Microsoft.Azure.Search.DefaultCognitiveServices";
         }
 
         /// <summary> Initializes a new instance of <see cref="DefaultCognitiveServicesAccount"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of Azure AI service resource attached to a skillset. </param>
+        /// <param name="odataType"> The discriminator for derived types. </param>
         /// <param name="description"> Description of the Azure AI service resource attached to a skillset. </param>
-        internal DefaultCognitiveServicesAccount(string oDataType, string description) : base(oDataType, description)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal DefaultCognitiveServicesAccount(string odataType, string description, IDictionary<string, BinaryData> additionalBinaryDataProperties) : base(odataType, description, additionalBinaryDataProperties)
         {
-            ODataType = oDataType ?? "#Microsoft.Azure.Search.DefaultCognitiveServices";
         }
     }
 }

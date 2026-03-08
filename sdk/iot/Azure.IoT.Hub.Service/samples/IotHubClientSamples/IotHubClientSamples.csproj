@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <RootNamespace>Azure.IoT.Hub.Service.Samples</RootNamespace>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
@@ -13,9 +13,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommandLineParser" Version="2.8.0" />
-    <PackageReference Include="Microsoft.Azure.Storage.Blob" Version="11.2.2" />
-    <PackageReference Include="Microsoft.Azure.Storage.Common" Version="11.2.2" />
+    <PackageReference Include="CommandLineParser" />
+    <PackageReference Include="Microsoft.Azure.Storage.Blob" />
+    <PackageReference Include="Microsoft.Azure.Storage.Common" />
+  </ItemGroup>
+
+  <!-- Use decentralized package references when building outside https://github.com/Azure/azure-sdk-for-net -->
+  <ItemGroup Condition="'$(IsSamplesProject)' != 'true'">
+    <PackageReference Update="CommandLineParser" Version="2.8.0" />
+    <PackageReference Update="Microsoft.Azure.Storage.Blob" Version="11.2.2" />
+    <PackageReference Update="Microsoft.Azure.Storage.Common" Version="11.2.2" />
   </ItemGroup>
 
   <ItemGroup>

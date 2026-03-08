@@ -5,14 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using Azure.Search.Documents.Indexes.Models;
+using Azure.Search.Documents;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> The IndexerResyncBody. </summary>
+    /// <summary> Request body for resync indexer operation. </summary>
     public partial class IndexerResyncBody
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="IndexerResyncBody"/>. </summary>
         public IndexerResyncBody()
         {
@@ -21,9 +25,11 @@ namespace Azure.Search.Documents.Models
 
         /// <summary> Initializes a new instance of <see cref="IndexerResyncBody"/>. </summary>
         /// <param name="options"> Re-sync options that have been pre-defined from data source. </param>
-        internal IndexerResyncBody(IList<IndexerResyncOption> options)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal IndexerResyncBody(IList<IndexerResyncOption> options, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Options = options;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Re-sync options that have been pre-defined from data source. </summary>

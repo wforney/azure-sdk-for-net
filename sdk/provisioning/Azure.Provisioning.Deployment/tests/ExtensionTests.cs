@@ -3,21 +3,23 @@
 
 using System.Collections.Generic;
 using System.Text.Json;
+using Azure.Core.TestFramework;
 using Azure.Provisioning.Primitives;
 using Azure.Provisioning.Storage;
 using Azure.Provisioning.Tests;
-using Microsoft.Identity.Client.Extensions.Msal;
 using NUnit.Framework;
 
 namespace Azure.Provisioning.Deployment.Tests;
 
+[LiveOnly]
 internal class ExtensionTests(bool async)
     : ProvisioningTestBase(async /*, skipTools: true, skipLiveCalls: true /**/)
 {
     [Test]
     public void LintClean()
     {
-        if (SkipTools) { return; }
+        if (SkipTools)
+        { return; }
 
         Infrastructure infra = new();
         StorageAccount resource =
@@ -39,7 +41,8 @@ internal class ExtensionTests(bool async)
     [Test]
     public void LintWarn()
     {
-        if (SkipTools) { return; }
+        if (SkipTools)
+        { return; }
 
         Infrastructure infra = new();
         ProvisioningParameter param = new("endpoint", typeof(string));
@@ -59,7 +62,8 @@ internal class ExtensionTests(bool async)
     [Test]
     public void LintError()
     {
-        if (SkipTools) { return; }
+        if (SkipTools)
+        { return; }
 
         Infrastructure infra = new();
         // Use a string as the default value for a param typed int
@@ -79,7 +83,8 @@ internal class ExtensionTests(bool async)
     [Test]
     public void GetArmTemplate()
     {
-        if (SkipTools) { return; }
+        if (SkipTools)
+        { return; }
 
         Infrastructure infra = new();
         StorageAccount resource =

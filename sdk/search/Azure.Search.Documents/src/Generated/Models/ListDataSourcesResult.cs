@@ -5,26 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Response from a List Datasources request. If successful, it includes the full definitions of all datasources. </summary>
     internal partial class ListDataSourcesResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ListDataSourcesResult"/>. </summary>
-        /// <param name="dataSources"> The datasources in the Search service. </param>
-        internal ListDataSourcesResult(IEnumerable<SearchIndexerDataSourceConnection> dataSources)
+        internal ListDataSourcesResult()
         {
-            DataSources = dataSources.ToList();
+            DataSources = new ChangeTrackingList<SearchIndexerDataSourceConnection>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ListDataSourcesResult"/>. </summary>
         /// <param name="dataSources"> The datasources in the Search service. </param>
-        internal ListDataSourcesResult(IReadOnlyList<SearchIndexerDataSourceConnection> dataSources)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ListDataSourcesResult(IReadOnlyList<SearchIndexerDataSourceConnection> dataSources, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             DataSources = dataSources;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The datasources in the Search service. </summary>

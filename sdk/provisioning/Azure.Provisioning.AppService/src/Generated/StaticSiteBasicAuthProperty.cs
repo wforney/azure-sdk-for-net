@@ -19,7 +19,7 @@ namespace Azure.Provisioning.AppService;
 public partial class StaticSiteBasicAuthProperty : ProvisionableResource
 {
     /// <summary>
-    /// Gets the Name.
+    /// name of the basic auth entry.
     /// </summary>
     public BicepValue<string> Name 
     {
@@ -117,6 +117,11 @@ public partial class StaticSiteBasicAuthProperty : ProvisionableResource
     private ResourceReference<StaticSite>? _parent;
 
     /// <summary>
+    /// Get the default value for the Name property.
+    /// </summary>
+    private partial BicepValue<string> GetNameDefaultValue();
+
+    /// <summary>
     /// Creates a new StaticSiteBasicAuthProperty.
     /// </summary>
     /// <param name="bicepIdentifier">
@@ -127,7 +132,7 @@ public partial class StaticSiteBasicAuthProperty : ProvisionableResource
     /// </param>
     /// <param name="resourceVersion">Version of the StaticSiteBasicAuthProperty.</param>
     public StaticSiteBasicAuthProperty(string bicepIdentifier, string? resourceVersion = default)
-        : base(bicepIdentifier, "Microsoft.Web/staticSites/basicAuth", resourceVersion ?? "2024-11-01")
+        : base(bicepIdentifier, "Microsoft.Web/staticSites/basicAuth", resourceVersion ?? "2025-03-01")
     {
     }
 
@@ -136,7 +141,8 @@ public partial class StaticSiteBasicAuthProperty : ProvisionableResource
     /// </summary>
     protected override void DefineProvisionableProperties()
     {
-        _name = DefineProperty<string>("Name", ["name"], isOutput: true);
+        base.DefineProvisionableProperties();
+        _name = DefineProperty<string>("Name", ["name"], isRequired: true, isOutput: true, defaultValue: GetNameDefaultValue());
         _applicableEnvironmentsMode = DefineProperty<string>("ApplicableEnvironmentsMode", ["properties", "applicableEnvironmentsMode"]);
         _environments = DefineListProperty<string>("Environments", ["properties", "environments"]);
         _kind = DefineProperty<string>("Kind", ["kind"]);
@@ -153,6 +159,11 @@ public partial class StaticSiteBasicAuthProperty : ProvisionableResource
     /// </summary>
     public static class ResourceVersions
     {
+        /// <summary>
+        /// 2025-03-01.
+        /// </summary>
+        public static readonly string V2025_03_01 = "2025-03-01";
+
         /// <summary>
         /// 2024-11-01.
         /// </summary>

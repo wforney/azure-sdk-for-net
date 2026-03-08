@@ -51,8 +51,8 @@ namespace Azure.ResourceManager.ContainerService.Models
         }
 
         /// <summary> Initializes a new instance of <see cref="ManagedClusterAutoUpgradeProfile"/>. </summary>
-        /// <param name="upgradeChannel"> For more information see [setting the AKS cluster auto-upgrade channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel). </param>
-        /// <param name="nodeOSUpgradeChannel"> Manner in which the OS on your nodes is updated. The default is NodeImage. </param>
+        /// <param name="upgradeChannel"> The upgrade channel for auto upgrade. The default is 'none'. For more information see [setting the AKS cluster auto-upgrade channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel). </param>
+        /// <param name="nodeOSUpgradeChannel"> Node OS Upgrade Channel. Manner in which the OS on your nodes is updated. The default is NodeImage. </param>
         /// <param name="serializedAdditionalRawData"> Keeps track of any properties unknown to the library. </param>
         internal ManagedClusterAutoUpgradeProfile(UpgradeChannel? upgradeChannel, ManagedClusterNodeOSUpgradeChannel? nodeOSUpgradeChannel, IDictionary<string, BinaryData> serializedAdditionalRawData)
         {
@@ -61,10 +61,10 @@ namespace Azure.ResourceManager.ContainerService.Models
             _serializedAdditionalRawData = serializedAdditionalRawData;
         }
 
-        /// <summary> For more information see [setting the AKS cluster auto-upgrade channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel). </summary>
+        /// <summary> The upgrade channel for auto upgrade. The default is 'none'. For more information see [setting the AKS cluster auto-upgrade channel](https://docs.microsoft.com/azure/aks/upgrade-cluster#set-auto-upgrade-channel). </summary>
         [WirePath("upgradeChannel")]
         public UpgradeChannel? UpgradeChannel { get; set; }
-        /// <summary> Manner in which the OS on your nodes is updated. The default is NodeImage. </summary>
+        /// <summary> Node OS Upgrade Channel. Manner in which the OS on your nodes is updated. The default is NodeImage. </summary>
         [WirePath("nodeOSUpgradeChannel")]
         public ManagedClusterNodeOSUpgradeChannel? NodeOSUpgradeChannel { get; set; }
     }

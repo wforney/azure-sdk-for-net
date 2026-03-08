@@ -12,5 +12,12 @@
 Initial Release
       ]]>
 		</PackageReleaseNotes>
+		<IncludeAutorestDependency>true</IncludeAutorestDependency>
+		<AotCompatOptOut>true</AotCompatOptOut>
 	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.Rest.ClientRuntime.Azure" />
+		<PackageReference Include="Newtonsoft.Json" />
+	</ItemGroup>
 </Project>

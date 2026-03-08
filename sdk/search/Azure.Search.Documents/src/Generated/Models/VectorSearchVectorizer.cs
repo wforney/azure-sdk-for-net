@@ -6,35 +6,40 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary>
     /// Specifies the vectorization method to be used during query time.
-    /// Please note <see cref="VectorSearchVectorizer"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-    /// The available derived classes include <see cref="AIServicesVisionVectorizer"/>, <see cref="AzureMachineLearningVectorizer"/>, <see cref="AzureOpenAIVectorizer"/> and <see cref="WebApiVectorizer"/>.
+    /// Please note this is the abstract base class. The derived classes available for instantiation are: <see cref="AzureOpenAIVectorizer"/>, <see cref="WebApiVectorizer"/>, <see cref="AIServicesVisionVectorizer"/>, and <see cref="AzureMachineLearningVectorizer"/>.
     /// </summary>
     public abstract partial class VectorSearchVectorizer
     {
-        /// <summary> Initializes a new instance of <see cref="VectorSearchVectorizer"/>. </summary>
-        /// <param name="vectorizerName"> The name to associate with this particular vectorization method. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="vectorizerName"/> is null. </exception>
-        protected VectorSearchVectorizer(string vectorizerName)
-        {
-            Argument.AssertNotNull(vectorizerName, nameof(vectorizerName));
-
-            VectorizerName = vectorizerName;
-        }
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
 
         /// <summary> Initializes a new instance of <see cref="VectorSearchVectorizer"/>. </summary>
         /// <param name="vectorizerName"> The name to associate with this particular vectorization method. </param>
-        /// <param name="kind"> The name of the kind of vectorization method being configured for use with vector search. </param>
-        internal VectorSearchVectorizer(string vectorizerName, VectorSearchVectorizerKind kind)
+        /// <param name="kind"> Type of VectorSearchVectorizer. </param>
+        private protected VectorSearchVectorizer(string vectorizerName, VectorSearchVectorizerKind kind)
         {
             VectorizerName = vectorizerName;
             Kind = kind;
         }
-        /// <summary> The name of the kind of vectorization method being configured for use with vector search. </summary>
+
+        /// <summary> Initializes a new instance of <see cref="VectorSearchVectorizer"/>. </summary>
+        /// <param name="vectorizerName"> The name to associate with this particular vectorization method. </param>
+        /// <param name="kind"> Type of VectorSearchVectorizer. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal VectorSearchVectorizer(string vectorizerName, VectorSearchVectorizerKind kind, IDictionary<string, BinaryData> additionalBinaryDataProperties)
+        {
+            VectorizerName = vectorizerName;
+            Kind = kind;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
+        }
+
+        /// <summary> Type of VectorSearchVectorizer. </summary>
         internal VectorSearchVectorizerKind Kind { get; set; }
     }
 }

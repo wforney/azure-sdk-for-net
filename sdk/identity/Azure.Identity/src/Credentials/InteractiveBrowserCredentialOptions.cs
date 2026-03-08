@@ -5,14 +5,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading;
-using Microsoft.Identity.Client;
 
 namespace Azure.Identity
 {
     /// <summary>
     /// Options to configure the <see cref="InteractiveBrowserCredential"/>.
     /// </summary>
-    public class InteractiveBrowserCredentialOptions : TokenCredentialOptions, ISupportsTokenCachePersistenceOptions, ISupportsDisableInstanceDiscovery, ISupportsAdditionallyAllowedTenants
+    public class InteractiveBrowserCredentialOptions : TokenCredentialOptions, ISupportsTokenCachePersistenceOptions, ISupportsDisableInstanceDiscovery, ISupportsAdditionallyAllowedTenants, ISupportsTenantId
     {
         private string _tenantId;
 
@@ -82,22 +81,59 @@ namespace Azure.Identity
                 ibcoClone.TenantId = _tenantId;
                 ibcoClone.AdditionallyAllowedTenants = AdditionallyAllowedTenants;
                 ibcoClone.ClientId = ClientId;
-                ibcoClone.TokenCachePersistenceOptions = TokenCachePersistenceOptions?.Clone();
+                ibcoClone.TokenCachePersistenceOptions = TokenCachePersistenceOptions;
                 ibcoClone.RedirectUri = RedirectUri;
                 ibcoClone.AuthenticationRecord = AuthenticationRecord;
                 ibcoClone.LoginHint = LoginHint;
                 ibcoClone.DisableInstanceDiscovery = DisableInstanceDiscovery;
                 if (BrowserCustomization != null)
                 {
-                    ibcoClone.BrowserCustomization = new BrowserCustomizationOptions
-                    {
-                        ErrorMessage = BrowserCustomization.ErrorMessage,
-                        SuccessMessage = BrowserCustomization.SuccessMessage,
-                        UseEmbeddedWebView = BrowserCustomization.UseEmbeddedWebView ?? false
-                    };
+                    ibcoClone.BrowserCustomization = BrowserCustomization.Clone();
                 }
             }
+            if (clone is IMsalSettablePublicClientInitializerOptions msalSettableClone && this is IMsalSettablePublicClientInitializerOptions thisAsInterface)
+            {
+                msalSettableClone.BeforeBuildClient = thisAsInterface.BeforeBuildClient;
+                msalSettableClone.UseDefaultBrokerAccount = thisAsInterface.UseDefaultBrokerAccount;
+            }
             return clone;
+        }
+
+        /// <summary>
+        /// Copies IBC-relevant properties from a DefaultAzureCredentialOptions source.
+        /// Called by DAC.Clone when the target type is an IBC-derived type.
+        /// </summary>
+        internal virtual void CopyFromDacOptions(DefaultAzureCredentialOptions source)
+        {
+            DisableAutomaticAuthentication = source.DisableAutomaticAuthentication;
+            TokenCachePersistenceOptions = source.TokenCachePersistenceOptions;
+            AuthenticationRecord = source.AuthenticationRecord;
+            RedirectUri = source.RedirectUri;
+
+            if (!string.IsNullOrEmpty(source.LoginHint))
+            {
+                LoginHint = source.LoginHint;
+            }
+
+            if (source.BrowserCustomization != null)
+            {
+                BrowserCustomization = source.BrowserCustomization.Clone();
+            }
+        }
+
+        internal virtual void CopyMsalSettableProperties(TokenCredentialOptions source)
+        {
+            if (source != null && this is IMsalSettablePublicClientInitializerOptions target)
+            {
+                if (source is DefaultAzureCredentialOptions dacOptions)
+                {
+                    target.UseDefaultBrokerAccount = dacOptions.UseDefaultBrokerAccount;
+                }
+                else if (source is IMsalPublicClientInitializerOptions msalSource)
+                {
+                    target.UseDefaultBrokerAccount = msalSource.UseDefaultBrokerAccount;
+                }
+            }
         }
     }
 }

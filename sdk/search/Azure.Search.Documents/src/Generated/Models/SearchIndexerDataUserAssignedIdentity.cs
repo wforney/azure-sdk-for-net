@@ -6,7 +6,8 @@
 #nullable disable
 
 using System;
-using Azure.Core;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
@@ -14,26 +15,22 @@ namespace Azure.Search.Documents.Indexes.Models
     public partial class SearchIndexerDataUserAssignedIdentity : SearchIndexerDataIdentity
     {
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataUserAssignedIdentity"/>. </summary>
-        /// <param name="userAssignedIdentity"> The fully qualified Azure resource Id of a user assigned managed identity typically in the form "/subscriptions/12345678-1234-1234-1234-1234567890ab/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myId" that should have been assigned to the search service. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="userAssignedIdentity"/> is null. </exception>
-        public SearchIndexerDataUserAssignedIdentity(ResourceIdentifier userAssignedIdentity)
+        /// <param name="resourceId"> The fully qualified Azure resource Id of a user assigned managed identity typically in the form "/subscriptions/12345678-1234-1234-1234-1234567890ab/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myId" that should have been assigned to the search service. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="resourceId"/> is null. </exception>
+        public SearchIndexerDataUserAssignedIdentity(string resourceId) : base("#Microsoft.Azure.Search.DataUserAssignedIdentity")
         {
-            Argument.AssertNotNull(userAssignedIdentity, nameof(userAssignedIdentity));
+            Argument.AssertNotNull(resourceId, nameof(resourceId));
 
-            UserAssignedIdentity = userAssignedIdentity;
-            ODataType = "#Microsoft.Azure.Search.DataUserAssignedIdentity";
+            ResourceId = resourceId;
         }
 
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataUserAssignedIdentity"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of identity. </param>
-        /// <param name="userAssignedIdentity"> The fully qualified Azure resource Id of a user assigned managed identity typically in the form "/subscriptions/12345678-1234-1234-1234-1234567890ab/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myId" that should have been assigned to the search service. </param>
-        internal SearchIndexerDataUserAssignedIdentity(string oDataType, ResourceIdentifier userAssignedIdentity) : base(oDataType)
+        /// <param name="odataType"> A URI fragment specifying the type of identity. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        /// <param name="resourceId"> The fully qualified Azure resource Id of a user assigned managed identity typically in the form "/subscriptions/12345678-1234-1234-1234-1234567890ab/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myId" that should have been assigned to the search service. </param>
+        internal SearchIndexerDataUserAssignedIdentity(string odataType, IDictionary<string, BinaryData> additionalBinaryDataProperties, string resourceId) : base(odataType, additionalBinaryDataProperties)
         {
-            UserAssignedIdentity = userAssignedIdentity;
-            ODataType = oDataType ?? "#Microsoft.Azure.Search.DataUserAssignedIdentity";
+            ResourceId = resourceId;
         }
-
-        /// <summary> The fully qualified Azure resource Id of a user assigned managed identity typically in the form "/subscriptions/12345678-1234-1234-1234-1234567890ab/resourceGroups/rg/providers/Microsoft.ManagedIdentity/userAssignedIdentities/myId" that should have been assigned to the search service. </summary>
-        public ResourceIdentifier UserAssignedIdentity { get; set; }
     }
 }

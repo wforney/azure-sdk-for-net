@@ -6,12 +6,17 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Defines a combination of configurations to use with vector search. </summary>
     public partial class VectorSearchProfile
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="VectorSearchProfile"/>. </summary>
         /// <param name="name"> The name to associate with this particular vector search profile. </param>
         /// <param name="algorithmConfigurationName"> The name of the vector search algorithm configuration that specifies the algorithm and optional parameters. </param>
@@ -30,20 +35,25 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="algorithmConfigurationName"> The name of the vector search algorithm configuration that specifies the algorithm and optional parameters. </param>
         /// <param name="vectorizerName"> The name of the vectorization being configured for use with vector search. </param>
         /// <param name="compressionName"> The name of the compression method configuration that specifies the compression method and optional parameters. </param>
-        internal VectorSearchProfile(string name, string algorithmConfigurationName, string vectorizerName, string compressionName)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal VectorSearchProfile(string name, string algorithmConfigurationName, string vectorizerName, string compressionName, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Name = name;
             AlgorithmConfigurationName = algorithmConfigurationName;
             VectorizerName = vectorizerName;
             CompressionName = compressionName;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name to associate with this particular vector search profile. </summary>
         public string Name { get; set; }
+
         /// <summary> The name of the vector search algorithm configuration that specifies the algorithm and optional parameters. </summary>
         public string AlgorithmConfigurationName { get; set; }
+
         /// <summary> The name of the vectorization being configured for use with vector search. </summary>
         public string VectorizerName { get; set; }
+
         /// <summary> The name of the compression method configuration that specifies the compression method and optional parameters. </summary>
         public string CompressionName { get; set; }
     }

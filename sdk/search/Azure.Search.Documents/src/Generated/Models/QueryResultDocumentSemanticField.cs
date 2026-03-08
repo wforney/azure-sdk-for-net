@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Description of fields that were sent to the semantic enrichment process, as well as how they were used. </summary>
     public partial class QueryResultDocumentSemanticField
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="QueryResultDocumentSemanticField"/>. </summary>
         internal QueryResultDocumentSemanticField()
         {
@@ -18,14 +24,17 @@ namespace Azure.Search.Documents.Models
         /// <summary> Initializes a new instance of <see cref="QueryResultDocumentSemanticField"/>. </summary>
         /// <param name="name"> The name of the field that was sent to the semantic enrichment process. </param>
         /// <param name="state"> The way the field was used for the semantic enrichment process (fully used, partially used, or unused). </param>
-        internal QueryResultDocumentSemanticField(string name, SemanticFieldState? state)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal QueryResultDocumentSemanticField(string name, SemanticFieldState? state, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Name = name;
             State = state;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the field that was sent to the semantic enrichment process. </summary>
         public string Name { get; }
+
         /// <summary> The way the field was used for the semantic enrichment process (fully used, partially used, or unused). </summary>
         public SemanticFieldState? State { get; }
     }

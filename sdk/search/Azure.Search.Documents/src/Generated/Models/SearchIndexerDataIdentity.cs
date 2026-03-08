@@ -5,28 +5,37 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary>
     /// Abstract base type for data identities.
-    /// Please note <see cref="SearchIndexerDataIdentity"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-    /// The available derived classes include <see cref="SearchIndexerDataNoneIdentity"/> and <see cref="SearchIndexerDataUserAssignedIdentity"/>.
+    /// Please note this is the abstract base class. The derived classes available for instantiation are: <see cref="SearchIndexerDataNoneIdentity"/> and <see cref="SearchIndexerDataUserAssignedIdentity"/>.
     /// </summary>
     public abstract partial class SearchIndexerDataIdentity
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataIdentity"/>. </summary>
-        public SearchIndexerDataIdentity()
+        /// <param name="odataType"> A URI fragment specifying the type of identity. </param>
+        private protected SearchIndexerDataIdentity(string odataType)
         {
+            OdataType = odataType;
         }
 
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataIdentity"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of identity. </param>
-        internal SearchIndexerDataIdentity(string oDataType)
+        /// <param name="odataType"> A URI fragment specifying the type of identity. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchIndexerDataIdentity(string odataType, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
-            ODataType = oDataType;
+            OdataType = odataType;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> A URI fragment specifying the type of identity. </summary>
-        internal string ODataType { get; set; }
+        internal string OdataType { get; set; }
     }
 }

@@ -3,9 +3,11 @@
 
 using System;
 using System.Diagnostics;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -28,6 +30,8 @@ namespace Azure.Identity
         internal const string Troubleshoot = "Please visit https://aka.ms/azure-dev for installation instructions and then, once installed, authenticate to your Azure account using 'azd auth login'.";
         internal const string InteractiveLoginRequired = "Azure Developer CLI could not login. Interactive login is required.";
         internal const string AzdCLIInternalError = "AzdCLIInternalError: The command failed with an unexpected error. Here is the traceback:";
+        internal const string ClaimsChallengeLoginFormat = "Azure Developer CLI authentication requires multi-factor authentication or additional claims. Please run '{0}' to re-authenticate with the required claims. After completing login, retry the operation.";
+        internal const string AzdUnknownClaimsFlagError = "Azure Developer CLI authentication requires multi-factor authentication or additional claims. However, claims challenges are not supported by the installed Azure Developer CLI version. Please update to version 1.18.1 or later.";
         internal TimeSpan ProcessTimeout { get; private set; }
 
         private static readonly string DefaultWorkingDirWindows = Environment.GetFolderPath(Environment.SpecialFolder.System);
@@ -123,7 +127,7 @@ namespace Azure.Identity
                 ScopeUtilities.ValidateScope(scope);
             }
 
-            GetFileNameAndArguments(context.Scopes, tenantId, out string fileName, out string argument);
+            GetFileNameAndArguments(context.Scopes, tenantId, context.Claims, out string fileName, out string argument);
             ProcessStartInfo processStartInfo = GetAzureDeveloperCliProcessStartInfo(fileName, argument);
             using var processRunner = new ProcessRunner(_processService.Create(processStartInfo), ProcessTimeout, _logPII, cancellationToken);
 
@@ -145,26 +149,45 @@ namespace Azure.Identity
             }
             catch (InvalidOperationException exception)
             {
-                bool isWinError = exception.Message.StartsWith(WinAzdCliError, StringComparison.CurrentCultureIgnoreCase);
+                string errorText = ProcessCliErrorForDisplay(exception.Message);
 
-                bool isOtherOsError = AzdNotFoundPattern.IsMatch(exception.Message);
+                // If an older azd version doesn't recognize the --claims flag, surface explicit guidance to update.
+                if (!string.IsNullOrWhiteSpace(context.Claims) && errorText.IndexOf("unknown flag: --claims", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    throw new AuthenticationFailedException(AzdUnknownClaimsFlagError);
+                }
+
+                // If a claims challenge was provided we attempted to invoke 'azd auth token' including the claims so azd can persist them.
+                // Since azd cannot complete the authentication non-interactively it returns an error instructing the user to run 'azd auth login'.
+                // Surface explicit guidance to the caller (never fall through when part of a chain) so they can remediate the challenge.
+                if (!string.IsNullOrWhiteSpace(context.Claims))
+                {
+                    string loginCommand = string.IsNullOrEmpty(tenantId)
+                        ? "azd auth login"
+                        : $"azd auth login --tenant-id {tenantId}";
+                    throw new AuthenticationFailedException(string.Format(CultureInfo.InvariantCulture, ClaimsChallengeLoginFormat, loginCommand));
+                }
+
+                bool isWinError = errorText.StartsWith(WinAzdCliError, StringComparison.CurrentCultureIgnoreCase);
+
+                bool isOtherOsError = AzdNotFoundPattern.IsMatch(errorText);
 
                 if (isWinError || isOtherOsError)
                 {
                     throw new CredentialUnavailableException(AzdCliNotInstalled);
                 }
 
-                bool isAADSTSError = exception.Message.Contains("AADSTS");
-                bool isLoginError = exception.Message.IndexOf("azd auth login", StringComparison.OrdinalIgnoreCase) != -1;
+                bool isAADSTSError = errorText.Contains("AADSTS");
+                bool isLoginError  = errorText.IndexOf("azd auth login", StringComparison.OrdinalIgnoreCase) != -1;
 
                 if (isLoginError && !isAADSTSError)
                 {
                     throw new CredentialUnavailableException(AzdNotLogIn);
                 }
 
-                bool isRefreshTokenFailedError = exception.Message.IndexOf(AzdCliFailedError, StringComparison.OrdinalIgnoreCase) != -1 &&
-                                                 exception.Message.IndexOf(RefreshTokeExpired, StringComparison.OrdinalIgnoreCase) != -1 ||
-                                                 exception.Message.IndexOf("CLIInternalError", StringComparison.OrdinalIgnoreCase) != -1;
+                bool isRefreshTokenFailedError = errorText.IndexOf(AzdCliFailedError, StringComparison.OrdinalIgnoreCase) != -1 &&
+                                                 errorText.IndexOf(RefreshTokeExpired, StringComparison.OrdinalIgnoreCase) != -1 ||
+                                                 errorText.IndexOf("CLIInternalError", StringComparison.OrdinalIgnoreCase) != -1;
 
                 if (isRefreshTokenFailedError)
                 {
@@ -173,11 +196,11 @@ namespace Azure.Identity
 
                 if (_isChainedCredential)
                 {
-                    throw new CredentialUnavailableException($"{AzdCliFailedError} {Troubleshoot} {exception.Message}");
+                    throw new CredentialUnavailableException($"{AzdCliFailedError} {Troubleshoot} {errorText}");
                 }
                 else
                 {
-                    throw new AuthenticationFailedException($"{AzdCliFailedError} {Troubleshoot} {exception.Message}");
+                    throw new AuthenticationFailedException($"{AzdCliFailedError} {Troubleshoot} {errorText}");
                 }
             }
 
@@ -202,13 +225,29 @@ namespace Azure.Identity
                 WorkingDirectory = DefaultWorkingDir
             };
 
-        private static void GetFileNameAndArguments(string[] scopes, string tenantId, out string fileName, out string argument)
+        private static void GetFileNameAndArguments(string[] scopes, string tenantId, string claims, out string fileName, out string argument)
         {
             string scopeArgs = string.Join(" ", scopes.Select(scope => $"--scope {scope}"));
+            // azd expects the value passed to --claims to be base64 encoded. TokenRequestContext.Claims is a JSON string
+            // so we encode it here (the auth policy will decode it later).
+            string claimsArg = string.Empty;
+            if (!string.IsNullOrWhiteSpace(claims))
+            {
+                try
+                {
+                    string encodedClaims = Convert.ToBase64String(Encoding.UTF8.GetBytes(claims));
+                    claimsArg = $" --claims {encodedClaims}";
+                }
+                catch (Exception)
+                {
+                    // If encoding fails, fall back to omitting claims to mirror the prior behavior of not throwing for formatting issues here.
+                    claimsArg = string.Empty;
+                }
+            }
             string command = tenantId switch
             {
-                null => $"azd auth token --output json {scopeArgs}",
-                _ => $"azd auth token --output json {scopeArgs} --tenant-id {tenantId}"
+                null => $"azd auth token --output json --no-prompt {scopeArgs}{claimsArg}",
+                _ => $"azd auth token --output json --no-prompt {scopeArgs} --tenant-id {tenantId}{claimsArg}"
             };
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -231,6 +270,38 @@ namespace Azure.Identity
             string accessToken = root.GetProperty("token").GetString();
             DateTimeOffset expiresOn = root.GetProperty("expiresOn").GetDateTimeOffset();
             return new AccessToken(accessToken, expiresOn);
+        }
+
+        private static string ProcessCliErrorForDisplay(string rawCliError)
+        {
+            // Strategy: Try to parse azd JSON format {"type":"...","data":{"message":"..."}}, extract message, fallback to raw
+            // Guard: skip processing if null/empty or doesn't start with brace
+            string trimmedError = rawCliError?.TrimStart();
+            bool skipParsing = string.IsNullOrEmpty(trimmedError) || trimmedError[0] != '{';
+            if (skipParsing)
+                return rawCliError;
+
+            try
+            {
+                using JsonDocument jsonDoc = JsonDocument.Parse(rawCliError);
+                JsonElement root = jsonDoc.RootElement;
+
+                if (root.TryGetProperty("data", out JsonElement dataObj) &&
+                    dataObj.TryGetProperty("message", out JsonElement msgObj))
+                {
+                    string msgText = msgObj.GetString();
+                    if (!string.IsNullOrWhiteSpace(msgText))
+                    {
+                        return msgText.Trim();
+                    }
+                }
+            }
+            catch (JsonException)
+            {
+                // Parsing failed, keep original output
+            }
+
+            return rawCliError;
         }
     }
 }

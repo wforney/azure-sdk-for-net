@@ -50,33 +50,36 @@ namespace Azure.ResourceManager.ContainerService.Models
         {
             PodCidrs = new ChangeTrackingList<string>();
             ServiceCidrs = new ChangeTrackingList<string>();
-            IPFamilies = new ChangeTrackingList<IPFamily>();
+            NetworkIPFamilies = new ChangeTrackingList<ContainerServiceIPFamily>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ContainerServiceNetworkProfile"/>. </summary>
         /// <param name="networkPlugin"> Network plugin used for building the Kubernetes network. </param>
         /// <param name="networkPluginMode"> The mode the network plugin should use. </param>
         /// <param name="networkPolicy"> Network policy used for building the Kubernetes network. </param>
-        /// <param name="networkMode"> This cannot be specified if networkPlugin is anything other than 'azure'. </param>
+        /// <param name="networkMode"> The network mode Azure CNI is configured with. This cannot be specified if networkPlugin is anything other than 'azure'. </param>
         /// <param name="networkDataplane"> Network dataplane used in the Kubernetes cluster. </param>
+        /// <param name="advancedNetworking"> Advanced Networking profile for enabling observability and security feature suite on a cluster. For more information see aka.ms/aksadvancednetworking. </param>
         /// <param name="podCidr"> A CIDR notation IP range from which to assign pod IPs when kubenet is used. </param>
         /// <param name="serviceCidr"> A CIDR notation IP range from which to assign service cluster IPs. It must not overlap with any Subnet IP ranges. </param>
         /// <param name="dnsServiceIP"> An IP address assigned to the Kubernetes DNS service. It must be within the Kubernetes service address range specified in serviceCidr. </param>
-        /// <param name="outboundType"> This can only be set at cluster creation time and cannot be changed later. For more information see [egress outbound type](https://docs.microsoft.com/azure/aks/egress-outboundtype). </param>
-        /// <param name="loadBalancerSku"> The default is 'standard'. See [Azure Load Balancer SKUs](https://docs.microsoft.com/azure/load-balancer/skus) for more information about the differences between load balancer SKUs. </param>
+        /// <param name="outboundType"> The outbound (egress) routing method. This can only be set at cluster creation time and cannot be changed later. For more information see [egress outbound type](https://docs.microsoft.com/azure/aks/egress-outboundtype). </param>
+        /// <param name="loadBalancerSku"> The load balancer sku for the managed cluster. The default is 'standard'. See [Azure Load Balancer SKUs](https://docs.microsoft.com/azure/load-balancer/skus) for more information about the differences between load balancer SKUs. </param>
         /// <param name="loadBalancerProfile"> Profile of the cluster load balancer. </param>
         /// <param name="natGatewayProfile"> Profile of the cluster NAT gateway. </param>
-        /// <param name="podCidrs"> One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. </param>
-        /// <param name="serviceCidrs"> One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. They must not overlap with any Subnet IP ranges. </param>
-        /// <param name="ipFamilies"> IP families are used to determine single-stack or dual-stack clusters. For single-stack, the expected value is IPv4. For dual-stack, the expected values are IPv4 and IPv6. </param>
+        /// <param name="staticEgressGatewayProfile"> The profile for Static Egress Gateway addon. For more details about Static Egress Gateway, see https://aka.ms/aks/static-egress-gateway. </param>
+        /// <param name="podCidrs"> The CIDR notation IP ranges from which to assign pod IPs. One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. </param>
+        /// <param name="serviceCidrs"> The CIDR notation IP ranges from which to assign service cluster IPs. One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. They must not overlap with any Subnet IP ranges. </param>
+        /// <param name="networkIPFamilies"> The IP families used to specify IP versions available to the cluster. IP families are used to determine single-stack or dual-stack clusters. For single-stack, the expected value is IPv4. For dual-stack, the expected values are IPv4 and IPv6. </param>
         /// <param name="serializedAdditionalRawData"> Keeps track of any properties unknown to the library. </param>
-        internal ContainerServiceNetworkProfile(ContainerServiceNetworkPlugin? networkPlugin, ContainerServiceNetworkPluginMode? networkPluginMode, ContainerServiceNetworkPolicy? networkPolicy, ContainerServiceNetworkMode? networkMode, NetworkDataplane? networkDataplane, string podCidr, string serviceCidr, string dnsServiceIP, ContainerServiceOutboundType? outboundType, ContainerServiceLoadBalancerSku? loadBalancerSku, ManagedClusterLoadBalancerProfile loadBalancerProfile, ManagedClusterNatGatewayProfile natGatewayProfile, IList<string> podCidrs, IList<string> serviceCidrs, IList<IPFamily> ipFamilies, IDictionary<string, BinaryData> serializedAdditionalRawData)
+        internal ContainerServiceNetworkProfile(ContainerServiceNetworkPlugin? networkPlugin, ContainerServiceNetworkPluginMode? networkPluginMode, ContainerServiceNetworkPolicy? networkPolicy, ContainerServiceNetworkMode? networkMode, NetworkDataplane? networkDataplane, ManagedClusterAdvancedNetworking advancedNetworking, string podCidr, string serviceCidr, string dnsServiceIP, ContainerServiceOutboundType? outboundType, ContainerServiceLoadBalancerSku? loadBalancerSku, ManagedClusterLoadBalancerProfile loadBalancerProfile, ManagedClusterNatGatewayProfile natGatewayProfile, ManagedClusterStaticEgressGatewayProfile staticEgressGatewayProfile, IList<string> podCidrs, IList<string> serviceCidrs, IList<ContainerServiceIPFamily> networkIPFamilies, IDictionary<string, BinaryData> serializedAdditionalRawData)
         {
             NetworkPlugin = networkPlugin;
             NetworkPluginMode = networkPluginMode;
             NetworkPolicy = networkPolicy;
             NetworkMode = networkMode;
             NetworkDataplane = networkDataplane;
+            AdvancedNetworking = advancedNetworking;
             PodCidr = podCidr;
             ServiceCidr = serviceCidr;
             DnsServiceIP = dnsServiceIP;
@@ -84,9 +87,10 @@ namespace Azure.ResourceManager.ContainerService.Models
             LoadBalancerSku = loadBalancerSku;
             LoadBalancerProfile = loadBalancerProfile;
             NatGatewayProfile = natGatewayProfile;
+            StaticEgressGatewayProfile = staticEgressGatewayProfile;
             PodCidrs = podCidrs;
             ServiceCidrs = serviceCidrs;
-            IPFamilies = ipFamilies;
+            NetworkIPFamilies = networkIPFamilies;
             _serializedAdditionalRawData = serializedAdditionalRawData;
         }
 
@@ -99,12 +103,15 @@ namespace Azure.ResourceManager.ContainerService.Models
         /// <summary> Network policy used for building the Kubernetes network. </summary>
         [WirePath("networkPolicy")]
         public ContainerServiceNetworkPolicy? NetworkPolicy { get; set; }
-        /// <summary> This cannot be specified if networkPlugin is anything other than 'azure'. </summary>
+        /// <summary> The network mode Azure CNI is configured with. This cannot be specified if networkPlugin is anything other than 'azure'. </summary>
         [WirePath("networkMode")]
         public ContainerServiceNetworkMode? NetworkMode { get; set; }
         /// <summary> Network dataplane used in the Kubernetes cluster. </summary>
         [WirePath("networkDataplane")]
         public NetworkDataplane? NetworkDataplane { get; set; }
+        /// <summary> Advanced Networking profile for enabling observability and security feature suite on a cluster. For more information see aka.ms/aksadvancednetworking. </summary>
+        [WirePath("advancedNetworking")]
+        public ManagedClusterAdvancedNetworking AdvancedNetworking { get; set; }
         /// <summary> A CIDR notation IP range from which to assign pod IPs when kubenet is used. </summary>
         [WirePath("podCidr")]
         public string PodCidr { get; set; }
@@ -114,10 +121,10 @@ namespace Azure.ResourceManager.ContainerService.Models
         /// <summary> An IP address assigned to the Kubernetes DNS service. It must be within the Kubernetes service address range specified in serviceCidr. </summary>
         [WirePath("dnsServiceIP")]
         public string DnsServiceIP { get; set; }
-        /// <summary> This can only be set at cluster creation time and cannot be changed later. For more information see [egress outbound type](https://docs.microsoft.com/azure/aks/egress-outboundtype). </summary>
+        /// <summary> The outbound (egress) routing method. This can only be set at cluster creation time and cannot be changed later. For more information see [egress outbound type](https://docs.microsoft.com/azure/aks/egress-outboundtype). </summary>
         [WirePath("outboundType")]
         public ContainerServiceOutboundType? OutboundType { get; set; }
-        /// <summary> The default is 'standard'. See [Azure Load Balancer SKUs](https://docs.microsoft.com/azure/load-balancer/skus) for more information about the differences between load balancer SKUs. </summary>
+        /// <summary> The load balancer sku for the managed cluster. The default is 'standard'. See [Azure Load Balancer SKUs](https://docs.microsoft.com/azure/load-balancer/skus) for more information about the differences between load balancer SKUs. </summary>
         [WirePath("loadBalancerSku")]
         public ContainerServiceLoadBalancerSku? LoadBalancerSku { get; set; }
         /// <summary> Profile of the cluster load balancer. </summary>
@@ -126,14 +133,29 @@ namespace Azure.ResourceManager.ContainerService.Models
         /// <summary> Profile of the cluster NAT gateway. </summary>
         [WirePath("natGatewayProfile")]
         public ManagedClusterNatGatewayProfile NatGatewayProfile { get; set; }
-        /// <summary> One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. </summary>
+        /// <summary> The profile for Static Egress Gateway addon. For more details about Static Egress Gateway, see https://aka.ms/aks/static-egress-gateway. </summary>
+        internal ManagedClusterStaticEgressGatewayProfile StaticEgressGatewayProfile { get; set; }
+        /// <summary> Enable Static Egress Gateway addon. Indicates if Static Egress Gateway addon is enabled or not. </summary>
+        [WirePath("staticEgressGatewayProfile.enabled")]
+        public bool? IsStaticEgressGatewayAddonEnabled
+        {
+            get => StaticEgressGatewayProfile is null ? default : StaticEgressGatewayProfile.IsStaticEgressGatewayAddonEnabled;
+            set
+            {
+                if (StaticEgressGatewayProfile is null)
+                    StaticEgressGatewayProfile = new ManagedClusterStaticEgressGatewayProfile();
+                StaticEgressGatewayProfile.IsStaticEgressGatewayAddonEnabled = value;
+            }
+        }
+
+        /// <summary> The CIDR notation IP ranges from which to assign pod IPs. One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. </summary>
         [WirePath("podCidrs")]
         public IList<string> PodCidrs { get; }
-        /// <summary> One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. They must not overlap with any Subnet IP ranges. </summary>
+        /// <summary> The CIDR notation IP ranges from which to assign service cluster IPs. One IPv4 CIDR is expected for single-stack networking. Two CIDRs, one for each IP family (IPv4/IPv6), is expected for dual-stack networking. They must not overlap with any Subnet IP ranges. </summary>
         [WirePath("serviceCidrs")]
         public IList<string> ServiceCidrs { get; }
-        /// <summary> IP families are used to determine single-stack or dual-stack clusters. For single-stack, the expected value is IPv4. For dual-stack, the expected values are IPv4 and IPv6. </summary>
+        /// <summary> The IP families used to specify IP versions available to the cluster. IP families are used to determine single-stack or dual-stack clusters. For single-stack, the expected value is IPv4. For dual-stack, the expected values are IPv4 and IPv6. </summary>
         [WirePath("ipFamilies")]
-        public IList<IPFamily> IPFamilies { get; }
+        public IList<ContainerServiceIPFamily> NetworkIPFamilies { get; }
     }
 }

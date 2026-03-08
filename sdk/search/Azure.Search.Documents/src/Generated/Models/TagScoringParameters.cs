@@ -6,12 +6,17 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Provides parameter values to a tag scoring function. </summary>
     public partial class TagScoringParameters
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="TagScoringParameters"/>. </summary>
         /// <param name="tagsParameter"> The name of the parameter passed in search queries to specify the list of tags to compare against the target field. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="tagsParameter"/> is null. </exception>
@@ -20,6 +25,15 @@ namespace Azure.Search.Documents.Indexes.Models
             Argument.AssertNotNull(tagsParameter, nameof(tagsParameter));
 
             TagsParameter = tagsParameter;
+        }
+
+        /// <summary> Initializes a new instance of <see cref="TagScoringParameters"/>. </summary>
+        /// <param name="tagsParameter"> The name of the parameter passed in search queries to specify the list of tags to compare against the target field. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal TagScoringParameters(string tagsParameter, IDictionary<string, BinaryData> additionalBinaryDataProperties)
+        {
+            TagsParameter = tagsParameter;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the parameter passed in search queries to specify the list of tags to compare against the target field. </summary>

@@ -1,0 +1,667 @@
+// Copyright (c) Microsoft Corporation. All rights reserved.
+// Licensed under the MIT License. See License.txt in the project root for license information.
+
+/**
+ * This module provides conversion functionality between the resolveArmResources API
+ * (from @azure-tools/typespec-azure-resource-manager) and our internal ArmProviderSchema format.
+ *
+ * The resolveArmResources API is a standardized way to extract ARM resource information
+ * from TypeSpec definitions. This converter transforms its output to match our existing
+ * schema structure used throughout the codebase.
+ *
+ * Key differences between the two formats:
+ * - resolveArmResources returns a Provider object with ResolvedResource entries
+ * - ArmProviderSchema uses ArmResourceSchema with ResourceMetadata
+ * - Operation categorization may differ between the two approaches
+ *
+ * Usage:
+ * ```typescript
+ * const schema = convertProviderToArmProviderSchema(program, sdkContext);
+ * ```
+ *
+ * Note: This is the first step towards migrating to use resolveArmResources.
+ * The converter is designed to maintain compatibility with existing code while
+ * allowing gradual migration to the standardized API.
+ */
+
+import { Program, Operation } from "@typespec/compiler";
+import {
+  ResolvedResource,
+  ResourceType,
+  resolveArmResources as resolveArmResourcesFromLibrary
+} from "@azure-tools/typespec-azure-resource-manager";
+import {
+  ArmProviderSchema,
+  ArmResourceSchema,
+  NonResourceMethod,
+  ResourceMetadata,
+  ResourceMethod,
+  ResourceOperationKind,
+  ResourceScope,
+  postProcessArmResources,
+  ParentResourceLookupContext,
+  assignNonResourceMethodsToResources
+} from "./resource-metadata.js";
+import { CSharpEmitterContext } from "@typespec/http-client-csharp";
+import { getCrossLanguageDefinitionId } from "@azure-tools/typespec-client-generator-core";
+import {
+  isVariableSegment,
+  isPrefix,
+  findLongestPrefixMatch,
+  getResourceTypeSegment,
+  getLastPathSegment
+} from "./utils.js";
+import { getAllSdkClients } from "./sdk-client-utils.js";
+import {
+  extensionResourceOperationName,
+  legacyExtensionResourceOperationName,
+  legacyResourceOperationName,
+  builtInResourceOperationName
+} from "./sdk-context-options.js";
+
+/**
+ * Resolves ARM resources from TypeSpec definitions using the standard resolveArmResources API
+ * and returns them in our ArmProviderSchema format.
+ *
+ * This function wraps the standard resolveArmResources API from typespec-azure-resource-manager
+ * and converts the result to our internal schema format for compatibility with existing code.
+ *
+ * @param program - The TypeSpec program
+ * @param sdkContext - The emitter context to map models
+ * @returns The ARM provider schema in our expected format
+ */
+export function resolveArmResources(
+  program: Program,
+  sdkContext: CSharpEmitterContext
+): ArmProviderSchema {
+  const provider = resolveArmResourcesFromLibrary(program);
+
+  // Convert resources
+  const resources: ArmResourceSchema[] = [];
+  const processedResources = new Set<string>();
+  const schemaToResolvedResource = new Map<
+    ArmResourceSchema,
+    ResolvedResource
+  >();
+
+  if (provider.resources) {
+    for (const resolvedResource of provider.resources) {
+      // Get the model from SDK context
+      const modelId = getCrossLanguageDefinitionId(
+        sdkContext,
+        resolvedResource.type
+      );
+      if (!modelId) {
+        continue;
+      }
+
+      // Create a unique key for this resource to avoid duplicates
+      const resourceKey = `${modelId}|${resolvedResource.resourceInstancePath}`;
+      if (processedResources.has(resourceKey)) {
+        continue;
+      }
+      processedResources.add(resourceKey);
+
+      // Convert to our resource schema format
+      const metadata = convertResolvedResourceToMetadata(
+        sdkContext,
+        resolvedResource
+      );
+
+      const resource = {
+        resourceModelId: modelId,
+        metadata
+      };
+      resources.push(resource);
+      schemaToResolvedResource.set(resource, resolvedResource);
+    }
+  }
+
+  // Assign list operations to the correct resources using prefix matching.
+  // The ARM library may assign list operations to the wrong resource when the same
+  // model has multiple resources with different path segments (e.g., publicConfigs
+  // vs configs). Instead of accepting the ARM library's assignment and fixing it
+  // afterwards, we assign list operations ourselves using path matching.
+  assignListOperationsToResources(
+    sdkContext,
+    resources,
+    schemaToResolvedResource
+  );
+
+  // Convert non-resource methods
+  const nonResourceMethods: NonResourceMethod[] = [];
+
+  // Create parent lookup context for resolveArmResources
+  // In this case, parent information comes from ResolvedResource objects
+  // Build validResourceMap once for efficient lookup
+  const validResourceMap = new Map<string, ArmResourceSchema>();
+  for (const r of resources.filter(
+    (r) => r.metadata.resourceIdPattern !== ""
+  )) {
+    const resolvedR = schemaToResolvedResource.get(r);
+    if (resolvedR) {
+      validResourceMap.set(resolvedR.resourceInstancePath, r);
+    }
+  }
+
+  const parentLookup: ParentResourceLookupContext = {
+    getParentResource: (
+      resource: ArmResourceSchema
+    ): ArmResourceSchema | undefined => {
+      const resolved = schemaToResolvedResource.get(resource);
+      if (!resolved) return undefined;
+
+      // Walk up the parent chain to find a valid parent
+      let parent = resolved.parent;
+      while (parent) {
+        const parentResource = validResourceMap.get(
+          parent.resourceInstancePath
+        );
+        if (parentResource) {
+          return parentResource;
+        }
+        parent = parent.parent;
+      }
+      return undefined;
+    }
+  };
+
+  // Use the shared post-processing function
+  const filteredResources = postProcessArmResources(
+    resources,
+    nonResourceMethods,
+    parentLookup
+  );
+
+  // Add provider operations as non-resource methods
+  if (provider.providerOperations) {
+    for (const operation of provider.providerOperations) {
+      // Get method ID from the operation
+      const methodId = getMethodIdFromOperation(
+        sdkContext,
+        operation.operation
+      );
+      if (!methodId) {
+        continue;
+      }
+
+      nonResourceMethods.push({
+        methodId,
+        operationPath: operation.path,
+        // TODO: this is also temporary because resolveArmResources does not have the scope of a provider operation
+        operationScope: getOperationScopeFromPath(operation.path)
+      });
+    }
+  }
+
+  // Post-processing step: Find operations that were not recognized by the ARM library
+  // and add them as non-resource methods
+  const includedOperationIds = new Set<string>();
+  // Track all operations that are already included
+  for (const resource of filteredResources) {
+    for (const method of resource.metadata.methods) {
+      includedOperationIds.add(method.methodId);
+    }
+  }
+  for (const nonResourceMethod of nonResourceMethods) {
+    includedOperationIds.add(nonResourceMethod.methodId);
+  }
+
+  // Get all SDK operations
+  const allSdkClients = getAllSdkClients(sdkContext);
+  for (const client of allSdkClients) {
+    for (const method of client.methods) {
+      const methodId = method.crossLanguageDefinitionId;
+      const operation = method.operation;
+
+      // Skip if already included
+      if (includedOperationIds.has(methodId)) {
+        continue;
+      }
+
+      // Skip if not an HTTP operation with a path
+      if (!operation || operation.kind !== "http" || !operation.path) {
+        continue;
+      }
+
+      // Add this missing operation as a non-resource method
+      nonResourceMethods.push({
+        methodId: methodId,
+        operationPath: operation.path,
+        operationScope: getOperationScopeFromPath(operation.path)
+      });
+    }
+  }
+
+  // Assign non-resource methods to resources based on operationPath prefix matching.
+  // If a non-resource method's path has a prefix matching a resource's resourceIdPattern,
+  // move it into that resource as an Action (longest prefix wins).
+  assignNonResourceMethodsToResources(filteredResources, nonResourceMethods);
+
+  return {
+    resources: filteredResources,
+    nonResourceMethods
+  };
+}
+
+/**
+ * Converts a ResolvedResource to ResourceMetadata format
+ */
+function convertResolvedResourceToMetadata(
+  sdkContext: CSharpEmitterContext,
+  resolvedResource: ResolvedResource
+): ResourceMetadata {
+  const methods: ResourceMethod[] = [];
+  const resourceScope = convertScopeToResourceScope(resolvedResource.scope);
+  let resourceIdPattern = "";
+
+  // Convert lifecycle operations
+  if (resolvedResource.operations.lifecycle) {
+    const lifecycle = resolvedResource.operations.lifecycle;
+
+    if (lifecycle.read && lifecycle.read.length > 0) {
+      for (const readOp of lifecycle.read) {
+        const methodId = getMethodIdFromOperation(sdkContext, readOp.operation);
+        if (methodId) {
+          methods.push({
+            methodId,
+            kind: ResourceOperationKind.Read,
+            operationPath: readOp.path,
+            operationScope: resourceScope,
+            resourceScope: calculateResourceScope(readOp.path, resolvedResource)
+          });
+          // Use the first read operation's path as the resource ID pattern
+          if (!resourceIdPattern) {
+            resourceIdPattern = readOp.path;
+          }
+        }
+      }
+    }
+
+    if (lifecycle.createOrUpdate && lifecycle.createOrUpdate.length > 0) {
+      for (const createOp of lifecycle.createOrUpdate) {
+        const methodId = getMethodIdFromOperation(
+          sdkContext,
+          createOp.operation
+        );
+        if (methodId) {
+          methods.push({
+            methodId,
+            kind: ResourceOperationKind.Create,
+            operationPath: createOp.path,
+            operationScope: resourceScope,
+            resourceScope: calculateResourceScope(
+              createOp.path,
+              resolvedResource
+            )
+          });
+        }
+      }
+    }
+
+    if (lifecycle.update && lifecycle.update.length > 0) {
+      for (const updateOp of lifecycle.update) {
+        const methodId = getMethodIdFromOperation(
+          sdkContext,
+          updateOp.operation
+        );
+        if (methodId) {
+          methods.push({
+            methodId,
+            kind: ResourceOperationKind.Update,
+            operationPath: updateOp.path,
+            operationScope: resourceScope,
+            resourceScope: calculateResourceScope(
+              updateOp.path,
+              resolvedResource
+            )
+          });
+        }
+      }
+    }
+
+    if (lifecycle.delete && lifecycle.delete.length > 0) {
+      for (const deleteOp of lifecycle.delete) {
+        const methodId = getMethodIdFromOperation(
+          sdkContext,
+          deleteOp.operation
+        );
+        if (methodId) {
+          methods.push({
+            methodId,
+            kind: ResourceOperationKind.Delete,
+            operationPath: deleteOp.path,
+            operationScope: resourceScope,
+            resourceScope: calculateResourceScope(
+              deleteOp.path,
+              resolvedResource
+            )
+          });
+        }
+      }
+    }
+  }
+
+  // Convert action operations
+  if (resolvedResource.operations.actions) {
+    for (const actionOp of resolvedResource.operations.actions) {
+      const methodId = getMethodIdFromOperation(sdkContext, actionOp.operation);
+      if (methodId) {
+        methods.push({
+          methodId,
+          kind: ResourceOperationKind.Action,
+          operationPath: actionOp.path,
+          operationScope: resourceScope,
+          resourceScope: calculateResourceScope(actionOp.path, resolvedResource)
+        });
+      }
+    }
+  }
+
+  // Convert resource scope
+  const resourceScopeValue = convertScopeToResourceScope(
+    resolvedResource.scope
+  );
+
+  // Build resource type string
+  const resourceType = formatResourceType(resolvedResource.resourceType);
+
+  // Use the explicit ResourceName if provided via the OverrideResourceName template parameter.
+  // The spec should always define unique resource names for extension resources targeting
+  // different parent types — the emitter should not auto-generate disambiguated names.
+  let resourceName = resolvedResource.resourceName;
+  const explicitName = getExplicitResourceNameFromOperations(resolvedResource);
+  if (explicitName) {
+    resourceName = explicitName;
+  }
+
+  return {
+    // we only assign resourceIdPattern when this resource has a read operation, otherwise this is empty
+    resourceIdPattern: resourceIdPattern,
+    resourceType,
+    methods,
+    resourceScope: resourceScopeValue,
+    parentResourceId: undefined,
+    parentResourceModelId: undefined,
+    // TODO: Temporary - waiting for resolveArmResources API update to include singleton information
+    // Once the API includes this, we can remove this extraction logic
+    singletonResourceName: extractSingletonName(
+      resolvedResource.resourceInstancePath
+    ),
+    resourceName: resourceName
+  };
+}
+
+/**
+ * Get method ID (cross-language definition ID) from an Operation.
+ * Uses TCGC's getCrossLanguageDefinitionId utility directly.
+ */
+function getMethodIdFromOperation(
+  sdkContext: CSharpEmitterContext,
+  operation: Operation
+): string | undefined {
+  // Use TCGC's utility to get the cross-language definition ID directly
+  // CSharpEmitterContext extends SdkContext which extends TCGCContext
+  return getCrossLanguageDefinitionId(sdkContext, operation);
+}
+
+/**
+ * Convert scope string/object to ResourceScope enum
+ */
+function convertScopeToResourceScope(
+  scope: string | ResolvedResource | undefined
+): ResourceScope {
+  if (!scope) {
+    // TODO: does it make sense that we have something without scope??
+    return ResourceScope.ResourceGroup; // Default
+  }
+
+  if (typeof scope === "string") {
+    switch (scope) {
+      case "Tenant":
+        return ResourceScope.Tenant;
+      case "Subscription":
+        return ResourceScope.Subscription;
+      case "ResourceGroup":
+        return ResourceScope.ResourceGroup;
+      case "ManagementGroup":
+        return ResourceScope.ManagementGroup;
+      case "Scope":
+      case "ExternalResource":
+        return ResourceScope.Extension;
+      default:
+        return ResourceScope.ResourceGroup;
+    }
+  }
+
+  // TODO: Schema update needed - when scope is a ResolvedResource (extension resource),
+  // our schema needs to support representing the specific parent resource, not just "Extension"
+  // If scope is a ResolvedResource, it's an extension resource
+  return ResourceScope.Extension;
+}
+
+/**
+ * Determine operation scope from path
+ */
+export function getOperationScopeFromPath(path: string): ResourceScope {
+  // Match any path starting with a variable segment followed by /providers/
+  // This covers scope-based operations like /{resourceUri}/providers/..., /{scope}/providers/..., /{resourceId}/providers/..., etc.
+  if (/^\/\{[^}]+\}\/providers\//.test(path)) {
+    return ResourceScope.Extension;
+  } else if (
+    /^\/subscriptions\/\{[^}]+\}\/resourceGroups\/\{[^}]+\}\//.test(path)
+  ) {
+    return ResourceScope.ResourceGroup;
+  } else if (/^\/subscriptions\/\{[^}]+\}\//.test(path)) {
+    return ResourceScope.Subscription;
+  } else if (
+    /^\/providers\/Microsoft\.Management\/managementGroups\/\{[^}]+\}\//.test(
+      path
+    )
+  ) {
+    return ResourceScope.ManagementGroup;
+  } else if (hasMultipleProviderSegments(path)) {
+    // Paths with multiple /providers/ segments indicate extension resources
+    // e.g., /providers/Microsoft.Management/serviceGroups/{name}/providers/Microsoft.Edge/sites/{siteName}
+    return ResourceScope.Extension;
+  }
+  return ResourceScope.Tenant; // all the templates work as if there is a tenant decorator when there is no such decorator
+}
+
+/**
+ * Check if a path has multiple /providers/ segments, indicating an extension resource
+ * that extends another ARM resource.
+ */
+function hasMultipleProviderSegments(path: string): boolean {
+  const providerMatches = path.match(/\/providers\//gi);
+  return providerMatches !== null && providerMatches.length > 1;
+}
+
+/**
+ * Format ResourceType to a string
+ */
+function formatResourceType(resourceType: ResourceType): string {
+  return `${resourceType.provider}/${resourceType.types.join("/")}`;
+}
+
+/**
+ * Extract singleton resource name from path if it exists
+ */
+function extractSingletonName(path: string): string | undefined {
+  // Check if the path ends with a fixed string instead of a parameter
+  const segments = path.split("/").filter((s) => s.length > 0);
+  const lastSegment = segments[segments.length - 1];
+
+  // If the last segment is not a parameter (doesn't start with {), it's a singleton
+  if (lastSegment && !isVariableSegment(lastSegment)) {
+    return lastSegment;
+  }
+
+  return undefined;
+}
+
+function calculateResourceScope(
+  operationPath: string,
+  resolvedResource: ResolvedResource
+): string | undefined {
+  if (isPrefix(resolvedResource.resourceInstancePath, operationPath)) {
+    return resolvedResource.resourceInstancePath;
+  }
+
+  let parent = resolvedResource.parent;
+  while (parent) {
+    if (isPrefix(parent.resourceInstancePath, operationPath)) {
+      return parent.resourceInstancePath;
+    }
+    parent = parent.parent;
+  }
+
+  return undefined;
+}
+
+/**
+ * Extracts the explicit resource name from a resolved resource's operations.
+ * Checks the CRUD operations' decorators for OverrideResourceName parameters
+ * set via @extensionResourceOperation or @legacyExtensionResourceOperation.
+ */
+function getExplicitResourceNameFromOperations(
+  resolvedResource: ResolvedResource
+): string | undefined {
+  const lifecycle = resolvedResource.operations.lifecycle;
+  if (!lifecycle) return undefined;
+
+  // Check all CRUD operations for an explicit resource name
+  const operations: Operation[] = [];
+  if (lifecycle.read) {
+    for (const op of lifecycle.read) operations.push(op.operation);
+  }
+  if (lifecycle.createOrUpdate) {
+    for (const op of lifecycle.createOrUpdate) operations.push(op.operation);
+  }
+  if (lifecycle.delete) {
+    for (const op of lifecycle.delete) operations.push(op.operation);
+  }
+
+  for (const operation of operations) {
+    const decorators = operation.decorators;
+    for (const decorator of decorators) {
+      const name = decorator.definition?.name;
+      if (
+        name === extensionResourceOperationName ||
+        name === legacyExtensionResourceOperationName ||
+        name === legacyResourceOperationName
+      ) {
+        // For extensionResourceOperation: args are (TargetResource, ExtensionResource, kind, ResourceName) — index 3
+        // For legacyExtensionResourceOperation/legacyResourceOperation: args are (Resource, kind, ResourceName) — index 2
+        const argIndex = name === extensionResourceOperationName ? 3 : 2;
+        if (
+          decorator.args.length > argIndex &&
+          decorator.args[argIndex].jsValue &&
+          typeof decorator.args[argIndex].jsValue === "string" &&
+          (decorator.args[argIndex].jsValue as string).length > 0
+        ) {
+          return decorator.args[argIndex].jsValue as string;
+        }
+      }
+      // For builtInResourceOperation: args are (ParentResource, BuiltInResource, kind, ResourceName) — index 3
+      if (name === builtInResourceOperationName && decorator.args.length > 3) {
+        return decorator.args[3].jsValue as string;
+      }
+    }
+  }
+
+  return undefined;
+}
+
+/**
+ * Assigns list operations from resolved resources to the correct ArmResourceSchema entries
+ * using prefix matching.
+ *
+ * The ARM library may assign list operations to the wrong resource when the same model
+ * has multiple resources with different path segments (e.g., `publicConfigs` at subscription
+ * scope and `configs` at resource group scope). Instead of accepting the ARM library's
+ * assignment and fixing it afterwards, we assign list operations ourselves using path matching:
+ *
+ * 1. If only one resource exists for the model, use it directly
+ * 2. Try prefix matching: find the resource whose path (stripped of the key variable segment)
+ *    is the longest prefix of the list operation path
+ * 3. Fall back to matching the list path's last segment against each resource's type segment
+ * 4. If no match found, fall back to the ARM library's original assignment
+ */
+function assignListOperationsToResources(
+  sdkContext: CSharpEmitterContext,
+  resources: ArmResourceSchema[],
+  schemaToResolvedResource: Map<ArmResourceSchema, ResolvedResource>
+): void {
+  // Precompute resources grouped by model ID to avoid repeated full scans
+  const resourcesByModelId = new Map<string, ArmResourceSchema[]>();
+  for (const r of resources) {
+    const existing = resourcesByModelId.get(r.resourceModelId);
+    if (existing) {
+      existing.push(r);
+    } else {
+      resourcesByModelId.set(r.resourceModelId, [r]);
+    }
+  }
+
+  for (const [resource, resolvedResource] of schemaToResolvedResource) {
+    if (!resolvedResource.operations.lists) continue;
+
+    const modelId = resource.resourceModelId;
+    const resourcesForModel = resourcesByModelId.get(modelId) ?? [];
+
+    for (const listOp of resolvedResource.operations.lists) {
+      const methodId = getMethodIdFromOperation(sdkContext, listOp.operation);
+      if (!methodId) continue;
+
+      let targetResource: ArmResourceSchema | undefined;
+
+      if (resourcesForModel.length === 1) {
+        // Only one resource for this model — no ambiguity
+        targetResource = resourcesForModel[0];
+      } else {
+        // Multiple resources for the same model — use prefix matching to find the correct one
+        targetResource = findLongestPrefixMatch(
+          listOp.path,
+          resourcesForModel,
+          (r) => {
+            const pattern = r.metadata.resourceIdPattern;
+            if (!pattern) return undefined;
+            // Strip the last segment (the key variable like {resourceName})
+            // so we compare against the collection/type segment
+            const lastSlash = pattern.lastIndexOf("/");
+            return lastSlash > 0 ? pattern.substring(0, lastSlash) : undefined;
+          }
+        );
+
+        // Fall back to type segment matching if prefix matching didn't find a match
+        if (!targetResource) {
+          const listLastSegment = getLastPathSegment(listOp.path);
+          if (listLastSegment) {
+            targetResource = resourcesForModel.find((r) => {
+              const typeSegment = getResourceTypeSegment(
+                r.metadata.resourceIdPattern
+              );
+              return (
+                typeSegment?.toLowerCase() === listLastSegment.toLowerCase()
+              );
+            });
+          }
+        }
+      }
+
+      // Fall back to the ARM library's original assignment
+      if (!targetResource) {
+        targetResource = resource;
+      }
+
+      targetResource.metadata.methods.push({
+        methodId,
+        kind: ResourceOperationKind.List,
+        operationPath: listOp.path,
+        operationScope: getOperationScopeFromPath(listOp.path),
+        resourceScope: undefined
+      });
+    }
+  }
+}

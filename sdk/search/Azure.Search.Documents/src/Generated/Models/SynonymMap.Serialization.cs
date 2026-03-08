@@ -5,103 +5,104 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Text.Json;
+using Azure;
 using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class SynonymMap : IUtf8JsonSerializable
+    /// <summary> Represents a synonym map definition. </summary>
+    public partial class SynonymMap : IJsonModel<SynonymMap>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="SynonymMap"/> for deserialization. </summary>
+        internal SynonymMap()
         {
-            writer.WriteStartObject();
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(Name);
-            writer.WritePropertyName("format"u8);
-            writer.WriteStringValue(Format);
-            writer.WritePropertyName("synonyms"u8);
-            writer.WriteStringValue(Synonyms);
-            if (Optional.IsDefined(EncryptionKey))
-            {
-                if (EncryptionKey != null)
-                {
-                    writer.WritePropertyName("encryptionKey"u8);
-                    writer.WriteObjectValue(EncryptionKey);
-                }
-                else
-                {
-                    writer.WriteNull("encryptionKey");
-                }
-            }
-            if (Optional.IsDefined(_etag))
-            {
-                writer.WritePropertyName("@odata.etag"u8);
-                writer.WriteStringValue(_etag);
-            }
-            writer.WriteEndObject();
         }
 
-        internal static SynonymMap DeserializeSynonymMap(JsonElement element)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual SynonymMap PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
         {
-            if (element.ValueKind == JsonValueKind.Null)
+            string format = options.Format == "W" ? ((IPersistableModel<SynonymMap>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeSynonymMap(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(SynonymMap)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SynonymMap>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(SynonymMap)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<SynonymMap>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SynonymMap IPersistableModel<SynonymMap>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<SynonymMap>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="synonymMap"> The <see cref="SynonymMap"/> to serialize into <see cref="RequestContent"/>. </param>
+        public static implicit operator RequestContent(SynonymMap synonymMap)
+        {
+            if (synonymMap == null)
             {
                 return null;
             }
-            string name = default;
-            string format = default;
-            string synonyms = default;
-            SearchResourceEncryptionKey encryptionKey = default;
-            string odataEtag = default;
-            foreach (var property in element.EnumerateObject())
+            return RequestContent.Create(synonymMap, ModelSerializationExtensions.WireOptions);
+        }
+
+        /// <param name="response"> The <see cref="Response"/> to deserialize the <see cref="SynonymMap"/> from. </param>
+        public static explicit operator SynonymMap(Response response)
+        {
+            using JsonDocument document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
+            return DeserializeSynonymMap(document.RootElement, ModelSerializationExtensions.WireOptions);
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<SynonymMap>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SynonymMap IJsonModel<SynonymMap>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual SynonymMap JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SynonymMap>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
             {
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("format"u8))
-                {
-                    format = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("synonyms"u8))
-                {
-                    synonyms = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("encryptionKey"u8))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        encryptionKey = null;
-                        continue;
-                    }
-                    encryptionKey = SearchResourceEncryptionKey.DeserializeSearchResourceEncryptionKey(property.Value);
-                    continue;
-                }
-                if (property.NameEquals("@odata.etag"u8))
-                {
-                    odataEtag = property.Value.GetString();
-                    continue;
-                }
+                throw new FormatException($"The model {nameof(SynonymMap)} does not support reading '{format}' format.");
             }
-            return new SynonymMap(name, format, synonyms, encryptionKey, odataEtag);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static SynonymMap FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeSynonymMap(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeSynonymMap(document.RootElement, options);
         }
     }
 }

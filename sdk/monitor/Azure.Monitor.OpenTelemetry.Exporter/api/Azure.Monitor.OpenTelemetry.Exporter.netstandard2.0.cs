@@ -15,19 +15,40 @@ namespace Azure.Monitor.OpenTelemetry.Exporter
         public Azure.Core.TokenCredential Credential { get { throw null; } set { } }
         public bool DisableOfflineStorage { get { throw null; } set { } }
         public bool EnableLiveMetrics { get { throw null; } set { } }
+        public bool EnablePerfCounters { get { throw null; } set { } }
+        public bool EnableStandardMetrics { get { throw null; } set { } }
+        public bool EnableTraceBasedLogsSampler { get { throw null; } set { } }
         public float SamplingRatio { get { throw null; } set { } }
         public string StorageDirectory { get { throw null; } set { } }
+        public double? TracesPerSecond { get { throw null; } set { } }
         public Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorExporterOptions.ServiceVersion Version { get { throw null; } set { } }
         public enum ServiceVersion
         {
             v2_1 = 1,
         }
     }
+    public sealed partial class AzureMonitorLogExporter : OpenTelemetry.BaseExporter<OpenTelemetry.Logs.LogRecord>
+    {
+        public AzureMonitorLogExporter(Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorExporterOptions options) { }
+        protected override void Dispose(bool disposing) { }
+        public override OpenTelemetry.ExportResult Export(in OpenTelemetry.Batch<OpenTelemetry.Logs.LogRecord> batch) { throw null; }
+    }
+    public sealed partial class AzureMonitorMetricExporter : OpenTelemetry.BaseExporter<OpenTelemetry.Metrics.Metric>
+    {
+        public AzureMonitorMetricExporter(Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorExporterOptions options) { }
+        protected override void Dispose(bool disposing) { }
+        public override OpenTelemetry.ExportResult Export(in OpenTelemetry.Batch<OpenTelemetry.Metrics.Metric> batch) { throw null; }
+    }
     public partial class AzureMonitorOpenTelemetryExporterContext : System.ClientModel.Primitives.ModelReaderWriterContext
     {
-        internal AzureMonitorOpenTelemetryExporterContext() { }
-        public static Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorOpenTelemetryExporterContext Default { get { throw null; } }
-        protected override bool TryGetTypeBuilderCore(System.Type type, out System.ClientModel.Primitives.ModelReaderWriterTypeBuilder builder) { throw null; }
+        public AzureMonitorOpenTelemetryExporterContext() { }
+        public Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorOpenTelemetryExporterContext Default { get { throw null; } }
+    }
+    public sealed partial class AzureMonitorTraceExporter : OpenTelemetry.BaseExporter<System.Diagnostics.Activity>
+    {
+        public AzureMonitorTraceExporter(Azure.Monitor.OpenTelemetry.Exporter.AzureMonitorExporterOptions options) { }
+        protected override void Dispose(bool disposing) { }
+        public override OpenTelemetry.ExportResult Export(in OpenTelemetry.Batch<System.Diagnostics.Activity> batch) { throw null; }
     }
     public static partial class OpenTelemetryBuilderExtensions
     {

@@ -8,8 +8,8 @@ azure-arm: true
 csharp: true
 library-name: NetApp
 namespace: Azure.ResourceManager.NetApp
-require: https://github.com/Azure/azure-rest-api-specs/blob/bf90cab9d5f6060ce1f7775ffac88ed8eda785ca/specification/netapp/resource-manager/readme.md
-tag: package-2025-03-01
+require: https://github.com/Azure/azure-rest-api-specs/blob/2daa93270f6743188fe69d301f101d031a624fb2/specification/netapp/resource-manager/Microsoft.NetApp/NetApp/readme.md
+tag: package-2025-12-01
 output-folder: $(this-folder)/Generated
 clear-output-folder: true
 sample-gen:
@@ -200,7 +200,9 @@ rename-mapping:
   CheckQuotaNameResourceTypes: NetAppQuotaAvailabilityResourceType
   QuotaAvailabilityRequest: NetAppQuotaAvailabilityContent
   InAvailabilityReasonType: NetAppNameUnavailableReason
+  Exclude: ExcludeReplicationsFilter
   Snapshot: NetAppVolumeSnapshot
+  QuotaItem: NetAppSubscriptionQuotaItem
   SubscriptionQuotaItem: NetAppSubscriptionQuotaItem
   SubvolumeInfo: NetAppSubvolumeInfo
   Replication: NetAppVolumeReplication
@@ -223,10 +225,19 @@ rename-mapping:
   PoolChangeRequest: NetAppVolumePoolChangeContent
   ReestablishReplicationRequest: NetAppVolumeReestablishReplicationContent
   ReplicationStatus: NetAppVolumeReplicationStatus
+  PoolPropertiesEncryptionType: CapacityPoolEncryptionType
+  CapacityPool.properties.customThroughputMibps: CustomThroughputMibpsInt
+  CapacityPoolPatch.properties.customThroughputMibps: CustomThroughputMibpsInt
+  BackupStatus.relationshipStatus: VolumeBackupRelationshipStatus
+  RestoreStatus.relationshipStatus: VolumeRestoreRelationshipStatus
+  ReplicationStatus.relationshipStatus: VolumeReplicationRelationshipStatus
+  NetAppProvisioningState: NetAppVolumeQuotaRuleProvisioningState
+  VolumeQuotaRule.properties.provisioningState: VolumeQuotaRuleProvisioningState
+  VolumeQuotaRulePatch.properties.provisioningState: VolumeQuotaRuleProvisioningState
   SecurityStyle: NetAppVolumeSecurityStyle
   SnapshotRestoreFiles: NetAppVolumeSnapshotRestoreFilesContent
   SubvolumeModel: NetAppSubvolumeMetadata
-  Type: NetAppVolumeQuotaType
+  QuotaType: NetAppVolumeQuotaType
   VolumePatchPropertiesDataProtection: NetAppVolumePatchDataProtection
   VolumePropertiesDataProtection: NetAppVolumeDataProtection
   VolumeRevert: NetAppVolumeRevertContent

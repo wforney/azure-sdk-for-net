@@ -1,16 +1,16 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using Azure.Core;
-using Microsoft.Identity.Client;
 using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Globalization;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
-using System.Globalization;
+using Azure.Core;
 using Azure.Core.Pipeline;
-using System.ComponentModel;
+using Microsoft.Identity.Client;
 
 namespace Azure.Identity
 {
@@ -18,6 +18,8 @@ namespace Azure.Identity
     /// Authenticates using tokens in a local cache file. This is a legacy mechanism for authenticating clients using credentials provided to Visual Studio.
     /// This mechanism for Visual Studio authentication has been replaced by the <see cref="VisualStudioCredential"/>.
     /// </summary>
+    [Obsolete("This credential is deprecated. Consider using other dev tool credentials, such as VisualStudioCredential.")]
+    [EditorBrowsable(EditorBrowsableState.Never)]
     public class SharedTokenCacheCredential : TokenCredential
     {
         internal const string NoAccountsInCacheMessage = "SharedTokenCacheCredential authentication unavailable. No accounts were found in the cache.";

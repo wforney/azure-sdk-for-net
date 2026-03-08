@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Models
 {
-    /// <summary> The VectorsDebugInfo. </summary>
+    /// <summary> "Contains debugging information specific to vector and hybrid search."). </summary>
     public partial class VectorsDebugInfo
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="VectorsDebugInfo"/>. </summary>
         internal VectorsDebugInfo()
         {
@@ -17,9 +23,11 @@ namespace Azure.Search.Documents.Models
 
         /// <summary> Initializes a new instance of <see cref="VectorsDebugInfo"/>. </summary>
         /// <param name="subscores"> The breakdown of subscores of the document prior to the chosen result set fusion/combination method such as RRF. </param>
-        internal VectorsDebugInfo(QueryResultDocumentSubscores subscores)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal VectorsDebugInfo(QueryResultDocumentSubscores subscores, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Subscores = subscores;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The breakdown of subscores of the document prior to the chosen result set fusion/combination method such as RRF. </summary>

@@ -8,12 +8,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Description for what data to store in the designated search index. </summary>
     public partial class SearchIndexerIndexProjectionSelector
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchIndexerIndexProjectionSelector"/>. </summary>
         /// <param name="targetIndexName"> Name of the search index to project to. Must have a key field with the 'keyword' analyzer set. </param>
         /// <param name="parentKeyFieldName"> Name of the field in the search index to map the parent document's key value to. Must be a string field that is filterable and not the key field. </param>
@@ -38,20 +42,25 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="parentKeyFieldName"> Name of the field in the search index to map the parent document's key value to. Must be a string field that is filterable and not the key field. </param>
         /// <param name="sourceContext"> Source context for the projections. Represents the cardinality at which the document will be split into multiple sub documents. </param>
         /// <param name="mappings"> Mappings for the projection, or which source should be mapped to which field in the target index. </param>
-        internal SearchIndexerIndexProjectionSelector(string targetIndexName, string parentKeyFieldName, string sourceContext, IList<InputFieldMappingEntry> mappings)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchIndexerIndexProjectionSelector(string targetIndexName, string parentKeyFieldName, string sourceContext, IList<InputFieldMappingEntry> mappings, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             TargetIndexName = targetIndexName;
             ParentKeyFieldName = parentKeyFieldName;
             SourceContext = sourceContext;
             Mappings = mappings;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Name of the search index to project to. Must have a key field with the 'keyword' analyzer set. </summary>
         public string TargetIndexName { get; set; }
+
         /// <summary> Name of the field in the search index to map the parent document's key value to. Must be a string field that is filterable and not the key field. </summary>
         public string ParentKeyFieldName { get; set; }
+
         /// <summary> Source context for the projections. Represents the cardinality at which the document will be split into multiple sub documents. </summary>
         public string SourceContext { get; set; }
+
         /// <summary> Mappings for the projection, or which source should be mapped to which field in the target index. </summary>
         public IList<InputFieldMappingEntry> Mappings { get; }
     }

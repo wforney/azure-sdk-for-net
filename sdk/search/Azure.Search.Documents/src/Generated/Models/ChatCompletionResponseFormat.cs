@@ -5,30 +5,37 @@
 
 #nullable disable
 
-using Azure.Search.Documents.Models;
+using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Determines how the language model's response should be serialized. Defaults to 'text'. </summary>
     public partial class ChatCompletionResponseFormat
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ChatCompletionResponseFormat"/>. </summary>
         public ChatCompletionResponseFormat()
         {
         }
 
         /// <summary> Initializes a new instance of <see cref="ChatCompletionResponseFormat"/>. </summary>
-        /// <param name="type"> Specifies how the LLM should format the response. Possible values: 'text' (plain string), 'json_object' (arbitrary JSON), or 'json_schema' (adheres to provided schema). </param>
-        /// <param name="chatCompletionSchemaProperties"> An open dictionary for extended properties. Required if 'type' == 'json_schema'. </param>
-        internal ChatCompletionResponseFormat(ChatCompletionResponseFormatType? type, ChatCompletionResponseFormatJsonSchemaProperties chatCompletionSchemaProperties)
+        /// <param name="type"> Specifies how the LLM should format the response. </param>
+        /// <param name="jsonSchemaProperties"> An open dictionary for extended properties. Required if 'type' == 'json_schema'. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ChatCompletionResponseFormat(ChatCompletionResponseFormatType? @type, ChatCompletionSchemaProperties jsonSchemaProperties, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
-            Type = type;
-            ChatCompletionSchemaProperties = chatCompletionSchemaProperties;
+            Type = @type;
+            JsonSchemaProperties = jsonSchemaProperties;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
-        /// <summary> Specifies how the LLM should format the response. Possible values: 'text' (plain string), 'json_object' (arbitrary JSON), or 'json_schema' (adheres to provided schema). </summary>
+        /// <summary> Specifies how the LLM should format the response. </summary>
         public ChatCompletionResponseFormatType? Type { get; set; }
+
         /// <summary> An open dictionary for extended properties. Required if 'type' == 'json_schema'. </summary>
-        public ChatCompletionResponseFormatJsonSchemaProperties ChatCompletionSchemaProperties { get; set; }
+        public ChatCompletionSchemaProperties JsonSchemaProperties { get; set; }
     }
 }

@@ -5,26 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Response from a List SynonymMaps request. If successful, it includes the full definitions of all synonym maps. </summary>
     internal partial class ListSynonymMapsResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ListSynonymMapsResult"/>. </summary>
-        /// <param name="synonymMaps"> The synonym maps in the Search service. </param>
-        internal ListSynonymMapsResult(IEnumerable<SynonymMap> synonymMaps)
+        internal ListSynonymMapsResult()
         {
-            SynonymMaps = synonymMaps.ToList();
+            SynonymMaps = new ChangeTrackingList<SynonymMap>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ListSynonymMapsResult"/>. </summary>
         /// <param name="synonymMaps"> The synonym maps in the Search service. </param>
-        internal ListSynonymMapsResult(IReadOnlyList<SynonymMap> synonymMaps)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ListSynonymMapsResult(IReadOnlyList<SynonymMap> synonymMaps, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             SynonymMaps = synonymMaps;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The synonym maps in the Search service. </summary>

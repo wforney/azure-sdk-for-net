@@ -5,68 +5,132 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class HnswParameters : IUtf8JsonSerializable
+    /// <summary> Contains the parameters specific to the HNSW algorithm. </summary>
+    public partial class HnswParameters : IJsonModel<HnswParameters>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual HnswParameters PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<HnswParameters>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeHnswParameters(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(HnswParameters)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<HnswParameters>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(HnswParameters)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<HnswParameters>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        HnswParameters IPersistableModel<HnswParameters>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<HnswParameters>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<HnswParameters>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(M))
-            {
-                if (M != null)
-                {
-                    writer.WritePropertyName("m"u8);
-                    writer.WriteNumberValue(M.Value);
-                }
-                else
-                {
-                    writer.WriteNull("m");
-                }
-            }
-            if (Optional.IsDefined(EfConstruction))
-            {
-                if (EfConstruction != null)
-                {
-                    writer.WritePropertyName("efConstruction"u8);
-                    writer.WriteNumberValue(EfConstruction.Value);
-                }
-                else
-                {
-                    writer.WriteNull("efConstruction");
-                }
-            }
-            if (Optional.IsDefined(EfSearch))
-            {
-                if (EfSearch != null)
-                {
-                    writer.WritePropertyName("efSearch"u8);
-                    writer.WriteNumberValue(EfSearch.Value);
-                }
-                else
-                {
-                    writer.WriteNull("efSearch");
-                }
-            }
-            if (Optional.IsDefined(Metric))
-            {
-                if (Metric != null)
-                {
-                    writer.WritePropertyName("metric"u8);
-                    writer.WriteStringValue(Metric.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("metric");
-                }
-            }
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static HnswParameters DeserializeHnswParameters(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<HnswParameters>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(HnswParameters)} does not support writing '{format}' format.");
+            }
+            if (Optional.IsDefined(M))
+            {
+                writer.WritePropertyName("m"u8);
+                writer.WriteNumberValue(M.Value);
+            }
+            if (Optional.IsDefined(EfConstruction))
+            {
+                writer.WritePropertyName("efConstruction"u8);
+                writer.WriteNumberValue(EfConstruction.Value);
+            }
+            if (Optional.IsDefined(EfSearch))
+            {
+                writer.WritePropertyName("efSearch"u8);
+                writer.WriteNumberValue(EfSearch.Value);
+            }
+            if (Optional.IsDefined(Metric))
+            {
+                writer.WritePropertyName("metric"u8);
+                writer.WriteStringValue(Metric.Value.ToString());
+            }
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        HnswParameters IJsonModel<HnswParameters>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual HnswParameters JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<HnswParameters>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(HnswParameters)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeHnswParameters(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static HnswParameters DeserializeHnswParameters(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -76,66 +140,52 @@ namespace Azure.Search.Documents.Indexes.Models
             int? efConstruction = default;
             int? efSearch = default;
             VectorSearchAlgorithmMetric? metric = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("m"u8))
+                if (prop.NameEquals("m"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
-                        m = null;
                         continue;
                     }
-                    m = property.Value.GetInt32();
+                    m = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("efConstruction"u8))
+                if (prop.NameEquals("efConstruction"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
-                        efConstruction = null;
                         continue;
                     }
-                    efConstruction = property.Value.GetInt32();
+                    efConstruction = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("efSearch"u8))
+                if (prop.NameEquals("efSearch"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
-                        efSearch = null;
                         continue;
                     }
-                    efSearch = property.Value.GetInt32();
+                    efSearch = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("metric"u8))
+                if (prop.NameEquals("metric"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         metric = null;
                         continue;
                     }
-                    metric = new VectorSearchAlgorithmMetric(property.Value.GetString());
+                    metric = new VectorSearchAlgorithmMetric(prop.Value.GetString());
                     continue;
                 }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
+                }
             }
-            return new HnswParameters(m, efConstruction, efSearch, metric);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static HnswParameters FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeHnswParameters(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new HnswParameters(m, efConstruction, efSearch, metric, additionalBinaryDataProperties);
         }
     }
 }

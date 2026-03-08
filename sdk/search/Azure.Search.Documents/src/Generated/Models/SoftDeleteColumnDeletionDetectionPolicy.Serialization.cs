@@ -5,16 +5,76 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class SoftDeleteColumnDeletionDetectionPolicy : IUtf8JsonSerializable
+    /// <summary> Defines a data deletion detection policy that implements a soft-deletion strategy. It determines whether an item should be deleted based on the value of a designated 'soft delete' column. </summary>
+    public partial class SoftDeleteColumnDeletionDetectionPolicy : DataDeletionDetectionPolicy, IJsonModel<SoftDeleteColumnDeletionDetectionPolicy>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override DataDeletionDetectionPolicy PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeSoftDeleteColumnDeletionDetectionPolicy(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(SoftDeleteColumnDeletionDetectionPolicy)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(SoftDeleteColumnDeletionDetectionPolicy)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SoftDeleteColumnDeletionDetectionPolicy IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>.Create(BinaryData data, ModelReaderWriterOptions options) => (SoftDeleteColumnDeletionDetectionPolicy)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<SoftDeleteColumnDeletionDetectionPolicy>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SoftDeleteColumnDeletionDetectionPolicy)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
             if (Optional.IsDefined(SoftDeleteColumnName))
             {
                 writer.WritePropertyName("softDeleteColumnName"u8);
@@ -25,55 +85,60 @@ namespace Azure.Search.Documents.Indexes.Models
                 writer.WritePropertyName("softDeleteMarkerValue"u8);
                 writer.WriteStringValue(SoftDeleteMarkerValue);
             }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            writer.WriteEndObject();
         }
 
-        internal static SoftDeleteColumnDeletionDetectionPolicy DeserializeSoftDeleteColumnDeletionDetectionPolicy(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SoftDeleteColumnDeletionDetectionPolicy IJsonModel<SoftDeleteColumnDeletionDetectionPolicy>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (SoftDeleteColumnDeletionDetectionPolicy)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override DataDeletionDetectionPolicy JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SoftDeleteColumnDeletionDetectionPolicy>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SoftDeleteColumnDeletionDetectionPolicy)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeSoftDeleteColumnDeletionDetectionPolicy(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static SoftDeleteColumnDeletionDetectionPolicy DeserializeSoftDeleteColumnDeletionDetectionPolicy(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
+            string odataType = "#Microsoft.Azure.Search.SoftDeleteColumnDeletionDetectionPolicy";
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
             string softDeleteColumnName = default;
             string softDeleteMarkerValue = default;
-            string odataType = default;
-            foreach (var property in element.EnumerateObject())
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("softDeleteColumnName"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    softDeleteColumnName = property.Value.GetString();
+                    odataType = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("softDeleteMarkerValue"u8))
+                if (prop.NameEquals("softDeleteColumnName"u8))
                 {
-                    softDeleteMarkerValue = property.Value.GetString();
+                    softDeleteColumnName = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (prop.NameEquals("softDeleteMarkerValue"u8))
                 {
-                    odataType = property.Value.GetString();
+                    softDeleteMarkerValue = prop.Value.GetString();
                     continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new SoftDeleteColumnDeletionDetectionPolicy(odataType, softDeleteColumnName, softDeleteMarkerValue);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new SoftDeleteColumnDeletionDetectionPolicy FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeSoftDeleteColumnDeletionDetectionPolicy(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new SoftDeleteColumnDeletionDetectionPolicy(odataType, additionalBinaryDataProperties, softDeleteColumnName, softDeleteMarkerValue);
         }
     }
 }

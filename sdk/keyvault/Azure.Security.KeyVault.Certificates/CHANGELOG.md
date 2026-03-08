@@ -6,9 +6,16 @@
 
 ### Breaking Changes
 
+- Added `UniformResourceIdentifiers` and `IpAddresses` collection properties in `SubjectAlternativeNames`.
+- Added the `OutContentType` option to `DownloadCertificateOptions` and as a parameter for `CertificateClient.DownloadCertificate` and `CertificateClient.DownloadCertificateAsync` methods to specify the format in which the certificate will be returned.
+
 ### Bugs Fixed
 
+- Fixed challenge-based authentication to correctly parse tenant ID from DSTSv2 authority URIs.
+
 ### Other Changes
+
+- The default service version is now `2025-07-01`.
 
 ## 4.8.0 (2025-06-16)
 

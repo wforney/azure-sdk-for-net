@@ -3,15 +3,18 @@
 
 using Azure.Core;
 using Azure.Core.Pipeline;
-using Azure.Generator.Management.Providers;
+using Azure.Generator.Management.Visitors;
+using Microsoft.TypeSpec.Generator.ClientModel.Providers;
 using Microsoft.TypeSpec.Generator.Expressions;
 using Microsoft.TypeSpec.Generator.Primitives;
+using Microsoft.TypeSpec.Generator.Providers;
+using Microsoft.TypeSpec.Generator.Snippets;
 using Microsoft.TypeSpec.Generator.Statements;
 using System;
 using System.Collections.Generic;
-using ProviderParameterProvider = Microsoft.TypeSpec.Generator.Providers.ParameterProvider;
+using System.Diagnostics;
+using System.Text.Json;
 using static Microsoft.TypeSpec.Generator.Snippets.Snippet;
-using Azure.Generator.Management.Visitors;
 
 namespace Azure.Generator.Management.Snippets
 {
@@ -34,18 +37,18 @@ namespace Azure.Generator.Management.Snippets
         }
 
         public static List<MethodBodyStatement> CreateDiagnosticScopeStatements(
-            ResourceClientProvider resourceClientProvider,
-            string operationName,
+            TypeProvider enclosingType,
+            ValueExpression clientDiagnostics,
+            string scopeName,
             out VariableExpression scopeVariable)
         {
             var statements = new List<MethodBodyStatement>();
 
             // using var scope = _clientDiagnostics.CreateScope("ResourceName.OperationName");
-            var clientDiagnosticsField = resourceClientProvider.GetClientDiagnosticsField();
             var scopeDeclaration = UsingDeclare(
                 "scope",
                 typeof(DiagnosticScope),
-                clientDiagnosticsField.Invoke("CreateScope", [Literal($"{resourceClientProvider.Name}.{operationName}")]),
+                clientDiagnostics.Invoke("CreateScope", [Literal($"{enclosingType.Name}.{scopeName}")]),
                 out scopeVariable);
             statements.Add(scopeDeclaration);
 
@@ -55,9 +58,8 @@ namespace Azure.Generator.Management.Snippets
             return statements;
         }
 
-        // TODO: The generated code has format issue https://github.com/microsoft/typespec/issues/7283
         public static MethodBodyStatement CreateRequestContext(
-            ProviderParameterProvider cancellationTokenParam,
+            ParameterProvider cancellationTokenParam,
             out VariableExpression contextVariable)
         {
             var requestContextParams = new Dictionary<ValueExpression, ValueExpression>
@@ -65,11 +67,6 @@ namespace Azure.Generator.Management.Snippets
                 { Identifier(nameof(RequestContext.CancellationToken)), cancellationTokenParam }
             };
 
-            //        RequestContext context = new RequestContext
-            //        {
-            //            CancellationToken = cancellationToken
-            //        }
-            //        ;
             return Declare("context", typeof(RequestContext), New.Instance(typeof(RequestContext), requestContextParams), out contextVariable);
         }
 
@@ -84,7 +81,7 @@ namespace Azure.Generator.Management.Snippets
         }
 
         public static MethodBodyStatement CreateHttpMessage(
-            ResourceClientProvider resourceClientProvider,
+            ValueExpression restClient,
             string methodName,
             IReadOnlyList<ValueExpression> arguments,
             out VariableExpression messageVariable)
@@ -93,7 +90,7 @@ namespace Azure.Generator.Management.Snippets
             return Declare(
                 "message",
                 typeof(HttpMessage),
-                resourceClientProvider.GetRestClientField().Invoke(methodName, arguments),
+                restClient.Invoke(methodName, arguments),
                 out messageVariable);
         }
 
@@ -102,7 +99,7 @@ namespace Azure.Generator.Management.Snippets
             VariableExpression contextVariable,
             CSharpType responseGenericType,
             bool isAsync,
-            out VariableExpression responseVariable)
+            out ScopedApi<Response> responseVariable)
         {
             var statements = new List<MethodBodyStatement>();
             var pipelineInvoke = isAsync ? "ProcessMessageAsync" : "ProcessMessage";
@@ -115,14 +112,19 @@ namespace Azure.Generator.Management.Snippets
                 out var resultVariable);
             statements.Add(resultDeclaration);
 
-            // Response<T> response = Response.FromValue((T)result, result);
+            // For enum/extensible enum types: Response<T> response = Response.FromValue(new T(JsonDocument.Parse(result.Content, ModelSerializationExtensions.JsonDocumentOptions).RootElement.GetString()), result);
+            // For model types: Response<T> response = Response.FromValue(T.FromResponse(result), result);
+            ValueExpression deserializedValue = responseGenericType.IsEnum
+                ? New.Instance(responseGenericType, Static(typeof(JsonDocument)).Invoke(nameof(JsonDocument.Parse), [resultVariable.Property("Content"), Static<ModelSerializationExtensionsDefinition>().Property("JsonDocumentOptions")]).Property(nameof(JsonDocument.RootElement)).Invoke(nameof(JsonElement.GetString)))
+                : Static(responseGenericType).Invoke(SerializationVisitor.FromResponseMethodName, [resultVariable]);
             var responseDeclaration = Declare(
                 "response",
                 new CSharpType(typeof(Response<>), responseGenericType),
                 Static(typeof(Response)).Invoke(
                     nameof(Response.FromValue),
-                    [Static(responseGenericType).Invoke(SerializationVisitor.FromResponseMethodName, [resultVariable]), resultVariable]),
-                out responseVariable);
+                    [deserializedValue, resultVariable]),
+                out var responseVar);
+            responseVariable = responseVar.As<Response>();
             statements.Add(responseDeclaration);
 
             return statements;
@@ -132,7 +134,7 @@ namespace Azure.Generator.Management.Snippets
             VariableExpression messageVariable,
             VariableExpression contextVariable,
             bool isAsync,
-            out VariableExpression responseVariable)
+            out ScopedApi<Response> responseVariable)
         {
             var statements = new List<MethodBodyStatement>();
             var pipelineInvoke = isAsync ? "ProcessMessageAsync" : "ProcessMessage";
@@ -142,10 +144,29 @@ namespace Azure.Generator.Management.Snippets
                 "response",
                 typeof(Response),
                 This.Property("Pipeline").Invoke(pipelineInvoke, [messageVariable, contextVariable], null, isAsync),
-                out responseVariable);
+                out var responseVar);
+            responseVariable = responseVar.As<Response>();
             statements.Add(responseDeclaration);
 
             return statements;
+        }
+
+        public static MethodProvider BuildValidateResourceIdMethod(TypeProvider enclosingType, ValueExpression resourceType)
+        {
+            var idParameter = new ParameterProvider("id", $"", typeof(ResourceIdentifier));
+            var signature = new MethodSignature(
+                "ValidateResourceId",
+                null,
+                MethodSignatureModifiers.Internal | MethodSignatureModifiers.Static,
+                null,
+                null,
+                [idParameter],
+                [new AttributeStatement(typeof(ConditionalAttribute), Literal("DEBUG"))]);
+            var bodyStatements = new IfStatement(idParameter.As<ResourceIdentifier>().ResourceType().NotEqual(resourceType))
+            {
+                Throw(New.ArgumentException(idParameter, StringSnippets.Format(Literal("Invalid resource type {0} expected {1}"), idParameter.As<ResourceIdentifier>().ResourceType(), resourceType), false))
+            };
+            return new MethodProvider(signature, bodyStatements, enclosingType);
         }
     }
 }

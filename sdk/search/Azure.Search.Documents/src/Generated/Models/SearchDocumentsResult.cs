@@ -5,21 +5,23 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
-    /// <summary> Response containing search results from an index. </summary>
     internal partial class SearchDocumentsResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchDocumentsResult"/>. </summary>
-        /// <param name="results"> The sequence of results returned by the query. </param>
-        internal SearchDocumentsResult(IEnumerable<SearchResult> results)
+        public SearchDocumentsResult()
         {
             Facets = new ChangeTrackingDictionary<string, IList<FacetResult>>();
             Answers = new ChangeTrackingList<QueryAnswerResult>();
-            Results = results.ToList();
+            Results = new ChangeTrackingList<SearchResult>();
         }
 
         /// <summary> Initializes a new instance of <see cref="SearchDocumentsResult"/>. </summary>
@@ -28,13 +30,14 @@ namespace Azure.Search.Documents.Models
         /// <param name="facets"> The facet query results for the search operation, organized as a collection of buckets for each faceted field; null if the query did not include any facet expressions. </param>
         /// <param name="answers"> The answers query results for the search operation; null if the answers query parameter was not specified or set to 'none'. </param>
         /// <param name="debugInfo"> Debug information that applies to the search results as a whole. </param>
-        /// <param name="nextPageParameters"> Continuation JSON payload returned when the query can't return all the requested results in a single response. You can use this JSON along with @odata.nextLink to formulate another POST Search request to get the next part of the search response. </param>
+        /// <param name="nextPageParameters"> Continuation JSON payload returned when the query can't return all the requested results in a single response. You can use this JSON along with. </param>
         /// <param name="results"> The sequence of results returned by the query. </param>
         /// <param name="nextLink"> Continuation URL returned when the query can't return all the requested results in a single response. You can use this URL to formulate another GET or POST Search request to get the next part of the search response. Make sure to use the same verb (GET or POST) as the request that produced this response. </param>
         /// <param name="semanticPartialResponseReason"> Reason that a partial response was returned for a semantic ranking request. </param>
         /// <param name="semanticPartialResponseType"> Type of partial response that was returned for a semantic ranking request. </param>
         /// <param name="semanticQueryRewritesResultType"> Type of query rewrite that was used to retrieve documents. </param>
-        internal SearchDocumentsResult(long? count, double? coverage, IReadOnlyDictionary<string, IList<FacetResult>> facets, IReadOnlyList<QueryAnswerResult> answers, DebugInfo debugInfo, SearchOptions nextPageParameters, IReadOnlyList<SearchResult> results, string nextLink, SemanticErrorReason? semanticPartialResponseReason, SemanticSearchResultsType? semanticPartialResponseType, SemanticQueryRewritesResultType? semanticQueryRewritesResultType)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchDocumentsResult(long? count, double? coverage, IReadOnlyDictionary<string, IList<FacetResult>> facets, IReadOnlyList<QueryAnswerResult> answers, DebugInfo debugInfo, SearchOptions nextPageParameters, IReadOnlyList<SearchResult> results, string nextLink, SemanticErrorReason? semanticPartialResponseReason, SemanticSearchResultsType? semanticPartialResponseType, SemanticQueryRewritesResultType? semanticQueryRewritesResultType, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Count = count;
             Coverage = coverage;
@@ -47,28 +50,39 @@ namespace Azure.Search.Documents.Models
             SemanticPartialResponseReason = semanticPartialResponseReason;
             SemanticPartialResponseType = semanticPartialResponseType;
             SemanticQueryRewritesResultType = semanticQueryRewritesResultType;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The total count of results found by the search operation, or null if the count was not requested. If present, the count may be greater than the number of results in this response. This can happen if you use the $top or $skip parameters, or if the query can't return all the requested documents in a single response. </summary>
         public long? Count { get; }
+
         /// <summary> A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not specified in the request. </summary>
         public double? Coverage { get; }
+
         /// <summary> The facet query results for the search operation, organized as a collection of buckets for each faceted field; null if the query did not include any facet expressions. </summary>
         public IReadOnlyDictionary<string, IList<FacetResult>> Facets { get; }
+
         /// <summary> The answers query results for the search operation; null if the answers query parameter was not specified or set to 'none'. </summary>
         public IReadOnlyList<QueryAnswerResult> Answers { get; }
+
         /// <summary> Debug information that applies to the search results as a whole. </summary>
         public DebugInfo DebugInfo { get; }
-        /// <summary> Continuation JSON payload returned when the query can't return all the requested results in a single response. You can use this JSON along with @odata.nextLink to formulate another POST Search request to get the next part of the search response. </summary>
+
+        /// <summary> Continuation JSON payload returned when the query can't return all the requested results in a single response. You can use this JSON along with. </summary>
         public SearchOptions NextPageParameters { get; }
+
         /// <summary> The sequence of results returned by the query. </summary>
         public IReadOnlyList<SearchResult> Results { get; }
+
         /// <summary> Continuation URL returned when the query can't return all the requested results in a single response. You can use this URL to formulate another GET or POST Search request to get the next part of the search response. Make sure to use the same verb (GET or POST) as the request that produced this response. </summary>
         public string NextLink { get; }
+
         /// <summary> Reason that a partial response was returned for a semantic ranking request. </summary>
         public SemanticErrorReason? SemanticPartialResponseReason { get; }
+
         /// <summary> Type of partial response that was returned for a semantic ranking request. </summary>
         public SemanticSearchResultsType? SemanticPartialResponseType { get; }
+
         /// <summary> Type of query rewrite that was used to retrieve documents. </summary>
         public SemanticQueryRewritesResultType? SemanticQueryRewritesResultType { get; }
     }

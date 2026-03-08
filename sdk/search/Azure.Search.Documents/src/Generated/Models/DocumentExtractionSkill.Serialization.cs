@@ -5,196 +5,228 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class DocumentExtractionSkill : IUtf8JsonSerializable
+    /// <summary> A skill that extracts content from a file within the enrichment pipeline. </summary>
+    public partial class DocumentExtractionSkill : SearchIndexerSkill, IJsonModel<DocumentExtractionSkill>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="DocumentExtractionSkill"/> for deserialization. </summary>
+        internal DocumentExtractionSkill()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<DocumentExtractionSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeDocumentExtractionSkill(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(DocumentExtractionSkill)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<DocumentExtractionSkill>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(DocumentExtractionSkill)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<DocumentExtractionSkill>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        DocumentExtractionSkill IPersistableModel<DocumentExtractionSkill>.Create(BinaryData data, ModelReaderWriterOptions options) => (DocumentExtractionSkill)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<DocumentExtractionSkill>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<DocumentExtractionSkill>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(ParsingMode))
-            {
-                if (ParsingMode != null)
-                {
-                    writer.WritePropertyName("parsingMode"u8);
-                    writer.WriteStringValue(ParsingMode.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("parsingMode");
-                }
-            }
-            if (Optional.IsDefined(DataToExtract))
-            {
-                if (DataToExtract != null)
-                {
-                    writer.WritePropertyName("dataToExtract"u8);
-                    writer.WriteStringValue(DataToExtract.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("dataToExtract");
-                }
-            }
-            if (Optional.IsCollectionDefined(Configuration))
-            {
-                if (Configuration != null)
-                {
-                    writer.WritePropertyName("configuration"u8);
-                    writer.WriteStartObject();
-                    foreach (var item in Configuration)
-                    {
-                        writer.WritePropertyName(item.Key);
-                        if (item.Value == null)
-                        {
-                            writer.WriteNullValue();
-                            continue;
-                        }
-                        writer.WriteObjectValue<object>(item.Value);
-                    }
-                    writer.WriteEndObject();
-                }
-                else
-                {
-                    writer.WriteNull("configuration");
-                }
-            }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            if (Optional.IsDefined(Name))
-            {
-                writer.WritePropertyName("name"u8);
-                writer.WriteStringValue(Name);
-            }
-            if (Optional.IsDefined(Description))
-            {
-                writer.WritePropertyName("description"u8);
-                writer.WriteStringValue(Description);
-            }
-            if (Optional.IsDefined(Context))
-            {
-                writer.WritePropertyName("context"u8);
-                writer.WriteStringValue(Context);
-            }
-            writer.WritePropertyName("inputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Inputs)
-            {
-                writer.WriteObjectValue<InputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
-            writer.WritePropertyName("outputs"u8);
-            writer.WriteStartArray();
-            foreach (var item in Outputs)
-            {
-                writer.WriteObjectValue<OutputFieldMappingEntry>(item);
-            }
-            writer.WriteEndArray();
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static DocumentExtractionSkill DeserializeDocumentExtractionSkill(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<DocumentExtractionSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DocumentExtractionSkill)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            if (Optional.IsDefined(ParsingMode))
+            {
+                writer.WritePropertyName("parsingMode"u8);
+                writer.WriteStringValue(ParsingMode.Value.ToString());
+            }
+            if (Optional.IsDefined(DataToExtract))
+            {
+                writer.WritePropertyName("dataToExtract"u8);
+                writer.WriteStringValue(DataToExtract.Value.ToString());
+            }
+            if (Optional.IsCollectionDefined(Configuration))
+            {
+                writer.WritePropertyName("configuration"u8);
+                writer.WriteStartObject();
+                foreach (var item in Configuration)
+                {
+                    writer.WritePropertyName(item.Key);
+                    if (item.Value == null)
+                    {
+                        writer.WriteNullValue();
+                        continue;
+                    }
+                    writer.WriteObjectValue<object>(item.Value, options);
+                }
+                writer.WriteEndObject();
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        DocumentExtractionSkill IJsonModel<DocumentExtractionSkill>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (DocumentExtractionSkill)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override SearchIndexerSkill JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<DocumentExtractionSkill>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DocumentExtractionSkill)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeDocumentExtractionSkill(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static DocumentExtractionSkill DeserializeDocumentExtractionSkill(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            BlobIndexerParsingMode? parsingMode = default;
-            BlobIndexerDataToExtract? dataToExtract = default;
-            IDictionary<string, object> configuration = default;
-            string odataType = default;
+            string odataType = "#Microsoft.Skills.Util.DocumentExtractionSkill";
             string name = default;
             string description = default;
             string context = default;
             IList<InputFieldMappingEntry> inputs = default;
             IList<OutputFieldMappingEntry> outputs = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            BlobIndexerParsingMode? parsingMode = default;
+            BlobIndexerDataToExtract? dataToExtract = default;
+            IDictionary<string, object> configuration = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("parsingMode"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        parsingMode = null;
-                        continue;
-                    }
-                    parsingMode = new BlobIndexerParsingMode(property.Value.GetString());
+                    odataType = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("dataToExtract"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        dataToExtract = null;
-                        continue;
-                    }
-                    dataToExtract = new BlobIndexerDataToExtract(property.Value.GetString());
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("configuration"u8))
+                if (prop.NameEquals("description"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    description = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("context"u8))
+                {
+                    context = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("inputs"u8))
+                {
+                    List<InputFieldMappingEntry> array = new List<InputFieldMappingEntry>();
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        configuration = null;
+                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item, options));
+                    }
+                    inputs = array;
+                    continue;
+                }
+                if (prop.NameEquals("outputs"u8))
+                {
+                    List<OutputFieldMappingEntry> array = new List<OutputFieldMappingEntry>();
+                    foreach (var item in prop.Value.EnumerateArray())
+                    {
+                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item, options));
+                    }
+                    outputs = array;
+                    continue;
+                }
+                if (prop.NameEquals("parsingMode"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    parsingMode = new BlobIndexerParsingMode(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("dataToExtract"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    dataToExtract = new BlobIndexerDataToExtract(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("configuration"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
                         continue;
                     }
                     Dictionary<string, object> dictionary = new Dictionary<string, object>();
-                    foreach (var property0 in property.Value.EnumerateObject())
+                    foreach (var prop0 in prop.Value.EnumerateObject())
                     {
-                        if (property0.Value.ValueKind == JsonValueKind.Null)
+                        if (prop0.Value.ValueKind == JsonValueKind.Null)
                         {
-                            dictionary.Add(property0.Name, null);
+                            dictionary.Add(prop0.Name, null);
                         }
                         else
                         {
-                            dictionary.Add(property0.Name, property0.Value.GetObject());
+                            dictionary.Add(prop0.Name, prop0.Value.GetObject());
                         }
                     }
                     configuration = dictionary;
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (options.Format != "W")
                 {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("description"u8))
-                {
-                    description = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("context"u8))
-                {
-                    context = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("inputs"u8))
-                {
-                    List<InputFieldMappingEntry> array = new List<InputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
-                    {
-                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item));
-                    }
-                    inputs = array;
-                    continue;
-                }
-                if (property.NameEquals("outputs"u8))
-                {
-                    List<OutputFieldMappingEntry> array = new List<OutputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
-                    {
-                        array.Add(OutputFieldMappingEntry.DeserializeOutputFieldMappingEntry(item));
-                    }
-                    outputs = array;
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
             return new DocumentExtractionSkill(
@@ -204,25 +236,10 @@ namespace Azure.Search.Documents.Indexes.Models
                 context,
                 inputs,
                 outputs,
+                additionalBinaryDataProperties,
                 parsingMode,
                 dataToExtract,
                 configuration ?? new ChangeTrackingDictionary<string, object>());
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new DocumentExtractionSkill FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeDocumentExtractionSkill(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
         }
     }
 }

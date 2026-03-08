@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Contains configuration options related to vector search. </summary>
     public partial class VectorSearch
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="VectorSearch"/>. </summary>
         public VectorSearch()
         {
@@ -23,48 +28,29 @@ namespace Azure.Search.Documents.Indexes.Models
 
         /// <summary> Initializes a new instance of <see cref="VectorSearch"/>. </summary>
         /// <param name="profiles"> Defines combinations of configurations to use with vector search. </param>
-        /// <param name="algorithms">
-        /// Contains configuration options specific to the algorithm used during indexing or querying.
-        /// Please note <see cref="VectorSearchAlgorithmConfiguration"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="ExhaustiveKnnAlgorithmConfiguration"/> and <see cref="HnswAlgorithmConfiguration"/>.
-        /// </param>
-        /// <param name="vectorizers">
-        /// Contains configuration options on how to vectorize text vector queries.
-        /// Please note <see cref="VectorSearchVectorizer"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="AIServicesVisionVectorizer"/>, <see cref="AzureMachineLearningVectorizer"/>, <see cref="AzureOpenAIVectorizer"/> and <see cref="WebApiVectorizer"/>.
-        /// </param>
-        /// <param name="compressions">
-        /// Contains configuration options specific to the compression method used during indexing or querying.
-        /// Please note <see cref="VectorSearchCompression"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="BinaryQuantizationCompression"/> and <see cref="ScalarQuantizationCompression"/>.
-        /// </param>
-        internal VectorSearch(IList<VectorSearchProfile> profiles, IList<VectorSearchAlgorithmConfiguration> algorithms, IList<VectorSearchVectorizer> vectorizers, IList<VectorSearchCompression> compressions)
+        /// <param name="algorithms"> Contains configuration options specific to the algorithm used during indexing or querying. </param>
+        /// <param name="vectorizers"> Contains configuration options on how to vectorize text vector queries. </param>
+        /// <param name="compressions"> Contains configuration options specific to the compression method used during indexing or querying. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal VectorSearch(IList<VectorSearchProfile> profiles, IList<VectorSearchAlgorithmConfiguration> algorithms, IList<VectorSearchVectorizer> vectorizers, IList<VectorSearchCompression> compressions, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Profiles = profiles;
             Algorithms = algorithms;
             Vectorizers = vectorizers;
             Compressions = compressions;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Defines combinations of configurations to use with vector search. </summary>
         public IList<VectorSearchProfile> Profiles { get; }
-        /// <summary>
-        /// Contains configuration options specific to the algorithm used during indexing or querying.
-        /// Please note <see cref="VectorSearchAlgorithmConfiguration"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="ExhaustiveKnnAlgorithmConfiguration"/> and <see cref="HnswAlgorithmConfiguration"/>.
-        /// </summary>
+
+        /// <summary> Contains configuration options specific to the algorithm used during indexing or querying. </summary>
         public IList<VectorSearchAlgorithmConfiguration> Algorithms { get; }
-        /// <summary>
-        /// Contains configuration options on how to vectorize text vector queries.
-        /// Please note <see cref="VectorSearchVectorizer"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="AIServicesVisionVectorizer"/>, <see cref="AzureMachineLearningVectorizer"/>, <see cref="AzureOpenAIVectorizer"/> and <see cref="WebApiVectorizer"/>.
-        /// </summary>
+
+        /// <summary> Contains configuration options on how to vectorize text vector queries. </summary>
         public IList<VectorSearchVectorizer> Vectorizers { get; }
-        /// <summary>
-        /// Contains configuration options specific to the compression method used during indexing or querying.
-        /// Please note <see cref="VectorSearchCompression"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="BinaryQuantizationCompression"/> and <see cref="ScalarQuantizationCompression"/>.
-        /// </summary>
+
+        /// <summary> Contains configuration options specific to the compression method used during indexing or querying. </summary>
         public IList<VectorSearchCompression> Compressions { get; }
     }
 }

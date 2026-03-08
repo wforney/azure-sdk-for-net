@@ -5,76 +5,144 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class AIServicesVisionVectorizer : IUtf8JsonSerializable
+    /// <summary> Clears the identity property of a datasource. </summary>
+    public partial class AIServicesVisionVectorizer : VectorSearchVectorizer, IJsonModel<AIServicesVisionVectorizer>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="AIServicesVisionVectorizer"/> for deserialization. </summary>
+        internal AIServicesVisionVectorizer()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override VectorSearchVectorizer PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesVisionVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAIServicesVisionVectorizer(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AIServicesVisionVectorizer)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesVisionVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AIServicesVisionVectorizer)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AIServicesVisionVectorizer>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AIServicesVisionVectorizer IPersistableModel<AIServicesVisionVectorizer>.Create(BinaryData data, ModelReaderWriterOptions options) => (AIServicesVisionVectorizer)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AIServicesVisionVectorizer>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AIServicesVisionVectorizer>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(AIServicesVisionParameters))
-            {
-                writer.WritePropertyName("aiServicesVisionParameters"u8);
-                writer.WriteObjectValue(AIServicesVisionParameters);
-            }
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(VectorizerName);
-            writer.WritePropertyName("kind"u8);
-            writer.WriteStringValue(Kind.ToString());
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static AIServicesVisionVectorizer DeserializeAIServicesVisionVectorizer(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesVisionVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AIServicesVisionVectorizer)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            if (Optional.IsDefined(AiServicesVisionParameters))
+            {
+                writer.WritePropertyName("aiServicesVisionParameters"u8);
+                writer.WriteObjectValue(AiServicesVisionParameters, options);
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AIServicesVisionVectorizer IJsonModel<AIServicesVisionVectorizer>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (AIServicesVisionVectorizer)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override VectorSearchVectorizer JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesVisionVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AIServicesVisionVectorizer)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAIServicesVisionVectorizer(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AIServicesVisionVectorizer DeserializeAIServicesVisionVectorizer(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            AIServicesVisionParameters aiServicesVisionParameters = default;
-            string name = default;
+            string vectorizerName = default;
             VectorSearchVectorizerKind kind = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            AIServicesVisionParameters aiServicesVisionParameters = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("aiServicesVisionParameters"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    vectorizerName = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("kind"u8))
+                {
+                    kind = new VectorSearchVectorizerKind(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("aiServicesVisionParameters"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    aiServicesVisionParameters = AIServicesVisionParameters.DeserializeAIServicesVisionParameters(property.Value);
+                    aiServicesVisionParameters = AIServicesVisionParameters.DeserializeAIServicesVisionParameters(prop.Value, options);
                     continue;
                 }
-                if (property.NameEquals("name"u8))
+                if (options.Format != "W")
                 {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("kind"u8))
-                {
-                    kind = new VectorSearchVectorizerKind(property.Value.GetString());
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new AIServicesVisionVectorizer(name, kind, aiServicesVisionParameters);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new AIServicesVisionVectorizer FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeAIServicesVisionVectorizer(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new AIServicesVisionVectorizer(vectorizerName, kind, additionalBinaryDataProperties, aiServicesVisionParameters);
         }
     }
 }

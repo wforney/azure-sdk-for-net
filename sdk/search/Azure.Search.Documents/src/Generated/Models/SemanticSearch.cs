@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Defines parameters for a search index that influence semantic capabilities. </summary>
     public partial class SemanticSearch
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SemanticSearch"/>. </summary>
         public SemanticSearch()
         {
@@ -21,14 +26,17 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="SemanticSearch"/>. </summary>
         /// <param name="defaultConfigurationName"> Allows you to set the name of a default semantic configuration in your index, making it optional to pass it on as a query parameter every time. </param>
         /// <param name="configurations"> The semantic configurations for the index. </param>
-        internal SemanticSearch(string defaultConfigurationName, IList<SemanticConfiguration> configurations)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SemanticSearch(string defaultConfigurationName, IList<SemanticConfiguration> configurations, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             DefaultConfigurationName = defaultConfigurationName;
             Configurations = configurations;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> Allows you to set the name of a default semantic configuration in your index, making it optional to pass it on as a query parameter every time. </summary>
         public string DefaultConfigurationName { get; set; }
+
         /// <summary> The semantic configurations for the index. </summary>
         public IList<SemanticConfiguration> Configurations { get; }
     }

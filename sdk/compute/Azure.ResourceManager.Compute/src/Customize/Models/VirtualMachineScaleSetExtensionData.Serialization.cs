@@ -7,6 +7,7 @@ using System;
 using System.ClientModel.Primitives;
 using System.Text.Json;
 using Azure.Core;
+using Azure.ResourceManager.Models;
 
 namespace Azure.ResourceManager.Compute
 {
@@ -41,7 +42,7 @@ namespace Azure.ResourceManager.Compute
             if (options.Format != "W" && Optional.IsDefined(SystemData))
             {
                 writer.WritePropertyName("systemData"u8);
-                JsonSerializer.Serialize(writer, SystemData);
+                ((IJsonModel<SystemData>)SystemData).Write(writer, options);
             }
             writer.WritePropertyName("properties"u8);
             writer.WriteStartObject();
@@ -79,7 +80,7 @@ namespace Azure.ResourceManager.Compute
             {
                 writer.WritePropertyName("settings"u8);
 #if NET6_0_OR_GREATER
-				writer.WriteRawValue(Settings);
+                writer.WriteRawValue(Settings);
 #else
                 using (JsonDocument document = JsonDocument.Parse(Settings))
                 {
@@ -91,7 +92,7 @@ namespace Azure.ResourceManager.Compute
             {
                 writer.WritePropertyName("protectedSettings"u8);
 #if NET6_0_OR_GREATER
-				writer.WriteRawValue(ProtectedSettings);
+                writer.WriteRawValue(ProtectedSettings);
 #else
                 using (JsonDocument document = JsonDocument.Parse(ProtectedSettings))
                 {
@@ -131,7 +132,7 @@ namespace Azure.ResourceManager.Compute
                 {
                     writer.WritePropertyName(item.Key);
 #if NET6_0_OR_GREATER
-				writer.WriteRawValue(item.Value);
+                    writer.WriteRawValue(item.Value);
 #else
                     using (JsonDocument document = JsonDocument.Parse(item.Value))
                     {

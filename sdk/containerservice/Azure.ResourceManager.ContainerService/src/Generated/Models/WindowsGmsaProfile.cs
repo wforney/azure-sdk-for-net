@@ -51,7 +51,7 @@ namespace Azure.ResourceManager.ContainerService.Models
         }
 
         /// <summary> Initializes a new instance of <see cref="WindowsGmsaProfile"/>. </summary>
-        /// <param name="isEnabled"> Specifies whether to enable Windows gMSA in the managed cluster. </param>
+        /// <param name="isEnabled"> Whether to enable Windows gMSA. Specifies whether to enable Windows gMSA in the managed cluster. </param>
         /// <param name="dnsServer"> Specifies the DNS server for Windows gMSA. &lt;br&gt;&lt;br&gt; Set it to empty if you have configured the DNS server in the vnet which is used to create the managed cluster. </param>
         /// <param name="rootDomainName"> Specifies the root domain name for Windows gMSA. &lt;br&gt;&lt;br&gt; Set it to empty if you have configured the DNS server in the vnet which is used to create the managed cluster. </param>
         /// <param name="serializedAdditionalRawData"> Keeps track of any properties unknown to the library. </param>
@@ -63,7 +63,7 @@ namespace Azure.ResourceManager.ContainerService.Models
             _serializedAdditionalRawData = serializedAdditionalRawData;
         }
 
-        /// <summary> Specifies whether to enable Windows gMSA in the managed cluster. </summary>
+        /// <summary> Whether to enable Windows gMSA. Specifies whether to enable Windows gMSA in the managed cluster. </summary>
         [WirePath("enabled")]
         public bool? IsEnabled { get; set; }
         /// <summary> Specifies the DNS server for Windows gMSA. &lt;br&gt;&lt;br&gt; Set it to empty if you have configured the DNS server in the vnet which is used to create the managed cluster. </summary>

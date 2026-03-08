@@ -96,6 +96,7 @@ namespace Azure.Identity
             AdditionallyAllowedTenantIds = TenantIdResolver.ResolveAddionallyAllowedTenantIds((options as ISupportsAdditionallyAllowedTenants)?.AdditionallyAllowedTenants);
             Record = (options as InteractiveBrowserCredentialOptions)?.AuthenticationRecord;
             BrowserCustomization = (options as InteractiveBrowserCredentialOptions)?.BrowserCustomization;
+            DisableAutomaticAuthentication = (options as InteractiveBrowserCredentialOptions)?.DisableAutomaticAuthentication ?? false;
             UseOperatingSystemAccount = (options as IMsalPublicClientInitializerOptions)?.UseDefaultBrokerAccount ?? false;
             IsChainedCredential = options?.IsChainedCredential ?? false;
         }
@@ -245,7 +246,7 @@ namespace Azure.Identity
                     }
                     catch (MsalUiRequiredException e)
                     {
-                        if (UseOperatingSystemAccount && IsChainedCredential)
+                        if ((UseOperatingSystemAccount && IsChainedCredential) || (Record is not null && IsChainedCredential))
                         {
                             throw;
                         }

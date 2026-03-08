@@ -5,19 +5,19 @@
 
 #nullable disable
 
-using Azure.Search.Documents.Indexes.Models;
+using System;
+using System.Collections.Generic;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Unknown version of CharFilter. </summary>
     internal partial class UnknownCharFilter : CharFilter
     {
         /// <summary> Initializes a new instance of <see cref="UnknownCharFilter"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of char filter. </param>
+        /// <param name="odataType"> The discriminator for derived types. </param>
         /// <param name="name"> The name of the char filter. It must only contain letters, digits, spaces, dashes or underscores, can only start and end with alphanumeric characters, and is limited to 128 characters. </param>
-        internal UnknownCharFilter(string oDataType, string name) : base(oDataType, name)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal UnknownCharFilter(string odataType, string name, IDictionary<string, BinaryData> additionalBinaryDataProperties) : base(odataType ?? "unknown", name, additionalBinaryDataProperties)
         {
-            ODataType = oDataType ?? "Unknown";
         }
     }
 }

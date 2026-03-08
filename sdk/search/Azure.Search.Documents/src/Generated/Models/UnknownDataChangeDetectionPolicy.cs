@@ -5,18 +5,18 @@
 
 #nullable disable
 
-using Azure.Search.Documents.Indexes.Models;
+using System;
+using System.Collections.Generic;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Unknown version of DataChangeDetectionPolicy. </summary>
     internal partial class UnknownDataChangeDetectionPolicy : DataChangeDetectionPolicy
     {
         /// <summary> Initializes a new instance of <see cref="UnknownDataChangeDetectionPolicy"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of data change detection policy. </param>
-        internal UnknownDataChangeDetectionPolicy(string oDataType) : base(oDataType)
+        /// <param name="odataType"> The discriminator for derived types. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal UnknownDataChangeDetectionPolicy(string odataType, IDictionary<string, BinaryData> additionalBinaryDataProperties) : base(odataType ?? "unknown", additionalBinaryDataProperties)
         {
-            ODataType = oDataType ?? "Unknown";
         }
     }
 }

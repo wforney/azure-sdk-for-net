@@ -8,6 +8,7 @@
 using System;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager.Resources.Models;
@@ -97,7 +98,7 @@ namespace Azure.ResourceManager.Batch.Models
             if (Optional.IsDefined(ServiceArtifactReference))
             {
                 writer.WritePropertyName("serviceArtifactReference"u8);
-                JsonSerializer.Serialize(writer, ServiceArtifactReference);
+                ((IJsonModel<WritableSubResource>)ServiceArtifactReference).Write(writer, options);
             }
             if (options.Format != "W" && _serializedAdditionalRawData != null)
             {
@@ -142,7 +143,7 @@ namespace Azure.ResourceManager.Batch.Models
             IList<BatchVmDataDisk> dataDisks = default;
             string licenseType = default;
             BatchVmContainerConfiguration containerConfiguration = default;
-            DiskEncryptionConfiguration diskEncryptionConfiguration = default;
+            BatchDiskEncryptionConfiguration diskEncryptionConfiguration = default;
             NodePlacementConfiguration nodePlacementConfiguration = default;
             IList<BatchVmExtension> extensions = default;
             BatchOSDisk osDisk = default;
@@ -205,7 +206,7 @@ namespace Azure.ResourceManager.Batch.Models
                     {
                         continue;
                     }
-                    diskEncryptionConfiguration = DiskEncryptionConfiguration.DeserializeDiskEncryptionConfiguration(property.Value, options);
+                    diskEncryptionConfiguration = BatchDiskEncryptionConfiguration.DeserializeBatchDiskEncryptionConfiguration(property.Value, options);
                     continue;
                 }
                 if (property.NameEquals("nodePlacementConfiguration"u8))
@@ -255,7 +256,7 @@ namespace Azure.ResourceManager.Batch.Models
                     {
                         continue;
                     }
-                    serviceArtifactReference = JsonSerializer.Deserialize<WritableSubResource>(property.Value.GetRawText());
+                    serviceArtifactReference = ModelReaderWriter.Read<WritableSubResource>(new BinaryData(Encoding.UTF8.GetBytes(property.Value.GetRawText())), options, AzureResourceManagerBatchContext.Default);
                     continue;
                 }
                 if (options.Format != "W")

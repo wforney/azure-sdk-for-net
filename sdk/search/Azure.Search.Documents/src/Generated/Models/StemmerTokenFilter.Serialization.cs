@@ -5,69 +5,137 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class StemmerTokenFilter : IUtf8JsonSerializable
+    /// <summary> Language specific stemming filter. This token filter is implemented using Apache Lucene. See https://learn.microsoft.com/rest/api/searchservice/Custom-analyzers-in-Azure-Search#TokenFilters. </summary>
+    public partial class StemmerTokenFilter : TokenFilter, IJsonModel<StemmerTokenFilter>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="StemmerTokenFilter"/> for deserialization. </summary>
+        internal StemmerTokenFilter()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<StemmerTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeStemmerTokenFilter(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(StemmerTokenFilter)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<StemmerTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(StemmerTokenFilter)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<StemmerTokenFilter>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        StemmerTokenFilter IPersistableModel<StemmerTokenFilter>.Create(BinaryData data, ModelReaderWriterOptions options) => (StemmerTokenFilter)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<StemmerTokenFilter>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<StemmerTokenFilter>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            writer.WritePropertyName("language"u8);
-            writer.WriteStringValue(Language.ToSerialString());
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(Name);
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static StemmerTokenFilter DeserializeStemmerTokenFilter(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<StemmerTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(StemmerTokenFilter)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            writer.WritePropertyName("language"u8);
+            writer.WriteStringValue(Language.ToSerialString());
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        StemmerTokenFilter IJsonModel<StemmerTokenFilter>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (StemmerTokenFilter)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<StemmerTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(StemmerTokenFilter)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeStemmerTokenFilter(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static StemmerTokenFilter DeserializeStemmerTokenFilter(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            StemmerTokenFilterLanguage language = default;
-            string odataType = default;
+            string odataType = "#Microsoft.Azure.Search.StemmerTokenFilter";
             string name = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            StemmerTokenFilterLanguage language = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("language"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    language = property.Value.GetString().ToStemmerTokenFilterLanguage();
+                    odataType = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    odataType = property.Value.GetString();
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("name"u8))
+                if (prop.NameEquals("language"u8))
                 {
-                    name = property.Value.GetString();
+                    language = prop.Value.GetString().ToStemmerTokenFilterLanguage();
                     continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new StemmerTokenFilter(odataType, name, language);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new StemmerTokenFilter FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeStemmerTokenFilter(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new StemmerTokenFilter(odataType, name, additionalBinaryDataProperties, language);
         }
     }
 }

@@ -7,12 +7,16 @@
 
 using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Defines parameters for a search index that influence scoring in search queries. </summary>
     public partial class ScoringProfile
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ScoringProfile"/>. </summary>
         /// <param name="name"> The name of the scoring profile. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
@@ -27,24 +31,27 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="ScoringProfile"/>. </summary>
         /// <param name="name"> The name of the scoring profile. </param>
         /// <param name="textWeights"> Parameters that boost scoring based on text matches in certain index fields. </param>
-        /// <param name="functions">
-        /// The collection of functions that influence the scoring of documents.
-        /// Please note <see cref="ScoringFunction"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="DistanceScoringFunction"/>, <see cref="FreshnessScoringFunction"/>, <see cref="MagnitudeScoringFunction"/> and <see cref="TagScoringFunction"/>.
-        /// </param>
+        /// <param name="functions"> The collection of functions that influence the scoring of documents. </param>
         /// <param name="functionAggregation"> A value indicating how the results of individual scoring functions should be combined. Defaults to "Sum". Ignored if there are no scoring functions. </param>
-        internal ScoringProfile(string name, TextWeights textWeights, IList<ScoringFunction> functions, ScoringFunctionAggregation? functionAggregation)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ScoringProfile(string name, TextWeights textWeights, IList<ScoringFunction> functions, ScoringFunctionAggregation? functionAggregation, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Name = name;
             TextWeights = textWeights;
             Functions = functions;
             FunctionAggregation = functionAggregation;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the scoring profile. </summary>
         public string Name { get; set; }
+
         /// <summary> Parameters that boost scoring based on text matches in certain index fields. </summary>
         public TextWeights TextWeights { get; set; }
+
+        /// <summary> The collection of functions that influence the scoring of documents. </summary>
+        public IList<ScoringFunction> Functions { get; }
+
         /// <summary> A value indicating how the results of individual scoring functions should be combined. Defaults to "Sum". Ignored if there are no scoring functions. </summary>
         public ScoringFunctionAggregation? FunctionAggregation { get; set; }
     }

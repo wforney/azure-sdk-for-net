@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Contains the parameters specific to exhaustive KNN algorithm. </summary>
     public partial class ExhaustiveKnnParameters
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ExhaustiveKnnParameters"/>. </summary>
         public ExhaustiveKnnParameters()
         {
@@ -17,9 +23,11 @@ namespace Azure.Search.Documents.Indexes.Models
 
         /// <summary> Initializes a new instance of <see cref="ExhaustiveKnnParameters"/>. </summary>
         /// <param name="metric"> The similarity metric to use for vector comparisons. </param>
-        internal ExhaustiveKnnParameters(VectorSearchAlgorithmMetric? metric)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ExhaustiveKnnParameters(VectorSearchAlgorithmMetric? metric, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Metric = metric;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The similarity metric to use for vector comparisons. </summary>

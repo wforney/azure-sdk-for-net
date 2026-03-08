@@ -7,22 +7,26 @@
 
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Defines how the Suggest API should apply to a group of fields in the index. </summary>
     public partial class SearchSuggester
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchSuggester"/>. </summary>
         /// <param name="name"> The name of the suggester. </param>
         /// <param name="searchMode"> A value indicating the capabilities of the suggester. </param>
         /// <param name="sourceFields"> The list of field names to which the suggester applies. Each field must be searchable. </param>
-        internal SearchSuggester(string name, string searchMode, IList<string> sourceFields)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchSuggester(string name, string searchMode, IList<string> sourceFields, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Name = name;
             SearchMode = searchMode;
             SourceFields = sourceFields;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the suggester. </summary>

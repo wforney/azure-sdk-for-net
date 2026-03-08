@@ -7,20 +7,27 @@ using System;
 
 namespace Azure.Generator.Management.Providers
 {
+    // TODO: Replace with SystemObjectModelProvider from MTG once it fully supports
+    // inheritable system object models. This class and InheritableSystemObjectModelVisitor
+    // should be cleaned up together.
     internal class InheritableSystemObjectModelProvider : ModelProvider
     {
         internal readonly Type _type;
-
         public InheritableSystemObjectModelProvider(Type type, InputModelType inputModel) : base(inputModel)
         {
             _type = type;
+            CrossLanguageDefinitionId = inputModel.CrossLanguageDefinitionId;
         }
 
-        protected override string BuildName() => _type.Name;
+        internal string CrossLanguageDefinitionId { get; }
+
+        protected override string BuildName() => _type?.Name ?? string.Empty;
 
         protected override string BuildRelativeFilePath()
             => throw new InvalidOperationException("This type should not be writing in generation");
 
-        protected override string BuildNamespace() => _type.Namespace!;
+        // _type may be null when called from base constructor before field assignment.
+        // The visitor's UpdateNamespace corrects this to _type.Namespace after construction.
+        protected override string BuildNamespace() => _type?.Namespace ?? string.Empty;
     }
 }

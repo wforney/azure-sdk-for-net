@@ -5,76 +5,144 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class AzureMachineLearningVectorizer : IUtf8JsonSerializable
+    /// <summary> Specifies an Azure Machine Learning endpoint deployed via the Azure AI Foundry Model Catalog for generating the vector embedding of a query string. </summary>
+    public partial class AzureMachineLearningVectorizer : VectorSearchVectorizer, IJsonModel<AzureMachineLearningVectorizer>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="AzureMachineLearningVectorizer"/> for deserialization. </summary>
+        internal AzureMachineLearningVectorizer()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override VectorSearchVectorizer PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureMachineLearningVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAzureMachineLearningVectorizer(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AzureMachineLearningVectorizer)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureMachineLearningVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AzureMachineLearningVectorizer)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AzureMachineLearningVectorizer>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureMachineLearningVectorizer IPersistableModel<AzureMachineLearningVectorizer>.Create(BinaryData data, ModelReaderWriterOptions options) => (AzureMachineLearningVectorizer)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AzureMachineLearningVectorizer>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AzureMachineLearningVectorizer>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(AMLParameters))
-            {
-                writer.WritePropertyName("amlParameters"u8);
-                writer.WriteObjectValue(AMLParameters);
-            }
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(VectorizerName);
-            writer.WritePropertyName("kind"u8);
-            writer.WriteStringValue(Kind.ToString());
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static AzureMachineLearningVectorizer DeserializeAzureMachineLearningVectorizer(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureMachineLearningVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureMachineLearningVectorizer)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            if (Optional.IsDefined(AMLParameters))
+            {
+                writer.WritePropertyName("amlParameters"u8);
+                writer.WriteObjectValue(AMLParameters, options);
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureMachineLearningVectorizer IJsonModel<AzureMachineLearningVectorizer>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (AzureMachineLearningVectorizer)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override VectorSearchVectorizer JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureMachineLearningVectorizer>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureMachineLearningVectorizer)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAzureMachineLearningVectorizer(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AzureMachineLearningVectorizer DeserializeAzureMachineLearningVectorizer(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
-            AzureMachineLearningParameters amlParameters = default;
-            string name = default;
+            string vectorizerName = default;
             VectorSearchVectorizerKind kind = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            AzureMachineLearningParameters amlParameters = default;
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("amlParameters"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    vectorizerName = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("kind"u8))
+                {
+                    kind = new VectorSearchVectorizerKind(prop.Value.GetString());
+                    continue;
+                }
+                if (prop.NameEquals("amlParameters"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    amlParameters = AzureMachineLearningParameters.DeserializeAzureMachineLearningParameters(property.Value);
+                    amlParameters = AzureMachineLearningParameters.DeserializeAzureMachineLearningParameters(prop.Value, options);
                     continue;
                 }
-                if (property.NameEquals("name"u8))
+                if (options.Format != "W")
                 {
-                    name = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("kind"u8))
-                {
-                    kind = new VectorSearchVectorizerKind(property.Value.GetString());
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new AzureMachineLearningVectorizer(name, kind, amlParameters);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new AzureMachineLearningVectorizer FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeAzureMachineLearningVectorizer(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new AzureMachineLearningVectorizer(vectorizerName, kind, additionalBinaryDataProperties, amlParameters);
         }
     }
 }

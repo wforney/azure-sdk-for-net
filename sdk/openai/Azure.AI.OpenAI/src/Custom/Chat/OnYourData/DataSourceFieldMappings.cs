@@ -14,7 +14,7 @@ public partial class DataSourceFieldMappings
     /// The name of the index field to use as a title.
     /// </summary>
     [CodeGenMember("TitleField")]
-    public string TitleFieldName { get; set;}
+    public string TitleFieldName { get; set; }
 
     /// <summary>
     /// The name of the index field to use as a URL.
@@ -27,7 +27,7 @@ public partial class DataSourceFieldMappings
     /// </para>
     /// </remarks>
     [CodeGenMember("UrlField")]
-    public string UrlFieldName { get; set;}
+    public string UrlFieldName { get; set; }
 
     /// <summary> The name of the index field to use as a filepath. </summary>
     /// <remarks>
@@ -49,7 +49,7 @@ public partial class DataSourceFieldMappings
     /// </para>
     /// </remarks>
     [CodeGenMember("ContentFields")]
-    public IList<string> ContentFieldNames { get; } = new ChangeTrackingList<string>();
+    public IList<string> ContentFieldNames { get; }
 
     /// <summary> The separator pattern that content fields should use. </summary>
     /// <remarks>
@@ -60,7 +60,7 @@ public partial class DataSourceFieldMappings
     /// </para>
     /// </remarks>
     [CodeGenMember("ContentFieldsSeparator")]
-    public string ContentFieldSeparator { get; set;}
+    public string ContentFieldSeparator { get; set; }
 
     /// <summary> The names of fields that represent vector data. </summary>
     /// <remarks>
@@ -73,18 +73,12 @@ public partial class DataSourceFieldMappings
     /// </para>
     /// </remarks>
     [CodeGenMember("VectorFields")]
-    public IList<string> VectorFieldNames { get; } = new ChangeTrackingList<string>();
+    public IList<string> VectorFieldNames { get; }
 
     /// <summary> The names of fields that represent image vector data. </summary>
     /// <remarks>
     /// This configuration is only applicable to <see cref="AzureSearchChatDataSource"/>.
     /// </remarks>
     [CodeGenMember("ImageVectorFields")]
-    public IList<string> ImageVectorFieldNames { get; } = new ChangeTrackingList<string>();
-
-    /// <summary>
-    /// Initializes a new instance of <see cref="DataSourceFieldMappings"/>.
-    /// </summary>
-    public DataSourceFieldMappings()
-    {}
+    public IList<string> ImageVectorFieldNames { get; }
 }

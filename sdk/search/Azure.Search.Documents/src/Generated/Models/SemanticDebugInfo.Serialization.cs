@@ -5,14 +5,142 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
-    public partial class SemanticDebugInfo
+    /// <summary> Contains debugging information specific to semantic ranking requests. </summary>
+    public partial class SemanticDebugInfo : IJsonModel<SemanticDebugInfo>
     {
-        internal static SemanticDebugInfo DeserializeSemanticDebugInfo(JsonElement element)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual SemanticDebugInfo PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SemanticDebugInfo>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeSemanticDebugInfo(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(SemanticDebugInfo)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SemanticDebugInfo>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(SemanticDebugInfo)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<SemanticDebugInfo>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SemanticDebugInfo IPersistableModel<SemanticDebugInfo>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<SemanticDebugInfo>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<SemanticDebugInfo>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SemanticDebugInfo>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SemanticDebugInfo)} does not support writing '{format}' format.");
+            }
+            if (options.Format != "W" && Optional.IsDefined(TitleField))
+            {
+                writer.WritePropertyName("titleField"u8);
+                writer.WriteObjectValue(TitleField, options);
+            }
+            if (options.Format != "W" && Optional.IsCollectionDefined(ContentFields))
+            {
+                writer.WritePropertyName("contentFields"u8);
+                writer.WriteStartArray();
+                foreach (QueryResultDocumentSemanticField item in ContentFields)
+                {
+                    writer.WriteObjectValue(item, options);
+                }
+                writer.WriteEndArray();
+            }
+            if (options.Format != "W" && Optional.IsCollectionDefined(KeywordFields))
+            {
+                writer.WritePropertyName("keywordFields"u8);
+                writer.WriteStartArray();
+                foreach (QueryResultDocumentSemanticField item in KeywordFields)
+                {
+                    writer.WriteObjectValue(item, options);
+                }
+                writer.WriteEndArray();
+            }
+            if (options.Format != "W" && Optional.IsDefined(RerankerInput))
+            {
+                writer.WritePropertyName("rerankerInput"u8);
+                writer.WriteObjectValue(RerankerInput, options);
+            }
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        SemanticDebugInfo IJsonModel<SemanticDebugInfo>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual SemanticDebugInfo JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<SemanticDebugInfo>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(SemanticDebugInfo)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeSemanticDebugInfo(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static SemanticDebugInfo DeserializeSemanticDebugInfo(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -22,64 +150,61 @@ namespace Azure.Search.Documents.Models
             IReadOnlyList<QueryResultDocumentSemanticField> contentFields = default;
             IReadOnlyList<QueryResultDocumentSemanticField> keywordFields = default;
             QueryResultDocumentRerankerInput rerankerInput = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("titleField"u8))
+                if (prop.NameEquals("titleField"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    titleField = QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(property.Value);
+                    titleField = QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(prop.Value, options);
                     continue;
                 }
-                if (property.NameEquals("contentFields"u8))
+                if (prop.NameEquals("contentFields"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
                     List<QueryResultDocumentSemanticField> array = new List<QueryResultDocumentSemanticField>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(item));
+                        array.Add(QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(item, options));
                     }
                     contentFields = array;
                     continue;
                 }
-                if (property.NameEquals("keywordFields"u8))
+                if (prop.NameEquals("keywordFields"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
                     List<QueryResultDocumentSemanticField> array = new List<QueryResultDocumentSemanticField>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(item));
+                        array.Add(QueryResultDocumentSemanticField.DeserializeQueryResultDocumentSemanticField(item, options));
                     }
                     keywordFields = array;
                     continue;
                 }
-                if (property.NameEquals("rerankerInput"u8))
+                if (prop.NameEquals("rerankerInput"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    rerankerInput = QueryResultDocumentRerankerInput.DeserializeQueryResultDocumentRerankerInput(property.Value);
+                    rerankerInput = QueryResultDocumentRerankerInput.DeserializeQueryResultDocumentRerankerInput(prop.Value, options);
                     continue;
                 }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
+                }
             }
-            return new SemanticDebugInfo(titleField, contentFields ?? new ChangeTrackingList<QueryResultDocumentSemanticField>(), keywordFields ?? new ChangeTrackingList<QueryResultDocumentSemanticField>(), rerankerInput);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static SemanticDebugInfo FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeSemanticDebugInfo(document.RootElement);
+            return new SemanticDebugInfo(titleField, contentFields ?? new ChangeTrackingList<QueryResultDocumentSemanticField>(), keywordFields ?? new ChangeTrackingList<QueryResultDocumentSemanticField>(), rerankerInput, additionalBinaryDataProperties);
         }
     }
 }

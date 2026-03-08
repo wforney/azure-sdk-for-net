@@ -8,6 +8,7 @@
 using System;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager.Models;
@@ -149,7 +150,7 @@ namespace Azure.ResourceManager.Batch
                     {
                         continue;
                     }
-                    systemData = JsonSerializer.Deserialize<SystemData>(property.Value.GetRawText());
+                    systemData = ModelReaderWriter.Read<SystemData>(new BinaryData(Encoding.UTF8.GetBytes(property.Value.GetRawText())), ModelSerializationExtensions.WireOptions, AzureResourceManagerBatchContext.Default);
                     continue;
                 }
                 if (property.NameEquals("properties"u8))
@@ -194,11 +195,11 @@ namespace Azure.ResourceManager.Batch
                 name,
                 type,
                 systemData,
+                etag,
+                tags ?? new ChangeTrackingDictionary<string, string>(),
                 displayName,
                 allowUpdates,
                 defaultVersion,
-                etag,
-                tags ?? new ChangeTrackingDictionary<string, string>(),
                 serializedAdditionalRawData);
         }
 

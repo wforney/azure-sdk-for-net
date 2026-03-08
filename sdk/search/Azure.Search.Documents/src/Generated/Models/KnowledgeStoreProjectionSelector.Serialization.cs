@@ -5,17 +5,75 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class KnowledgeStoreProjectionSelector : IUtf8JsonSerializable
+    /// <summary> Abstract class to share properties between concrete selectors. </summary>
+    public partial class KnowledgeStoreProjectionSelector : IJsonModel<KnowledgeStoreProjectionSelector>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual KnowledgeStoreProjectionSelector PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<KnowledgeStoreProjectionSelector>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeKnowledgeStoreProjectionSelector(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(KnowledgeStoreProjectionSelector)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<KnowledgeStoreProjectionSelector>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(KnowledgeStoreProjectionSelector)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<KnowledgeStoreProjectionSelector>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        KnowledgeStoreProjectionSelector IPersistableModel<KnowledgeStoreProjectionSelector>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<KnowledgeStoreProjectionSelector>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<KnowledgeStoreProjectionSelector>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<KnowledgeStoreProjectionSelector>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(KnowledgeStoreProjectionSelector)} does not support writing '{format}' format.");
+            }
             if (Optional.IsDefined(ReferenceKeyName))
             {
                 writer.WritePropertyName("referenceKeyName"u8);
@@ -40,16 +98,49 @@ namespace Azure.Search.Documents.Indexes.Models
             {
                 writer.WritePropertyName("inputs"u8);
                 writer.WriteStartArray();
-                foreach (var item in Inputs)
+                foreach (InputFieldMappingEntry item in Inputs)
                 {
-                    writer.WriteObjectValue(item);
+                    writer.WriteObjectValue(item, options);
                 }
                 writer.WriteEndArray();
             }
-            writer.WriteEndObject();
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
         }
 
-        internal static KnowledgeStoreProjectionSelector DeserializeKnowledgeStoreProjectionSelector(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        KnowledgeStoreProjectionSelector IJsonModel<KnowledgeStoreProjectionSelector>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual KnowledgeStoreProjectionSelector JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<KnowledgeStoreProjectionSelector>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(KnowledgeStoreProjectionSelector)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeKnowledgeStoreProjectionSelector(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static KnowledgeStoreProjectionSelector DeserializeKnowledgeStoreProjectionSelector(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -60,60 +151,55 @@ namespace Azure.Search.Documents.Indexes.Models
             string source = default;
             string sourceContext = default;
             IList<InputFieldMappingEntry> inputs = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("referenceKeyName"u8))
+                if (prop.NameEquals("referenceKeyName"u8))
                 {
-                    referenceKeyName = property.Value.GetString();
+                    referenceKeyName = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("generatedKeyName"u8))
+                if (prop.NameEquals("generatedKeyName"u8))
                 {
-                    generatedKeyName = property.Value.GetString();
+                    generatedKeyName = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("source"u8))
+                if (prop.NameEquals("source"u8))
                 {
-                    source = property.Value.GetString();
+                    source = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("sourceContext"u8))
+                if (prop.NameEquals("sourceContext"u8))
                 {
-                    sourceContext = property.Value.GetString();
+                    sourceContext = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("inputs"u8))
+                if (prop.NameEquals("inputs"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
                     List<InputFieldMappingEntry> array = new List<InputFieldMappingEntry>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
-                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item));
+                        array.Add(InputFieldMappingEntry.DeserializeInputFieldMappingEntry(item, options));
                     }
                     inputs = array;
                     continue;
                 }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
+                }
             }
-            return new KnowledgeStoreProjectionSelector(referenceKeyName, generatedKeyName, source, sourceContext, inputs ?? new ChangeTrackingList<InputFieldMappingEntry>());
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static KnowledgeStoreProjectionSelector FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeKnowledgeStoreProjectionSelector(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new KnowledgeStoreProjectionSelector(
+                referenceKeyName,
+                generatedKeyName,
+                source,
+                sourceContext,
+                inputs ?? new ChangeTrackingList<InputFieldMappingEntry>(),
+                additionalBinaryDataProperties);
         }
     }
 }

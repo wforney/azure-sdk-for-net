@@ -5,32 +5,37 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
-    /// <summary> Response containing suggestion query results from an index. </summary>
     internal partial class SuggestDocumentsResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SuggestDocumentsResult"/>. </summary>
-        /// <param name="results"> The sequence of results returned by the query. </param>
-        internal SuggestDocumentsResult(IEnumerable<SuggestResult> results)
+        internal SuggestDocumentsResult()
         {
-            Results = results.ToList();
+            Results = new ChangeTrackingList<SuggestResult>();
         }
 
         /// <summary> Initializes a new instance of <see cref="SuggestDocumentsResult"/>. </summary>
         /// <param name="results"> The sequence of results returned by the query. </param>
         /// <param name="coverage"> A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request. </param>
-        internal SuggestDocumentsResult(IReadOnlyList<SuggestResult> results, double? coverage)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SuggestDocumentsResult(IReadOnlyList<SuggestResult> results, double? coverage, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Results = results;
             Coverage = coverage;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The sequence of results returned by the query. </summary>
         public IReadOnlyList<SuggestResult> Results { get; }
+
         /// <summary> A value indicating the percentage of the index that was included in the query, or null if minimumCoverage was not set in the request. </summary>
         public double? Coverage { get; }
     }

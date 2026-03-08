@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Contains the parameters specific to Scalar Quantization. </summary>
     public partial class ScalarQuantizationParameters
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ScalarQuantizationParameters"/>. </summary>
         public ScalarQuantizationParameters()
         {
@@ -17,9 +23,11 @@ namespace Azure.Search.Documents.Indexes.Models
 
         /// <summary> Initializes a new instance of <see cref="ScalarQuantizationParameters"/>. </summary>
         /// <param name="quantizedDataType"> The quantized data type of compressed vector values. </param>
-        internal ScalarQuantizationParameters(VectorSearchCompressionTarget? quantizedDataType)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ScalarQuantizationParameters(VectorSearchCompressionTarget? quantizedDataType, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             QuantizedDataType = quantizedDataType;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The quantized data type of compressed vector values. </summary>

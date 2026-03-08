@@ -6,12 +6,16 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Represents a schedule for indexer execution. </summary>
     public partial class IndexingSchedule
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="IndexingSchedule"/>. </summary>
         /// <param name="interval"> The interval of time between indexer executions. </param>
         public IndexingSchedule(TimeSpan interval)
@@ -22,14 +26,17 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="IndexingSchedule"/>. </summary>
         /// <param name="interval"> The interval of time between indexer executions. </param>
         /// <param name="startTime"> The time when an indexer should start running. </param>
-        internal IndexingSchedule(TimeSpan interval, DateTimeOffset? startTime)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal IndexingSchedule(TimeSpan interval, DateTimeOffset? startTime, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Interval = interval;
             StartTime = startTime;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The interval of time between indexer executions. </summary>
         public TimeSpan Interval { get; set; }
+
         /// <summary> The time when an indexer should start running. </summary>
         public DateTimeOffset? StartTime { get; set; }
     }

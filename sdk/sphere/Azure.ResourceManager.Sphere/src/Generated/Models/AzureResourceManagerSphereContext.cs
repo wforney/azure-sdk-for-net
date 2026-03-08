@@ -6,13 +6,64 @@
 #nullable disable
 
 using System.ClientModel.Primitives;
+using Azure;
+using Azure.ResourceManager.Models;
+using Azure.ResourceManager.Sphere.Models;
 
 namespace Azure.ResourceManager.Sphere
 {
     /// <summary>
     /// Context class which will be filled in by the System.ClientModel.SourceGeneration.
-    /// For more information see 'https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md'
+    /// For more information <see href='https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md' />
     /// </summary>
+    [ModelReaderWriterBuildable(typeof(CatalogListResult))]
+    [ModelReaderWriterBuildable(typeof(CatalogProperties))]
+    [ModelReaderWriterBuildable(typeof(CertificateListResult))]
+    [ModelReaderWriterBuildable(typeof(ClaimSphereDevicesContent))]
+    [ModelReaderWriterBuildable(typeof(CountDevicesResult))]
+    [ModelReaderWriterBuildable(typeof(CountElementsResult))]
+    [ModelReaderWriterBuildable(typeof(DeploymentListResult))]
+    [ModelReaderWriterBuildable(typeof(DeploymentProperties))]
+    [ModelReaderWriterBuildable(typeof(DeviceGroupListResult))]
+    [ModelReaderWriterBuildable(typeof(DeviceGroupProperties))]
+    [ModelReaderWriterBuildable(typeof(DeviceGroupUpdateProperties))]
+    [ModelReaderWriterBuildable(typeof(DeviceListResult))]
+    [ModelReaderWriterBuildable(typeof(DeviceProperties))]
+    [ModelReaderWriterBuildable(typeof(DeviceUpdateProperties))]
+    [ModelReaderWriterBuildable(typeof(GenerateCapabilityImageContent))]
+    [ModelReaderWriterBuildable(typeof(ImageListResult))]
+    [ModelReaderWriterBuildable(typeof(ImageProperties))]
+    [ModelReaderWriterBuildable(typeof(ListSphereDeviceGroupsContent))]
+    [ModelReaderWriterBuildable(typeof(PagedDeviceInsight))]
+    [ModelReaderWriterBuildable(typeof(ProductListResult))]
+    [ModelReaderWriterBuildable(typeof(ProductProperties))]
+    [ModelReaderWriterBuildable(typeof(ProductUpdateProperties))]
+    [ModelReaderWriterBuildable(typeof(ProofOfPossessionNonceContent))]
+    [ModelReaderWriterBuildable(typeof(ProofOfPossessionNonceResponse))]
+    [ModelReaderWriterBuildable(typeof(ResponseError))]
+    [ModelReaderWriterBuildable(typeof(SignedCapabilityImageResponse))]
+    [ModelReaderWriterBuildable(typeof(SphereCatalogData))]
+    [ModelReaderWriterBuildable(typeof(SphereCatalogPatch))]
+    [ModelReaderWriterBuildable(typeof(SphereCatalogResource))]
+    [ModelReaderWriterBuildable(typeof(SphereCertificateChainResult))]
+    [ModelReaderWriterBuildable(typeof(SphereCertificateData))]
+    [ModelReaderWriterBuildable(typeof(SphereCertificateProperties))]
+    [ModelReaderWriterBuildable(typeof(SphereCertificateResource))]
+    [ModelReaderWriterBuildable(typeof(SphereDeploymentData))]
+    [ModelReaderWriterBuildable(typeof(SphereDeploymentResource))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceData))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceGroupData))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceGroupPatch))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceGroupResource))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceInsight))]
+    [ModelReaderWriterBuildable(typeof(SphereDevicePatch))]
+    [ModelReaderWriterBuildable(typeof(SphereDeviceResource))]
+    [ModelReaderWriterBuildable(typeof(SphereImageData))]
+    [ModelReaderWriterBuildable(typeof(SphereImageResource))]
+    [ModelReaderWriterBuildable(typeof(SphereProductData))]
+    [ModelReaderWriterBuildable(typeof(SphereProductPatch))]
+    [ModelReaderWriterBuildable(typeof(SphereProductResource))]
+    [ModelReaderWriterBuildable(typeof(SystemData))]
     public partial class AzureResourceManagerSphereContext : ModelReaderWriterContext
     {
     }

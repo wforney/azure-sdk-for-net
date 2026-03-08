@@ -20,7 +20,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetsAnUpdateRunResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Get.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Get.json
             // this example is just showing the usage of "UpdateRuns_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -51,7 +51,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetsAnUpdateRunResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Get_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Get_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -82,7 +82,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Delete_DeleteAnUpdateRunResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Delete.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Delete.json
             // this example is just showing the usage of "UpdateRuns_Delete" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -100,7 +100,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            await containerServiceFleetUpdateRun.DeleteAsync(WaitUntil.Completed);
+            await containerServiceFleetUpdateRun.DeleteAsync(WaitUntil.Completed, ifMatch: (ETag?)null);
 
             Console.WriteLine("Succeeded");
         }
@@ -109,7 +109,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Delete_DeleteAnUpdateRunResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Delete_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Delete_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_Delete" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -127,7 +127,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            string ifMatch = "xnbwucfeufeagpa";
+            ETag ifMatch = new ETag("xnbwucfeufeagpa");
             await containerServiceFleetUpdateRun.DeleteAsync(WaitUntil.Completed, ifMatch: ifMatch);
 
             Console.WriteLine("Succeeded");
@@ -137,7 +137,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Update_CreateAnUpdateRun()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_CreateOrUpdate.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_CreateOrUpdate.json
             // this example is just showing the usage of "UpdateRuns_CreateOrUpdate" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -160,8 +160,26 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
                 UpdateStrategyId = new ResourceIdentifier("/subscriptions/00000000-0000-0000-0000-000000000000/resourceGroups/rg1/providers/Microsoft.ContainerService/fleets/myFleet/updateStrategies/strategy1"),
                 StrategyStages = {new ContainerServiceFleetUpdateStage("stage1")
 {
-Groups = {new ContainerServiceFleetUpdateGroup("group-a")},
+Groups = {new ContainerServiceFleetUpdateGroup("group-a")
+{
+BeforeGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate before group-a",
+}},
+AfterGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate after group-a",
+}},
+}},
 AfterStageWaitInSeconds = 3600,
+BeforeGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate before stage1",
+}},
+AfterGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate after stage1",
+}},
 }},
                 ManagedClusterUpdate = new ContainerServiceFleetManagedClusterUpdate(new ContainerServiceFleetManagedClusterUpgradeSpec(ContainerServiceFleetManagedClusterUpgradeType.Full)
                 {
@@ -171,7 +189,7 @@ AfterStageWaitInSeconds = 3600,
                     NodeImageSelection = new NodeImageSelection(NodeImageSelectionType.Latest),
                 },
             };
-            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.UpdateAsync(WaitUntil.Completed, data);
+            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.UpdateAsync(WaitUntil.Completed, data, matchConditions: null);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -185,7 +203,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Update_CreateAnUpdateRunGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_CreateOrUpdate_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_CreateOrUpdate_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_CreateOrUpdate" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -222,9 +240,12 @@ AfterStageWaitInSeconds = 3600,
                     },
                 },
             };
-            string ifMatch = "wyolpuaxgybeygcbz";
-            string ifNoneMatch = "rwrhonlormgshamadufoo";
-            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.UpdateAsync(WaitUntil.Completed, data, ifMatch: ifMatch, ifNoneMatch: ifNoneMatch);
+            MatchConditions matchConditions = new MatchConditions
+            {
+                IfMatch = new ETag("wyolpuaxgybeygcbz"),
+                IfNoneMatch = new ETag("rwrhonlormgshamadufoo")
+            };
+            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.UpdateAsync(WaitUntil.Completed, data, matchConditions: matchConditions);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -238,7 +259,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Skip_SkipsOneOrMoreMemberGroupStageAfterStageWaitSOfAnUpdateRun()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Skip.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Skip.json
             // this example is just showing the usage of "UpdateRuns_Skip" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -261,7 +282,7 @@ AfterStageWaitInSeconds = 3600,
 new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.Member, "member-one"),
 new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWait, "stage1")
             });
-            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.SkipAsync(WaitUntil.Completed, body);
+            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.SkipAsync(WaitUntil.Completed, body, ifMatch: (ETag?)null);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -275,7 +296,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
         [Ignore("Only validating compilation of examples")]
         public async Task Skip_SkipsOneOrMoreMemberGroupStageAfterStageWaitSOfAnUpdateRunGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Skip_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Skip_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_Skip" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -298,7 +319,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
 new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.Member, "member-one"),
 new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWait, "stage1")
             });
-            string ifMatch = "rncfubdzrhcihvpqflbsjvoau";
+            ETag ifMatch = new ETag("rncfubdzrhcihvpqflbsjvoau");
             ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.SkipAsync(WaitUntil.Completed, body, ifMatch: ifMatch);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
@@ -313,7 +334,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
         [Ignore("Only validating compilation of examples")]
         public async Task Start_StartsAnUpdateRun()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Start.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Start.json
             // this example is just showing the usage of "UpdateRuns_Start" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -331,7 +352,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StartAsync(WaitUntil.Completed);
+            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StartAsync(WaitUntil.Completed, ifMatch: (ETag?)null);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -345,7 +366,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
         [Ignore("Only validating compilation of examples")]
         public async Task Start_StartsAnUpdateRunGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Start_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Start_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_Start" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -363,7 +384,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            string ifMatch = "bvhjlqeindkmljbbiypbqiaqgtkhlu";
+            ETag ifMatch = new ETag("bvhjlqeindkmljbbiypbqiaqgtkhlu");
             ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StartAsync(WaitUntil.Completed, ifMatch: ifMatch);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
@@ -378,7 +399,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
         [Ignore("Only validating compilation of examples")]
         public async Task Stop_StopsAnUpdateRun()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Stop.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Stop.json
             // this example is just showing the usage of "UpdateRuns_Stop" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -396,7 +417,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StopAsync(WaitUntil.Completed);
+            ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StopAsync(WaitUntil.Completed, ifMatch: (ETag?)null);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -410,7 +431,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
         [Ignore("Only validating compilation of examples")]
         public async Task Stop_StopsAnUpdateRunGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateRuns_Stop_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateRuns_Stop_MaximumSet_Gen.json
             // this example is just showing the usage of "UpdateRuns_Stop" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -428,7 +449,7 @@ new ContainerServiceFleetSkipTarget(ContainerServiceFleetTargetType.AfterStageWa
             ContainerServiceFleetUpdateRunResource containerServiceFleetUpdateRun = client.GetContainerServiceFleetUpdateRunResource(containerServiceFleetUpdateRunResourceId);
 
             // invoke the operation
-            string ifMatch = "jb";
+            ETag ifMatch = new ETag("jb");
             ArmOperation<ContainerServiceFleetUpdateRunResource> lro = await containerServiceFleetUpdateRun.StopAsync(WaitUntil.Completed, ifMatch: ifMatch);
             ContainerServiceFleetUpdateRunResource result = lro.Value;
 

@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Contains debugging information specific to query rewrites. </summary>
     public partial class QueryRewritesValuesDebugInfo
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="QueryRewritesValuesDebugInfo"/>. </summary>
         internal QueryRewritesValuesDebugInfo()
         {
@@ -21,14 +26,17 @@ namespace Azure.Search.Documents.Models
         /// <summary> Initializes a new instance of <see cref="QueryRewritesValuesDebugInfo"/>. </summary>
         /// <param name="inputQuery"> The input text to the generative query rewriting model. There may be cases where the user query and the input to the generative model are not identical. </param>
         /// <param name="rewrites"> List of query rewrites. </param>
-        internal QueryRewritesValuesDebugInfo(string inputQuery, IReadOnlyList<string> rewrites)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal QueryRewritesValuesDebugInfo(string inputQuery, IReadOnlyList<string> rewrites, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             InputQuery = inputQuery;
             Rewrites = rewrites;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The input text to the generative query rewriting model. There may be cases where the user query and the input to the generative model are not identical. </summary>
         public string InputQuery { get; }
+
         /// <summary> List of query rewrites. </summary>
         public IReadOnlyList<string> Rewrites { get; }
     }

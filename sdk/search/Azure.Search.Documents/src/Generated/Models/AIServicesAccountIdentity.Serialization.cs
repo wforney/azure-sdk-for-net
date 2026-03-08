@@ -5,95 +5,153 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class AIServicesAccountIdentity : IUtf8JsonSerializable
+    /// <summary> The multi-region account of an Azure AI service resource that's attached to a skillset. </summary>
+    public partial class AIServicesAccountIdentity : CognitiveServicesAccount, IJsonModel<AIServicesAccountIdentity>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="AIServicesAccountIdentity"/> for deserialization. </summary>
+        internal AIServicesAccountIdentity()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override CognitiveServicesAccount PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesAccountIdentity>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAIServicesAccountIdentity(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AIServicesAccountIdentity)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesAccountIdentity>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AIServicesAccountIdentity)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AIServicesAccountIdentity>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AIServicesAccountIdentity IPersistableModel<AIServicesAccountIdentity>.Create(BinaryData data, ModelReaderWriterOptions options) => (AIServicesAccountIdentity)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AIServicesAccountIdentity>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AIServicesAccountIdentity>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(Identity))
-            {
-                if (Identity != null)
-                {
-                    writer.WritePropertyName("identity"u8);
-                    writer.WriteObjectValue(Identity);
-                }
-                else
-                {
-                    writer.WriteNull("identity");
-                }
-            }
-            writer.WritePropertyName("subdomainUrl"u8);
-            writer.WriteStringValue(SubdomainUrl);
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            if (Optional.IsDefined(Description))
-            {
-                writer.WritePropertyName("description"u8);
-                writer.WriteStringValue(Description);
-            }
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static AIServicesAccountIdentity DeserializeAIServicesAccountIdentity(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesAccountIdentity>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AIServicesAccountIdentity)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
+            if (Optional.IsDefined(Identity))
+            {
+                writer.WritePropertyName("identity"u8);
+                writer.WriteObjectValue(Identity, options);
+            }
+            writer.WritePropertyName("subdomainUrl"u8);
+            writer.WriteStringValue(SubdomainUrl);
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AIServicesAccountIdentity IJsonModel<AIServicesAccountIdentity>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (AIServicesAccountIdentity)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override CognitiveServicesAccount JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AIServicesAccountIdentity>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AIServicesAccountIdentity)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAIServicesAccountIdentity(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AIServicesAccountIdentity DeserializeAIServicesAccountIdentity(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
+            string odataType = "#Microsoft.Azure.Search.AIServicesByIdentity";
+            string description = default;
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
             SearchIndexerDataIdentity identity = default;
             string subdomainUrl = default;
-            string odataType = default;
-            string description = default;
-            foreach (var property in element.EnumerateObject())
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("identity"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    odataType = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("description"u8))
+                {
+                    description = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("identity"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         identity = null;
                         continue;
                     }
-                    identity = SearchIndexerDataIdentity.DeserializeSearchIndexerDataIdentity(property.Value);
+                    identity = SearchIndexerDataIdentity.DeserializeSearchIndexerDataIdentity(prop.Value, options);
                     continue;
                 }
-                if (property.NameEquals("subdomainUrl"u8))
+                if (prop.NameEquals("subdomainUrl"u8))
                 {
-                    subdomainUrl = property.Value.GetString();
+                    subdomainUrl = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (options.Format != "W")
                 {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("description"u8))
-                {
-                    description = property.Value.GetString();
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new AIServicesAccountIdentity(odataType, description, identity, subdomainUrl);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new AIServicesAccountIdentity FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeAIServicesAccountIdentity(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new AIServicesAccountIdentity(odataType, description, additionalBinaryDataProperties, identity, subdomainUrl);
         }
     }
 }

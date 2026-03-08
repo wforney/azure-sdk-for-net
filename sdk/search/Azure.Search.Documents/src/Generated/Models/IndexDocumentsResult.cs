@@ -5,26 +5,31 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Models
 {
     /// <summary> Response containing the status of operations for all documents in the indexing request. </summary>
     public partial class IndexDocumentsResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="IndexDocumentsResult"/>. </summary>
-        /// <param name="results"> The list of status information for each document in the indexing request. </param>
-        internal IndexDocumentsResult(IEnumerable<IndexingResult> results)
+        internal IndexDocumentsResult()
         {
-            Results = results.ToList();
+            Results = new ChangeTrackingList<IndexingResult>();
         }
 
         /// <summary> Initializes a new instance of <see cref="IndexDocumentsResult"/>. </summary>
         /// <param name="results"> The list of status information for each document in the indexing request. </param>
-        internal IndexDocumentsResult(IReadOnlyList<IndexingResult> results)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal IndexDocumentsResult(IReadOnlyList<IndexingResult> results, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Results = results;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The list of status information for each document in the indexing request. </summary>

@@ -2,10 +2,12 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Linq;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using Azure.Monitor.OpenTelemetry.Exporter.Internals;
+using Azure.Monitor.OpenTelemetry.Exporter.Internals.Platform;
 
 using OpenTelemetry.Logs;
 
@@ -13,6 +15,9 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
 {
     internal partial class TelemetryItem
     {
+        private static volatile string? s_cloudRoleNameOverride;
+        private static volatile string? s_cloudRoleInstanceOverride;
+
         public TelemetryItem(Activity activity, ref ActivityTagsProcessor activityTagsProcessor, AzureMonitorResource? resource, string instrumentationKey, float sampleRate) :
             this(activity.GetTelemetryType() == TelemetryType.Request ? "Request" : "RemoteDependency", FormatUtcTimestamp(activity.StartTimeUtc))
         {
@@ -23,9 +28,20 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
 
             Tags[ContextTagKeys.AiOperationId.ToString()] = activity.TraceId.ToHexString();
 
+            string? microsoftClientIp = AzMonList.GetTagValue(ref activityTagsProcessor.MappedTags, "microsoft.client.ip")?.ToString();
+
+            // Check for microsoft.operation_name override (applies to both request and dependency)
+            string? overrideOperationName = activityTagsProcessor.HasOverrideAttributes
+                ? AzMonList.GetTagValue(ref activityTagsProcessor.MappedTags, SemanticConventions.AttributeMicrosoftOperationName)?.ToString()
+                : null;
+
             if (activity.GetTelemetryType() == TelemetryType.Request)
             {
-                if (activityTagsProcessor.activityType.HasFlag(OperationType.V2))
+                if (!string.IsNullOrEmpty(overrideOperationName))
+                {
+                    Tags[ContextTagKeys.AiOperationName.ToString()] = overrideOperationName.Truncate(SchemaConstants.Tags_AiOperationName_MaxLength);
+                }
+                else if (activityTagsProcessor.activityType.HasFlag(OperationType.V2))
                 {
                     Tags[ContextTagKeys.AiOperationName.ToString()] = TraceHelper.GetOperationNameV2(activity, ref activityTagsProcessor.MappedTags).Truncate(SchemaConstants.Tags_AiOperationName_MaxLength);
                 }
@@ -38,14 +54,27 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
                     Tags[ContextTagKeys.AiOperationName.ToString()] = activity.DisplayName.Truncate(SchemaConstants.Tags_AiOperationName_MaxLength);
                 }
 
-                // Set ip in case of server spans only.
                 if (activity.Kind == ActivityKind.Server)
                 {
-                    var locationIp = AzMonList.GetTagValue(ref activityTagsProcessor.MappedTags, SemanticConventions.AttributeClientAddress)?.ToString();
+                    var locationIp = microsoftClientIp ??
+                                     AzMonList.GetTagValue(ref activityTagsProcessor.MappedTags, SemanticConventions.AttributeClientAddress)?.ToString();
+
                     if (locationIp != null)
                     {
                         Tags[ContextTagKeys.AiLocationIp.ToString()] = locationIp;
                     }
+                }
+            }
+            else // dependency
+            {
+                if (!string.IsNullOrEmpty(overrideOperationName))
+                {
+                    Tags[ContextTagKeys.AiOperationName.ToString()] = overrideOperationName.Truncate(SchemaConstants.Tags_AiOperationName_MaxLength);
+                }
+
+                if (microsoftClientIp != null)
+                {
+                    Tags[ContextTagKeys.AiLocationIp.ToString()] = microsoftClientIp;
                 }
             }
 
@@ -58,7 +87,7 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
                 Tags["ai.user.userAgent"] = userAgent;
             }
 
-            SetAuthenticatedUserId(ref activityTagsProcessor);
+            SetUserIdAndAuthenticatedUserId(ref activityTagsProcessor);
             SetResourceSdkVersionAndIkey(resource, instrumentationKey);
 
             if (sampleRate != 100f)
@@ -91,7 +120,7 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
             }
         }
 
-        public TelemetryItem (string name, LogRecord logRecord, AzureMonitorResource? resource, string instrumentationKey) :
+        public TelemetryItem (string name, LogRecord logRecord, AzureMonitorResource? resource, string instrumentationKey, LogContextInfo logContext) :
             this(name, FormatUtcTimestamp(logRecord.Timestamp))
         {
             if (logRecord.TraceId != default)
@@ -102,6 +131,35 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
             if (logRecord.SpanId != default)
             {
                 Tags[ContextTagKeys.AiOperationParentId.ToString()] = logRecord.SpanId.ToHexString();
+            }
+
+            if (logContext.HasValues)
+            {
+                if (logContext.MicrosoftClientIp != null)
+                {
+                    Tags[ContextTagKeys.AiLocationIp.ToString()] = logContext.MicrosoftClientIp;
+                }
+
+                if (logContext.EndUserPseudoId != null)
+                {
+                    Tags[ContextTagKeys.AiUserId.ToString()] = logContext.EndUserPseudoId.Truncate(SchemaConstants.Tags_AiUserId_MaxLength);
+                }
+
+                if (logContext.EndUserId != null)
+                {
+                    Tags[ContextTagKeys.AiUserAuthUserId.ToString()] = logContext.EndUserId.Truncate(SchemaConstants.Tags_AiUserAuthUserId_MaxLength);
+                }
+
+                if (logContext.UserAgent != null)
+                {
+                    // todo: update swagger to include this key.
+                    Tags["ai.user.userAgent"] = logContext.UserAgent;
+                }
+
+                if (logContext.OperationName != null)
+                {
+                    Tags[ContextTagKeys.AiOperationName.ToString()] = logContext.OperationName.Truncate(SchemaConstants.Tags_AiOperationName_MaxLength);
+                }
             }
 
             InstrumentationKey = instrumentationKey;
@@ -126,6 +184,27 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
             Tags[ContextTagKeys.AiCloudRoleInstance.ToString()] = resource?.RoleInstance_Truncated;
             Tags[ContextTagKeys.AiApplicationVer.ToString()] = resource?.ServiceVersion_Truncated;
             Tags[ContextTagKeys.AiInternalSdkVersion.ToString()] = SdkVersionUtils.s_sdkVersion.Truncate(SchemaConstants.Tags_AiInternalSdkVersion_MaxLength);
+
+            var roleName = s_cloudRoleNameOverride ?? (s_cloudRoleNameOverride = Environment.GetEnvironmentVariable(EnvironmentVariableConstants.APPLICATIONINSIGHTS_CLOUD_ROLE_NAME) ?? string.Empty);
+            if (roleName.Length > 0)
+            {
+                Tags[ContextTagKeys.AiCloudRole.ToString()] = roleName.Truncate(SchemaConstants.Tags_AiCloudRole_MaxLength);
+            }
+
+            var roleInstance = s_cloudRoleInstanceOverride ?? (s_cloudRoleInstanceOverride = Environment.GetEnvironmentVariable(EnvironmentVariableConstants.APPLICATIONINSIGHTS_CLOUD_ROLE_INSTANCE) ?? string.Empty);
+            if (roleInstance.Length > 0)
+            {
+                Tags[ContextTagKeys.AiCloudRoleInstance.ToString()] = roleInstance.Truncate(SchemaConstants.Tags_AiCloudRoleInstance_MaxLength);
+            }
+        }
+
+        /// <summary>
+        /// Resets the cached environment variable overrides. For testing only.
+        /// </summary>
+        internal static void ResetEnvironmentVariableOverrides()
+        {
+            s_cloudRoleNameOverride = null;
+            s_cloudRoleInstanceOverride = null;
         }
 
         internal static DateTimeOffset FormatUtcTimestamp(System.DateTime utcTimestamp)
@@ -134,11 +213,16 @@ namespace Azure.Monitor.OpenTelemetry.Exporter.Models
         }
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private void SetAuthenticatedUserId(ref ActivityTagsProcessor activityTagsProcessor)
+        private void SetUserIdAndAuthenticatedUserId(ref ActivityTagsProcessor activityTagsProcessor)
         {
             if (activityTagsProcessor.EndUserId != null)
             {
                 Tags[ContextTagKeys.AiUserAuthUserId.ToString()] = activityTagsProcessor.EndUserId.Truncate(SchemaConstants.Tags_AiUserAuthUserId_MaxLength);
+            }
+
+            if (activityTagsProcessor.EndUserPseudoId != null)
+            {
+                Tags[ContextTagKeys.AiUserId.ToString()] = activityTagsProcessor.EndUserPseudoId.Truncate(SchemaConstants.Tags_AiUserId_MaxLength);
             }
         }
     }

@@ -10,12 +10,24 @@ using System.Text.Json;
 using Azure.Core;
 using Azure.Messaging.EventGrid.Models;
 using Azure.Messaging.EventGrid.SystemEvents;
+using Microsoft.TypeSpec.Generator.Customizations;
 using AcsRouterJobStatus = Azure.Messaging.EventGrid.Models.AcsRouterJobStatus;
 
 namespace Azure.Messaging.EventGrid
 {
 #pragma warning disable CA1054 // URI-like parameters should not be strings
-    [CodeGenType("MessagingEventGridSystemEventsModelFactory")]
+    [CodeGenType("EventGridSystemEventsModelFactory")]
+    [CodeGenSuppress("ResourceWriteSuccessEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceWriteFailureEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceWriteCancelEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceDeleteSuccessEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceDeleteFailureEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceDeleteCancelEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceActionSuccessEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceActionFailureEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("ResourceActionCancelEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(JsonElement), typeof(JsonElement), typeof(string), typeof(JsonElement))]
+    [CodeGenSuppress("StorageDirectoryDeletedEventData", typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(string), typeof(object))]
+    [CodeGenSuppress("ResourceHttpRequest", typeof(string), typeof(string), typeof(string), typeof(string))]
     public static partial class EventGridModelFactory
     {
         /// <summary> Initializes new instance of MediaJobError class. </summary>
@@ -514,7 +526,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static MapsGeofenceEventProperties MapsGeofenceEventProperties(IReadOnlyList<string> expiredGeofenceGeometryId, IReadOnlyList<MapsGeofenceGeometry> geometries, IReadOnlyList<string> invalidPeriodGeofenceGeometryId, bool? isEventPublished)
         {
-            return MapsGeofenceEventProperties((IEnumerable<string>) expiredGeofenceGeometryId, geometries, invalidPeriodGeofenceGeometryId, isEventPublished);
+            return MapsGeofenceEventProperties((IEnumerable<string>)expiredGeofenceGeometryId, geometries, invalidPeriodGeofenceGeometryId, isEventPublished);
         }
 
         /// <summary> Initializes new instance of AcsChatThreadCreatedWithUserEventData class. </summary>
@@ -530,7 +542,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static AcsChatThreadCreatedWithUserEventData AcsChatThreadCreatedWithUserEventData(CommunicationIdentifierModel recipientCommunicationIdentifier, string transactionId, string threadId, DateTimeOffset? createTime, long? version, CommunicationIdentifierModel createdByCommunicationIdentifier, IReadOnlyDictionary<string, object> properties, IReadOnlyList<AcsChatThreadParticipantProperties> participants)
         {
-            return AcsChatThreadCreatedWithUserEventData(recipientCommunicationIdentifier, transactionId, threadId, createTime, version, createdByCommunicationIdentifier, properties, new Dictionary<string, string>(), participants);
+            return AcsChatThreadCreatedWithUserEventData(recipientCommunicationIdentifier, transactionId, threadId, createTime, version, createdByCommunicationIdentifier, properties, null, participants);
         }
 
         /// <summary> Initializes new instance of AcsChatThreadCreatedEventData class. </summary>
@@ -545,7 +557,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static AcsChatThreadCreatedEventData AcsChatThreadCreatedEventData(string transactionId, string threadId, DateTimeOffset? createTime, long? version, CommunicationIdentifierModel createdByCommunicationIdentifier, IReadOnlyDictionary<string, object> properties, IReadOnlyList<AcsChatThreadParticipantProperties> participants)
         {
-            return AcsChatThreadCreatedEventData(transactionId, threadId, createTime, version, createdByCommunicationIdentifier, properties, new Dictionary<string, string>(), (IEnumerable<AcsChatThreadParticipantProperties>) participants);
+            return AcsChatThreadCreatedEventData(transactionId, threadId, createTime, version, createdByCommunicationIdentifier, properties, new Dictionary<string, string>(), (IEnumerable<AcsChatThreadParticipantProperties>)participants);
         }
 
         /// <summary> Initializes a new instance of AcsChatThreadCreatedWithUserEventData. </summary>
@@ -643,7 +655,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static AcsSmsDeliveryReportReceivedEventData AcsSmsDeliveryReportReceivedEventData(string messageId, string @from, string to, string deliveryStatus, string deliveryStatusDetails, IReadOnlyList<AcsSmsDeliveryAttemptProperties> deliveryAttempts, DateTimeOffset? receivedTimestamp, string tag)
         {
-            return AcsSmsDeliveryReportReceivedEventData(messageId, @from, to, deliveryStatus, deliveryStatusDetails, (IEnumerable<AcsSmsDeliveryAttemptProperties>) deliveryAttempts, receivedTimestamp, tag);
+            return AcsSmsDeliveryReportReceivedEventData(messageId, @from, to, deliveryStatus, deliveryStatusDetails, (IEnumerable<AcsSmsDeliveryAttemptProperties>)deliveryAttempts, receivedTimestamp, tag);
         }
 
         /// <summary> Initializes new instance of AcsRecordingStorageInfoProperties class. </summary>
@@ -652,7 +664,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static AcsRecordingStorageInfoProperties AcsRecordingStorageInfoProperties(IReadOnlyList<AcsRecordingChunkInfoProperties> recordingChunks)
         {
-            return AcsRecordingStorageInfoProperties((IEnumerable<AcsRecordingChunkInfoProperties>) recordingChunks);
+            return AcsRecordingStorageInfoProperties((IEnumerable<AcsRecordingChunkInfoProperties>)recordingChunks);
         }
 
         /// <summary> Initializes new instance of ResourceWriteSuccessEventData class. </summary>
@@ -976,7 +988,7 @@ namespace Azure.Messaging.EventGrid
         [EditorBrowsable(EditorBrowsableState.Never)]
         public static AcsRecordingFileStatusUpdatedEventData AcsRecordingFileStatusUpdatedEventData()
         {
-            return AcsRecordingFileStatusUpdatedEventData(null, null, null, (RecordingContentType) null, null, null, null);
+            return AcsRecordingFileStatusUpdatedEventData(null, null, null, (RecordingContentType)null, null, null, null);
         }
 
         /// <summary> Initializes a new instance of AcsRecordingChunkInfoProperties. </summary>
@@ -1113,7 +1125,7 @@ namespace Azure.Messaging.EventGrid
         /// <param name="unavailableForMatching"> Unavailable For Matching for Router Job Received. </param>
         /// <returns> A new <see cref="SystemEvents.AcsRouterJobReceivedEventData"/> instance for mocking. </returns>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        public static AcsRouterJobReceivedEventData AcsRouterJobReceivedEventData(string jobId = null, string channelReference = null, string channelId = null, string queueId = null, IReadOnlyDictionary<string, string> labels = null, IReadOnlyDictionary<string, string> tags = null, Azure.Messaging.EventGrid.Models.AcsRouterJobStatus? jobStatus = null, string classificationPolicyId = null, int? priority = null, IEnumerable<AcsRouterWorkerSelector> requestedWorkerSelectors = null, DateTimeOffset? scheduledOn = null, bool unavailableForMatching = default)
+        public static AcsRouterJobReceivedEventData AcsRouterJobReceivedEventData(string jobId = null, string channelReference = null, string channelId = null, string queueId = null, IReadOnlyDictionary<string, string> labels = null, IReadOnlyDictionary<string, string> tags = null, AcsRouterJobStatus? jobStatus = null, string classificationPolicyId = null, int? priority = null, IEnumerable<AcsRouterWorkerSelector> requestedWorkerSelectors = null, DateTimeOffset? scheduledOn = null, bool unavailableForMatching = default)
         {
             labels ??= new Dictionary<string, string>();
             tags ??= new Dictionary<string, string>();

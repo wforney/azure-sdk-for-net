@@ -6,13 +6,73 @@
 #nullable disable
 
 using System.ClientModel.Primitives;
+using Azure;
+using Azure.ResourceManager.Models;
+using Azure.ResourceManager.SelfHelp.Models;
 
 namespace Azure.ResourceManager.SelfHelp
 {
     /// <summary>
     /// Context class which will be filled in by the System.ClientModel.SourceGeneration.
-    /// For more information see 'https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md'
+    /// For more information <see href='https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md' />
     /// </summary>
+    [ModelReaderWriterBuildable(typeof(AutomatedCheckResult))]
+    [ModelReaderWriterBuildable(typeof(ChartFilterGroup))]
+    [ModelReaderWriterBuildable(typeof(ClassificationService))]
+    [ModelReaderWriterBuildable(typeof(DiagnosticResourceProperties))]
+    [ModelReaderWriterBuildable(typeof(DiscoveryNlpContent))]
+    [ModelReaderWriterBuildable(typeof(DiscoveryNlpResult))]
+    [ModelReaderWriterBuildable(typeof(KBSearchResult))]
+    [ModelReaderWriterBuildable(typeof(KBWebResult))]
+    [ModelReaderWriterBuildable(typeof(MetricsBasedChart))]
+    [ModelReaderWriterBuildable(typeof(NlpSolutions))]
+    [ModelReaderWriterBuildable(typeof(ReplacementMapsResult))]
+    [ModelReaderWriterBuildable(typeof(ResponseConfig))]
+    [ModelReaderWriterBuildable(typeof(ResponseError))]
+    [ModelReaderWriterBuildable(typeof(ResponseValidationProperties))]
+    [ModelReaderWriterBuildable(typeof(RestartTroubleshooterResult))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiagnosticData))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiagnosticInfo))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiagnosticInsight))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiagnosticInvocation))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiagnosticResource))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpDiscoverySolutionResult))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpError))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpFilter))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpNameAvailabilityContent))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpNameAvailabilityResult))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSection))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSimplifiedSolutionData))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSimplifiedSolutionResource))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionData))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionMetadata))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionPatch))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionResource))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionResultData))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpSolutionResultResource))]
+    [ModelReaderWriterBuildable(typeof(SelfhelpSolutions))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpStep))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpTroubleshooterData))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpTroubleshooterResource))]
+    [ModelReaderWriterBuildable(typeof(SelfHelpVideo))]
+    [ModelReaderWriterBuildable(typeof(SimplifiedSolutionsResourceProperties))]
+    [ModelReaderWriterBuildable(typeof(SolutionMetadataProperties))]
+    [ModelReaderWriterBuildable(typeof(SolutionNlpMetadata))]
+    [ModelReaderWriterBuildable(typeof(SolutionReplacementMaps))]
+    [ModelReaderWriterBuildable(typeof(SolutionResourceProperties))]
+    [ModelReaderWriterBuildable(typeof(SolutionsDiagnostic))]
+    [ModelReaderWriterBuildable(typeof(SolutionSection))]
+    [ModelReaderWriterBuildable(typeof(SolutionsResourcePropertiesSelfHelp))]
+    [ModelReaderWriterBuildable(typeof(SolutionsTroubleshooters))]
+    [ModelReaderWriterBuildable(typeof(SolutionTriggerCriterion))]
+    [ModelReaderWriterBuildable(typeof(SolutionWarmUpContent))]
+    [ModelReaderWriterBuildable(typeof(SystemData))]
+    [ModelReaderWriterBuildable(typeof(TroubleshooterContinueContent))]
+    [ModelReaderWriterBuildable(typeof(TroubleshooterInstanceProperties))]
+    [ModelReaderWriterBuildable(typeof(TroubleshooterResult))]
+    [ModelReaderWriterBuildable(typeof(TroubleshooterStepInput))]
+    [ModelReaderWriterBuildable(typeof(VideoGroupDetail))]
+    [ModelReaderWriterBuildable(typeof(VideoGroupVideo))]
     public partial class AzureResourceManagerSelfHelpContext : ModelReaderWriterContext
     {
     }

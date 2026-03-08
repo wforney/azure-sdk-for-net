@@ -6,16 +6,74 @@
 #nullable disable
 
 using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class AzureOpenAIVectorizerParameters : IUtf8JsonSerializable
+    /// <summary> Specifies the parameters for connecting to the Azure OpenAI resource. </summary>
+    public partial class AzureOpenAIVectorizerParameters : IJsonModel<AzureOpenAIVectorizerParameters>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AzureOpenAIVectorizerParameters PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureOpenAIVectorizerParameters>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeAzureOpenAIVectorizerParameters(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(AzureOpenAIVectorizerParameters)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureOpenAIVectorizerParameters>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(AzureOpenAIVectorizerParameters)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<AzureOpenAIVectorizerParameters>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureOpenAIVectorizerParameters IPersistableModel<AzureOpenAIVectorizerParameters>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<AzureOpenAIVectorizerParameters>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<AzureOpenAIVectorizerParameters>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureOpenAIVectorizerParameters>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureOpenAIVectorizerParameters)} does not support writing '{format}' format.");
+            }
             if (Optional.IsDefined(ResourceUri))
             {
                 writer.WritePropertyName("resourceUri"u8);
@@ -33,93 +91,113 @@ namespace Azure.Search.Documents.Indexes.Models
             }
             if (Optional.IsDefined(AuthenticationIdentity))
             {
-                if (AuthenticationIdentity != null)
-                {
-                    writer.WritePropertyName("authIdentity"u8);
-                    writer.WriteObjectValue(AuthenticationIdentity);
-                }
-                else
-                {
-                    writer.WriteNull("authIdentity");
-                }
+                writer.WritePropertyName("authIdentity"u8);
+                writer.WriteObjectValue(AuthenticationIdentity, options);
             }
             if (Optional.IsDefined(ModelName))
             {
                 writer.WritePropertyName("modelName"u8);
                 writer.WriteStringValue(ModelName.Value.ToString());
             }
-            writer.WriteEndObject();
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
         }
 
-        internal static AzureOpenAIVectorizerParameters DeserializeAzureOpenAIVectorizerParameters(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        AzureOpenAIVectorizerParameters IJsonModel<AzureOpenAIVectorizerParameters>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual AzureOpenAIVectorizerParameters JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<AzureOpenAIVectorizerParameters>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(AzureOpenAIVectorizerParameters)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeAzureOpenAIVectorizerParameters(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static AzureOpenAIVectorizerParameters DeserializeAzureOpenAIVectorizerParameters(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
             Uri resourceUri = default;
-            string deploymentId = default;
+            string deploymentName = default;
             string apiKey = default;
-            SearchIndexerDataIdentity authIdentity = default;
+            SearchIndexerDataIdentity authenticationIdentity = default;
             AzureOpenAIModelName? modelName = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("resourceUri"u8))
+                if (prop.NameEquals("resourceUri"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    resourceUri = new Uri(property.Value.GetString());
+                    resourceUri = string.IsNullOrEmpty(prop.Value.GetString()) ? null : new Uri(prop.Value.GetString(), UriKind.RelativeOrAbsolute);
                     continue;
                 }
-                if (property.NameEquals("deploymentId"u8))
+                if (prop.NameEquals("deploymentId"u8))
                 {
-                    deploymentId = property.Value.GetString();
+                    deploymentName = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("apiKey"u8))
+                if (prop.NameEquals("apiKey"u8))
                 {
-                    apiKey = property.Value.GetString();
+                    apiKey = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("authIdentity"u8))
+                if (prop.NameEquals("authIdentity"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
-                    {
-                        authIdentity = null;
-                        continue;
-                    }
-                    authIdentity = SearchIndexerDataIdentity.DeserializeSearchIndexerDataIdentity(property.Value);
-                    continue;
-                }
-                if (property.NameEquals("modelName"u8))
-                {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    modelName = new AzureOpenAIModelName(property.Value.GetString());
+                    authenticationIdentity = SearchIndexerDataIdentity.DeserializeSearchIndexerDataIdentity(prop.Value, options);
                     continue;
+                }
+                if (prop.NameEquals("modelName"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    modelName = new AzureOpenAIModelName(prop.Value.GetString());
+                    continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new AzureOpenAIVectorizerParameters(resourceUri, deploymentId, apiKey, authIdentity, modelName);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static AzureOpenAIVectorizerParameters FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeAzureOpenAIVectorizerParameters(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new AzureOpenAIVectorizerParameters(
+                resourceUri,
+                deploymentName,
+                apiKey,
+                authenticationIdentity,
+                modelName,
+                additionalBinaryDataProperties);
         }
     }
 }

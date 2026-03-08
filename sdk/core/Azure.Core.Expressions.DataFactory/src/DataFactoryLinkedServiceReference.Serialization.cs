@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 
 using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -9,7 +10,7 @@ using System.Text.Json.Serialization;
 namespace Azure.Core.Expressions.DataFactory
 {
     [JsonConverter(typeof(DataFactoryLinkedServiceReferenceConverter))]
-    public partial class DataFactoryLinkedServiceReference : IUtf8JsonSerializable
+    public partial class DataFactoryLinkedServiceReference : IUtf8JsonSerializable, IJsonModel<DataFactoryLinkedServiceReference>
     {
         void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
         {
@@ -31,7 +32,7 @@ namespace Azure.Core.Expressions.DataFactory
                         continue;
                     }
 #if NET6_0_OR_GREATER
-				writer.WriteRawValue(item.Value);
+                    writer.WriteRawValue(item.Value);
 #else
                     JsonSerializer.Serialize(writer, JsonDocument.Parse(item.Value.ToString()).RootElement);
 #endif
@@ -40,6 +41,54 @@ namespace Azure.Core.Expressions.DataFactory
             }
             writer.WriteEndObject();
         }
+
+        void IJsonModel<DataFactoryLinkedServiceReference>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            var format = options.Format == "W" ? ((IPersistableModel<DataFactoryLinkedServiceReference>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DataFactoryLinkedServiceReference)} does not support writing '{format}' format.");
+            }
+
+            ((IUtf8JsonSerializable)this).Write(writer);
+        }
+
+        DataFactoryLinkedServiceReference? IJsonModel<DataFactoryLinkedServiceReference>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            var format = options.Format == "W" ? ((IPersistableModel<DataFactoryLinkedServiceReference>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DataFactoryLinkedServiceReference)} does not support reading '{format}' format.");
+            }
+
+            using var document = JsonDocument.ParseValue(ref reader);
+            return DeserializeDataFactoryLinkedServiceReference(document.RootElement);
+        }
+
+        BinaryData IPersistableModel<DataFactoryLinkedServiceReference>.Write(ModelReaderWriterOptions options)
+        {
+            var format = options.Format == "W" ? ((IPersistableModel<DataFactoryLinkedServiceReference>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DataFactoryLinkedServiceReference)} does not support writing '{format}' format.");
+            }
+
+            return ModelReaderWriter.Write(this, options, DataFactoryContext.Default);
+        }
+
+        DataFactoryLinkedServiceReference? IPersistableModel<DataFactoryLinkedServiceReference>.Create(BinaryData data, ModelReaderWriterOptions options)
+        {
+            var format = options.Format == "W" ? ((IPersistableModel<DataFactoryLinkedServiceReference>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(DataFactoryLinkedServiceReference)} does not support reading '{format}' format.");
+            }
+
+            using var document = JsonDocument.Parse(data);
+            return DeserializeDataFactoryLinkedServiceReference(document.RootElement);
+        }
+
+        string IPersistableModel<DataFactoryLinkedServiceReference>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
 
         internal static DataFactoryLinkedServiceReference? DeserializeDataFactoryLinkedServiceReference(JsonElement element)
         {
@@ -87,9 +136,9 @@ namespace Azure.Core.Expressions.DataFactory
             return new DataFactoryLinkedServiceReference(kind, referenceName, Optional.ToDictionary(parameters));
         }
 
-        internal partial class DataFactoryLinkedServiceReferenceConverter : JsonConverter<DataFactoryLinkedServiceReference?>
+        internal partial class DataFactoryLinkedServiceReferenceConverter : JsonConverter<DataFactoryLinkedServiceReference>
         {
-            public override void Write(Utf8JsonWriter writer, DataFactoryLinkedServiceReference? model, JsonSerializerOptions options)
+            public override void Write(Utf8JsonWriter writer, DataFactoryLinkedServiceReference model, JsonSerializerOptions options)
             {
                 (model as IUtf8JsonSerializable)?.Write(writer);
             }

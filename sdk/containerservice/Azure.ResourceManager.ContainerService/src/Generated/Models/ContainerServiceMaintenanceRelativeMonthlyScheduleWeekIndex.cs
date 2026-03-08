@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace Azure.ResourceManager.ContainerService.Models
 {
-    /// <summary> Specifies on which week of the month the dayOfWeek applies. </summary>
+    /// <summary> The week index. Specifies on which week of the month the dayOfWeek applies. </summary>
     public readonly partial struct ContainerServiceMaintenanceRelativeMonthlyScheduleWeekIndex : IEquatable<ContainerServiceMaintenanceRelativeMonthlyScheduleWeekIndex>
     {
         private readonly string _value;

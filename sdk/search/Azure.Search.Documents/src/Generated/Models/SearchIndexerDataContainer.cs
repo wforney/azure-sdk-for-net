@@ -6,12 +6,17 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Represents information about the entity (such as Azure SQL table or CosmosDB collection) that will be indexed. </summary>
     public partial class SearchIndexerDataContainer
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataContainer"/>. </summary>
         /// <param name="name"> The name of the table or view (for Azure SQL data source) or collection (for CosmosDB data source) that will be indexed. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="name"/> is null. </exception>
@@ -25,14 +30,17 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="SearchIndexerDataContainer"/>. </summary>
         /// <param name="name"> The name of the table or view (for Azure SQL data source) or collection (for CosmosDB data source) that will be indexed. </param>
         /// <param name="query"> A query that is applied to this data container. The syntax and meaning of this parameter is datasource-specific. Not supported by Azure SQL datasources. </param>
-        internal SearchIndexerDataContainer(string name, string query)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchIndexerDataContainer(string name, string query, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Name = name;
             Query = query;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the table or view (for Azure SQL data source) or collection (for CosmosDB data source) that will be indexed. </summary>
         public string Name { get; set; }
+
         /// <summary> A query that is applied to this data container. The syntax and meaning of this parameter is datasource-specific. Not supported by Azure SQL datasources. </summary>
         public string Query { get; set; }
     }

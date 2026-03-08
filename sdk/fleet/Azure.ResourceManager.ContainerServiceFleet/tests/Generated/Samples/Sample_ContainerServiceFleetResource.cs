@@ -21,7 +21,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetsAFleetResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_Get.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_Get.json
             // this example is just showing the usage of "Fleets_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -51,7 +51,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetsAFleetResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_Get_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_Get_MaximumSet_Gen.json
             // this example is just showing the usage of "Fleets_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -81,7 +81,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Delete_DeletesAFleetResourceAsynchronouslyWithALongRunningOperation()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_Delete.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_Delete.json
             // this example is just showing the usage of "Fleets_Delete" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -98,7 +98,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
             ContainerServiceFleetResource containerServiceFleet = client.GetContainerServiceFleetResource(containerServiceFleetResourceId);
 
             // invoke the operation
-            await containerServiceFleet.DeleteAsync(WaitUntil.Completed);
+            await containerServiceFleet.DeleteAsync(WaitUntil.Completed, ifMatch: (ETag?)null);
 
             Console.WriteLine("Succeeded");
         }
@@ -107,7 +107,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Delete_DeletesAFleetResourceAsynchronouslyWithALongRunningOperationGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_Delete_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_Delete_MaximumSet_Gen.json
             // this example is just showing the usage of "Fleets_Delete" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -124,7 +124,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
             ContainerServiceFleetResource containerServiceFleet = client.GetContainerServiceFleetResource(containerServiceFleetResourceId);
 
             // invoke the operation
-            string ifMatch = "crsgokrdxddjsvqxpplerummnmzav";
+            ETag ifMatch = new ETag("crsgokrdxddjsvqxpplerummnmzav");
             await containerServiceFleet.DeleteAsync(WaitUntil.Completed, ifMatch: ifMatch);
 
             Console.WriteLine("Succeeded");
@@ -134,7 +134,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Update_UpdateAFleet()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_PatchTags.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_PatchTags.json
             // this example is just showing the usage of "Fleets_Update" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -159,7 +159,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
 ["tier"] = "secure"
 },
             };
-            string ifMatch = "dfjkwelr7384";
+            ETag ifMatch = new ETag("dfjkwelr7384");
             ArmOperation<ContainerServiceFleetResource> lro = await containerServiceFleet.UpdateAsync(WaitUntil.Completed, patch, ifMatch: ifMatch);
             ContainerServiceFleetResource result = lro.Value;
 
@@ -174,7 +174,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task Update_UpdateAFleetGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_Update_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_Update_MaximumSet_Gen.json
             // this example is just showing the usage of "Fleets_Update" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -202,7 +202,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
 },
                 },
             };
-            string ifMatch = "lgoeir";
+            ETag ifMatch = new ETag("lgoeir");
             ArmOperation<ContainerServiceFleetResource> lro = await containerServiceFleet.UpdateAsync(WaitUntil.Completed, patch, ifMatch: ifMatch);
             ContainerServiceFleetResource result = lro.Value;
 
@@ -217,7 +217,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task GetCredentials_ListsTheUserCredentialsOfAFleet()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_ListCredentialsResult.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_ListCredentialsResult.json
             // this example is just showing the usage of "Fleets_ListCredentials" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -243,7 +243,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task GetCredentials_ListsTheUserCredentialsOfAFleetGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/Fleets_ListCredentials_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/Fleets_ListCredentials_MaximumSet_Gen.json
             // this example is just showing the usage of "Fleets_ListCredentials" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line

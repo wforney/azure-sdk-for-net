@@ -69,6 +69,11 @@ jobs:
           displayName: 'Packages to be published'
 
         - ${{ if eq(parameters.Registry, 'https://registry.npmjs.org/') }}:
+        
+          - template: /eng/common/pipelines/templates/steps/reset-npmrc.yml
+            parameters:
+              Registry: ${{ parameters.Registry }}
+
           - task: EsrpRelease@9
             displayName: 'Publish ${{ parameters.ArtifactName }} via ESRP'
             condition: and(succeeded(), ne(variables['SkipPublishing'], 'true'))
@@ -99,6 +104,7 @@ jobs:
                 $packageTags = npm view $packageJson.name "dist-tags" -json -silent | ConvertFrom-Json
                 if ($LASTEXITCODE -ne 0 -or !$packageTags) {
                   Write-Warning "Failed to retrieve dist-tags for $packageJson.name. It is possible the package hasn't been indexed yet so ignoring."
+                  $global:LASTEXITCODE = 0
                   continue
                 }
 

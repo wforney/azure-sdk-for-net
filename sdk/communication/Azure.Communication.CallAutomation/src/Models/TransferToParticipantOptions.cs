@@ -42,6 +42,26 @@ namespace Azure.Communication.CallAutomation
         }
 
         /// <summary>
+        /// Creates a new TransferToParticipantOptions object.
+        /// </summary>
+        /// <param name="targetIdentity"> The target to transfer the call to. </param>
+        public TransferToParticipantOptions(TeamsExtensionUserIdentifier targetIdentity)
+        {
+            Target = targetIdentity;
+            CustomCallingContext = new CustomCallingContext(sipHeaders: null, voipHeaders: new Dictionary<string, string>());
+        }
+
+        /// <summary>
+        /// Creates a new TransferToParticipantOptions object.
+        /// </summary>
+        /// <param name="targetIdentity"> The target to transfer the call to. </param>
+        public TransferToParticipantOptions(MicrosoftTeamsAppIdentifier targetIdentity)
+        {
+            Target = targetIdentity;
+            CustomCallingContext = new CustomCallingContext(sipHeaders: null, voipHeaders: new Dictionary<string, string>());
+        }
+
+        /// <summary>
         /// The target callee.
         /// </summary>
         /// <value></value>

@@ -20,7 +20,7 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
         [Ignore("Only validating compilation of examples")]
         public async Task CreateOrUpdate_CreateAFleetUpdateStrategy()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateStrategies_CreateOrUpdate.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateStrategies_CreateOrUpdate.json
             // this example is just showing the usage of "FleetUpdateStrategies_CreateOrUpdate" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -40,16 +40,34 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Samples
             FleetUpdateStrategyCollection collection = containerServiceFleet.GetFleetUpdateStrategies();
 
             // invoke the operation
-            string updateStrategyName = "strartegy1";
+            string updateStrategyName = "strategy1";
             FleetUpdateStrategyData data = new FleetUpdateStrategyData
             {
                 StrategyStages = {new ContainerServiceFleetUpdateStage("stage1")
 {
-Groups = {new ContainerServiceFleetUpdateGroup("group-a")},
+Groups = {new ContainerServiceFleetUpdateGroup("group-a")
+{
+BeforeGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate before group-a",
+}},
+AfterGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate after group-a",
+}},
+}},
 AfterStageWaitInSeconds = 3600,
+BeforeGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate before stage1",
+}},
+AfterGates = {new ContainerServiceFleetGateConfiguration(ContainerServiceFleetGateType.Approval)
+{
+DisplayName = "gate after stage1",
+}},
 }},
             };
-            ArmOperation<FleetUpdateStrategyResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, updateStrategyName, data);
+            ArmOperation<FleetUpdateStrategyResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, updateStrategyName, data, matchConditions: null);
             FleetUpdateStrategyResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -63,7 +81,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task CreateOrUpdate_CreateAFleetUpdateStrategyGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/FleetUpdateStrategies_CreateOrUpdate_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/FleetUpdateStrategies_CreateOrUpdate_MaximumSet_Gen.json
             // this example is just showing the usage of "FleetUpdateStrategies_CreateOrUpdate" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -92,9 +110,12 @@ Groups = {new ContainerServiceFleetUpdateGroup("group-a")},
 AfterStageWaitInSeconds = 3600,
 }},
             };
-            string ifMatch = "bttptpmhheves";
-            string ifNoneMatch = "tlx";
-            ArmOperation<FleetUpdateStrategyResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, updateStrategyName, data, ifMatch: ifMatch, ifNoneMatch: ifNoneMatch);
+            MatchConditions matchConditions = new MatchConditions
+            {
+                IfMatch = new ETag("bttptpmhheves"),
+                IfNoneMatch = new ETag("tlx")
+            };
+            ArmOperation<FleetUpdateStrategyResource> lro = await collection.CreateOrUpdateAsync(WaitUntil.Completed, updateStrategyName, data, matchConditions: matchConditions);
             FleetUpdateStrategyResource result = lro.Value;
 
             // the variable result is a resource, you could call other operations on this instance as well
@@ -108,7 +129,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetAFleetUpdateStrategyResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateStrategies_Get.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateStrategies_Get.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -142,7 +163,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Get_GetAFleetUpdateStrategyResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -176,7 +197,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task GetAll_ListTheFleetUpdateStrategyResourcesByFleet()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateStrategies_ListByFleet.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateStrategies_ListByFleet.json
             // this example is just showing the usage of "FleetUpdateStrategies_ListByFleet" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -212,7 +233,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task GetAll_ListTheFleetUpdateStrategyResourcesByFleetGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/FleetUpdateStrategies_ListByFleet_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/FleetUpdateStrategies_ListByFleet_MaximumSet_Gen.json
             // this example is just showing the usage of "FleetUpdateStrategies_ListByFleet" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -248,7 +269,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Exists_GetAFleetUpdateStrategyResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateStrategies_Get.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateStrategies_Get.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -278,7 +299,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task Exists_GetAFleetUpdateStrategyResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -308,7 +329,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task GetIfExists_GetAFleetUpdateStrategyResource()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/UpdateStrategies_Get.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/UpdateStrategies_Get.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line
@@ -350,7 +371,7 @@ AfterStageWaitInSeconds = 3600,
         [Ignore("Only validating compilation of examples")]
         public async Task GetIfExists_GetAFleetUpdateStrategyResourceGeneratedByMaximumSetRule()
         {
-            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/stable/2025-03-01/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
+            // Generated from example definition: specification/containerservice/resource-manager/Microsoft.ContainerService/fleet/preview/2025-04-01-preview/examples/FleetUpdateStrategies_Get_MaximumSet_Gen.json
             // this example is just showing the usage of "FleetUpdateStrategies_Get" operation, for the dependent resources, they will have to be created separately.
 
             // get your azure access token, for more details of how Azure SDK get your access token, please refer to https://learn.microsoft.com/en-us/dotnet/azure/sdk/authentication?tabs=command-line

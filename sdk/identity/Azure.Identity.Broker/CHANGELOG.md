@@ -1,10 +1,50 @@
 # Release History
 
+## 1.5.0-beta.1 (Unreleased)
+
+### Features Added
+
+### Breaking Changes
+
+### Bugs Fixed
+
+### Other Changes
+
+## 1.4.0 (2026-02-26)
+
+### Features Added
+
+- Added experimental `Microsoft.Extensions.Configuration` and `Microsoft.Extensions.DependencyInjection` integration for Azure SDK clients. For details, see the [Configuration and Dependency Injection](https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/Azure.Core/src/docs/ConfigurationAndDependencyInjection.md) documentation.
+
+## 1.3.1 (2025-11-19)
+
+### Other Changes
+
+- Updated `Microsoft.Identity.Client.Broker` dependency to version 4.78.0
+- Updated `Azure.Identity` dependency to version 1.17.1
+
+## 1.3.0 (2025-09-04)
+
+### Breaking Changes
+
+- Deprecated `SharedTokenCacheCredentialBrokerOptions`. The supporting credential (`SharedTokenCacheCredential`) was a legacy mechanism for authenticating clients using credentials provided to Visual Studio. For brokered authentication, consider using `InteractiveBrowserCredential` instead.
+
+### Other Changes
+
+- Updated `Microsoft.Identity.Client.Broker` dependency to version 4.76.0
+- Updated `Azure.Identity` dependency to version 1.15.0
+
 ## 1.3.0-beta.4 (2025-07-11)
 
 ### Features Added
 
 - Support Microsoft Broker on macOS.
+
+### Other Changes
+
+- Updated `Azure.Identity` to 1.14.2 to apply a security fix in the updated `Microsoft.Identity.Client` dependency.
+
+## 1.2.1 (2025-07-11)
 
 ### Other Changes
 

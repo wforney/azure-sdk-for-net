@@ -16,25 +16,6 @@ trigger:
     - eng/packages/
     - eng/scripts/typespec/
 
-pr:
-  branches:
-    include:
-    - main
-    - feature/*
-    - hotfix/*
-    - release/*
-  paths:
-    include:
-    - sdk/core/
-    - sdk/testcommon/
-    - eng/
-    - samples/
-    exclude:
-    - eng/mgmt/
-    - eng/common/
-    - eng/packages/
-    - eng/scripts/typespec/
-
 extends:
   template: /eng/pipelines/templates/stages/archetype-sdk-client.yml
   parameters:
@@ -47,10 +28,11 @@ extends:
       triggeringPaths:
       - /sdk/resourcemanager/
       - /eng/Versioning.targets
-      - /eng/Packages.Data.props
+      - /eng/centralpackagemanagement
       - /eng/Directory.Build.Common.props
       - /eng/Directory.Build.Common.targets
       - /eng/service.proj
+      - /sdk/keyvault/Azure.Security.KeyVault.Secrets/
 
     - name: Azure.Core.Experimental
       safeName: AzureCoreExperimental
@@ -66,12 +48,9 @@ extends:
       safeName: AzureCoreAmqp
     - name: System.ClientModel
       safeName: SystemClientModel
-    CheckAOTCompat: true
-    AOTTestInputs:
-    - ArtifactName: Azure.Core
-      ExpectedWarningsFilepath: /Azure.Core/tests/compatibility/ExpectedAotWarnings.txt
-    - ArtifactName: System.ClientModel
-      ExpectedWarningsFilepath: None
+    - name: Microsoft.ClientModel.TestFramework
+      safeName: MicrosoftClientModelTestFramework
+      skipReleaseStage: true
 
     TestSetupSteps:
     - template: /sdk/storage/tests-install-azurite.yml

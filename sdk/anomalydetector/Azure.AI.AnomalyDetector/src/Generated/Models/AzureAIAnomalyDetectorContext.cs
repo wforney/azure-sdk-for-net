@@ -11,8 +11,31 @@ namespace Azure.AI.AnomalyDetector
 {
     /// <summary>
     /// Context class which will be filled in by the System.ClientModel.SourceGeneration.
-    /// For more information see 'https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md'
+    /// For more information <see href='https://github.com/Azure/azure-sdk-for-net/blob/main/sdk/core/System.ClientModel/src/docs/ModelReaderWriterContext.md' />
     /// </summary>
+    [ModelReaderWriterBuildable(typeof(AlignPolicy))]
+    [ModelReaderWriterBuildable(typeof(AnomalyDetectionModel))]
+    [ModelReaderWriterBuildable(typeof(AnomalyInterpretation))]
+    [ModelReaderWriterBuildable(typeof(AnomalyState))]
+    [ModelReaderWriterBuildable(typeof(AnomalyValue))]
+    [ModelReaderWriterBuildable(typeof(CorrelationChanges))]
+    [ModelReaderWriterBuildable(typeof(DiagnosticsInfo))]
+    [ModelReaderWriterBuildable(typeof(ErrorResponse))]
+    [ModelReaderWriterBuildable(typeof(ModelInfo))]
+    [ModelReaderWriterBuildable(typeof(ModelList))]
+    [ModelReaderWriterBuildable(typeof(ModelState))]
+    [ModelReaderWriterBuildable(typeof(MultivariateBatchDetectionOptions))]
+    [ModelReaderWriterBuildable(typeof(MultivariateBatchDetectionResultSummary))]
+    [ModelReaderWriterBuildable(typeof(MultivariateDetectionResult))]
+    [ModelReaderWriterBuildable(typeof(MultivariateLastDetectionOptions))]
+    [ModelReaderWriterBuildable(typeof(MultivariateLastDetectionResult))]
+    [ModelReaderWriterBuildable(typeof(TimeSeriesPoint))]
+    [ModelReaderWriterBuildable(typeof(UnivariateChangePointDetectionOptions))]
+    [ModelReaderWriterBuildable(typeof(UnivariateChangePointDetectionResult))]
+    [ModelReaderWriterBuildable(typeof(UnivariateDetectionOptions))]
+    [ModelReaderWriterBuildable(typeof(UnivariateLastDetectionResult))]
+    [ModelReaderWriterBuildable(typeof(VariableState))]
+    [ModelReaderWriterBuildable(typeof(VariableValues))]
     public partial class AzureAIAnomalyDetectorContext : ModelReaderWriterContext
     {
     }

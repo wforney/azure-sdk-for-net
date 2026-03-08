@@ -6,9 +6,12 @@
 #nullable disable
 
 using System.ClientModel.Primitives;
+using Parameters.Spread._Alias;
+using Parameters.Spread._Model;
 
 namespace Parameters.Spread
 {
+    [ModelReaderWriterBuildable(typeof(BodyParameter))]
     public partial class ParametersSpreadContext : ModelReaderWriterContext
     {
     }

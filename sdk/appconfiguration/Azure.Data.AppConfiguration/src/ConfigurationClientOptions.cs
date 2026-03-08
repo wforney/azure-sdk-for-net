@@ -2,14 +2,19 @@
 // Licensed under the MIT License.
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using Azure.Core;
+using Microsoft.Extensions.Configuration;
+using Microsoft.TypeSpec.Generator.Customizations;
 
-[assembly: CodeGenSuppressType("ConfigurationClientOptions")]
 namespace Azure.Data.AppConfiguration
 {
+    // CUSTOM:
+    // - Suppressed generated client options.
     /// <summary>
     /// Options that allow users to configure the requests sent to the App Configuration service.
     /// </summary>
+    [CodeGenSuppress("ConfigurationClientOptions", typeof(ServiceVersion))]
     public partial class ConfigurationClientOptions : ClientOptions
     {
         private const ServiceVersion LatestVersion = ServiceVersion.V2023_11_01;
@@ -57,16 +62,33 @@ namespace Azure.Data.AppConfiguration
         /// </param>
         public ConfigurationClientOptions(ServiceVersion version = LatestVersion)
         {
-            Version = version switch
-            {
-                ServiceVersion.V1_0 => "1.0",
-                ServiceVersion.V2023_10_01 => "2023-10-01",
-                ServiceVersion.V2023_11_01 => "2023-11-01",
-
-                _ => throw new NotSupportedException()
-            };
+            Version = GetVersionString(version);
             this.ConfigureLogging();
         }
+
+        [Experimental("SCME0002")]
+        internal ConfigurationClientOptions(IConfigurationSection section)
+            : base(section, null)
+        {
+            Version = GetVersionString(LatestVersion);
+
+            string audience = section["Audience"];
+            if (!string.IsNullOrEmpty(audience))
+            {
+                Audience = new AppConfigurationAudience(audience);
+            }
+
+            this.ConfigureLogging();
+        }
+
+        private static string GetVersionString(ServiceVersion version) => version switch
+        {
+            ServiceVersion.V1_0 => "1.0",
+            ServiceVersion.V2023_10_01 => "2023-10-01",
+            ServiceVersion.V2023_11_01 => "2023-11-01",
+
+            _ => throw new NotSupportedException()
+        };
 
         internal string GetDefaultScope(Uri uri)
         {

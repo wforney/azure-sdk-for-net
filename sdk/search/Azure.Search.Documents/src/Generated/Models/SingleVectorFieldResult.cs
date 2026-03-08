@@ -5,27 +5,36 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Models
 {
-    /// <summary> A single vector field result. Both @search.score and vector similarity values are returned. Vector similarity is related to @search.score by an equation. </summary>
+    /// <summary> A single vector field result. Both. </summary>
     public partial class SingleVectorFieldResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SingleVectorFieldResult"/>. </summary>
         internal SingleVectorFieldResult()
         {
         }
 
         /// <summary> Initializes a new instance of <see cref="SingleVectorFieldResult"/>. </summary>
-        /// <param name="searchScore"> The @search.score value that is calculated from the vector similarity score. This is the score that's visible in a pure single-field single-vector query. </param>
+        /// <param name="searchScore"> The. </param>
         /// <param name="vectorSimilarity"> The vector similarity score for this document. Note this is the canonical definition of similarity metric, not the 'distance' version. For example, cosine similarity instead of cosine distance. </param>
-        internal SingleVectorFieldResult(double? searchScore, double? vectorSimilarity)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SingleVectorFieldResult(double? searchScore, double? vectorSimilarity, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             SearchScore = searchScore;
             VectorSimilarity = vectorSimilarity;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
-        /// <summary> The @search.score value that is calculated from the vector similarity score. This is the score that's visible in a pure single-field single-vector query. </summary>
+        /// <summary> The. </summary>
         public double? SearchScore { get; }
+
         /// <summary> The vector similarity score for this document. Note this is the canonical definition of similarity metric, not the 'distance' version. For example, cosine similarity instead of cosine distance. </summary>
         public double? VectorSimilarity { get; }
     }

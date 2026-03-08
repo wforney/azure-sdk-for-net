@@ -5,26 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Response from a List Indexes request. If successful, it includes the full definitions of all indexes. </summary>
     internal partial class ListIndexesResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ListIndexesResult"/>. </summary>
-        /// <param name="indexes"> The indexes in the Search service. </param>
-        internal ListIndexesResult(IEnumerable<SearchIndex> indexes)
+        internal ListIndexesResult()
         {
-            Indexes = indexes.ToList();
+            Indexes = new ChangeTrackingList<SearchIndex>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ListIndexesResult"/>. </summary>
         /// <param name="indexes"> The indexes in the Search service. </param>
-        internal ListIndexesResult(IReadOnlyList<SearchIndex> indexes)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ListIndexesResult(IReadOnlyList<SearchIndex> indexes, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Indexes = indexes;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The indexes in the Search service. </summary>

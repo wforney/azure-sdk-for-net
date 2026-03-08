@@ -1,9 +1,8 @@
-﻿// Copyright (c) Microsoft Corporation. All rights reserved.
+// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
 using System.Threading.Tasks;
 using Azure.Core;
-using Azure.Core.TestFramework;
 using Azure.Provisioning.Authorization;
 using Azure.Provisioning.Expressions;
 using Azure.Provisioning.Roles;
@@ -12,22 +11,34 @@ using NUnit.Framework;
 
 namespace Azure.Provisioning.Storage.Tests;
 
-public class BasicStorageTests(bool async)
-    : ProvisioningTestBase(async /*, skipTools: true, skipLiveCalls: true /**/)
+public class BasicStorageTests
 {
-    [Test]
-    public async Task CreateDefault()
+    internal static Trycep CreateDefaultStorageTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
-            new StorageAccount("storage", StorageAccount.ResourceVersions.V2023_01_01)
+        return new Trycep().Define(
+            ctx =>
             {
-                Kind = StorageKind.StorageV2,
-                Sku = { Name = StorageSkuName.StandardLrs },
-                IsHnsEnabled = true,
-                AllowBlobPublicAccess = false
-            })
-        .Compare(
+                #region Snippet:StorageAccountBasic
+                Infrastructure infra = new();
+
+                StorageAccount storage = new("storage", StorageAccount.ResourceVersions.V2023_01_01)
+                {
+                    Kind = StorageKind.StorageV2,
+                    Sku = { Name = StorageSkuName.StandardLrs },
+                    IsHnsEnabled = true,
+                    AllowBlobPublicAccess = false
+                };
+                infra.Add(storage);
+                #endregion
+
+                return infra;
+            });
+    }
+    [Test]
+    public async Task CreateDefaultStorage()
+    {
+        await using Trycep test = CreateDefaultStorageTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -44,16 +55,12 @@ public class BasicStorageTests(bool async)
                 isHnsEnabled: true
               }
             }
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    public async Task CreateSimpleBlobs()
+    internal static Trycep CreateSimpleStorageBlobsTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -69,12 +76,18 @@ public class BasicStorageTests(bool async)
                 storage.IsHnsEnabled.ClearValue();
                 infra.Add(storage);
 
-                BlobService blobs = new(nameof(blobs)) { Parent = storage, DependsOn = { storage } };
+                BlobService blobs = new(nameof(blobs), BlobService.ResourceVersions.V2024_01_01) { Parent = storage, DependsOn = { storage } };
                 infra.Add(blobs);
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    public async Task CreateSimpleStorageBlobs()
+    {
+        await using Trycep test = CreateSimpleStorageBlobsTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -98,16 +111,12 @@ public class BasicStorageTests(bool async)
                 storage
               ]
             }
-            """)
-        .Lint(ignore: ["no-unnecessary-dependson"])
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    public async Task AddStorageRole()
+    internal static Trycep CreateAddStorageRoleTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -122,15 +131,21 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(storage);
 
-                UserAssignedIdentity id = new(nameof(id));
+                UserAssignedIdentity id = new(nameof(id), UserAssignedIdentity.ResourceVersions.V2023_01_31);
                 infra.Add(id);
 
                 RoleAssignment role = storage.CreateRoleAssignment(StorageBuiltInRole.StorageBlobDataReader, id);
                 infra.Add(role);
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    public async Task AddStorageRole()
+    {
+        await using Trycep test = CreateAddStorageRoleTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -162,16 +177,12 @@ public class BasicStorageTests(bool async)
               }
               scope: storage
             }
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    public async Task AddStorageRoleWithExplicitPrincipal()
+    internal static Trycep CreateAddStorageRoleWithExplicitPrincipalTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -186,7 +197,7 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(storage);
 
-                UserAssignedIdentity id = new(nameof(id));
+                UserAssignedIdentity id = new(nameof(id), UserAssignedIdentity.ResourceVersions.V2023_01_31);
                 infra.Add(id);
 
                 RoleAssignment role = storage.CreateRoleAssignment(StorageBuiltInRole.StorageBlobDataReader, RoleManagementPrincipalType.ServicePrincipal, id.PrincipalId, "custom");
@@ -197,8 +208,14 @@ public class BasicStorageTests(bool async)
                 infra.Add(role);
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    public async Task AddStorageRoleWithExplicitPrincipal()
+    {
+        await using Trycep test = CreateAddStorageRoleWithExplicitPrincipalTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -240,16 +257,12 @@ public class BasicStorageTests(bool async)
               }
               scope: storage
             }
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    public async Task GetEndpoint()
+    internal static Trycep CreateGetEndpointTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -264,7 +277,7 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(storage);
 
-                BlobService blobs = new(nameof(blobs)) { Parent = storage };
+                BlobService blobs = new(nameof(blobs), BlobService.ResourceVersions.V2024_01_01) { Parent = storage };
                 infra.Add(blobs);
 
                 infra.Add(new ProvisioningOutput("blobs_endpoint", typeof(string)) { Value = storage.PrimaryEndpoints.BlobUri });
@@ -279,8 +292,14 @@ public class BasicStorageTests(bool async)
                 infra.Add(new ProvisioningOutput("computed_endpoint", typeof(string)) { Value = computed });
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    public async Task GetEndpoint()
+    {
+        await using Trycep test = CreateGetEndpointTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -306,16 +325,12 @@ public class BasicStorageTests(bool async)
             output blobs_endpoint string = storage.properties.primaryEndpoints.blob
 
             output computed_endpoint string = 'https://${storage.name}.blob.core.windows.net'
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    public async Task SimpleConnStr()
+    internal static Trycep CreateSimpleConnStringTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -330,14 +345,20 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(storage);
 
-                BlobService blobs = new(nameof(blobs)) { Parent = storage };
+                BlobService blobs = new(nameof(blobs), BlobService.ResourceVersions.V2024_01_01) { Parent = storage };
                 infra.Add(blobs);
 
                 infra.Add(new ProvisioningOutput("blobs_endpoint", typeof(string)) { Value = storage.PrimaryEndpoints.BlobUri });
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    public async Task SimpleConnString()
+    {
+        await using Trycep test = CreateSimpleConnStringTest();
+        test.Compare(
             """
             @description('The location for the resource(s) to be deployed.')
             param location string = resourceGroup().location
@@ -361,17 +382,12 @@ public class BasicStorageTests(bool async)
             }
 
             output blobs_endpoint string = storage.properties.primaryEndpoints.blob
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/main.bicep")]
-    public async Task CreateStandardStorageAccount()
+    internal static Trycep CreateStandardStorageAccountTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -385,7 +401,7 @@ public class BasicStorageTests(bool async)
                 infra.Add(storageAccountType);
 
                 StorageAccount sa =
-                    new(nameof(sa))
+                    new(nameof(sa), StorageAccount.ResourceVersions.V2024_01_01)
                     {
                         Sku = new StorageSku { Name = storageAccountType },
                         Kind = StorageKind.StorageV2
@@ -396,8 +412,15 @@ public class BasicStorageTests(bool async)
                 infra.Add(new ProvisioningOutput("storageAccountId", typeof(string)) { Value = sa.Id });
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/main.bicep")]
+    public async Task CreateStandardStorageAccount()
+    {
+        await using Trycep test = CreateStandardStorageAccountTest();
+        test.Compare(
             """
             @description('Storage Account type')
             param storageAccountType string = 'Standard_LRS'
@@ -417,17 +440,12 @@ public class BasicStorageTests(bool async)
             output storageAccountName string = sa.name
 
             output storageAccountId string = sa.id
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-blob-container/main.bicep")]
-    public async Task CreateStorageAccountAndContainer()
+    internal static Trycep CreateStorageAccountAndContainerTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -441,7 +459,7 @@ public class BasicStorageTests(bool async)
                 infra.Add(containerName);
 
                 StorageAccount sa =
-                    new(nameof(sa))
+                    new(nameof(sa), StorageAccount.ResourceVersions.V2024_01_01)
                     {
                         Sku = new StorageSku { Name = StorageSkuName.StandardLrs },
                         Kind = StorageKind.StorageV2,
@@ -449,7 +467,7 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(sa);
 
-                BlobService blobs = new(nameof(blobs)) { Parent = sa };
+                BlobService blobs = new(nameof(blobs), BlobService.ResourceVersions.V2024_01_01) { Parent = sa };
                 infra.Add(blobs);
 
                 BlobContainer container =
@@ -461,8 +479,15 @@ public class BasicStorageTests(bool async)
                 infra.Add(container);
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-blob-container/main.bicep")]
+    public async Task CreateStorageAccountAndContainer()
+    {
+        await using Trycep test = CreateStorageAccountAndContainerTest();
+        test.Compare(
             """
             @description('The container name.')
             param containerName string = 'mycontainer'
@@ -491,17 +516,12 @@ public class BasicStorageTests(bool async)
               name: containerName
               parent: blobs
             }
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-service-encryption-create/main.bicep")]
-    public async Task CreateStorageAccountWithServiceEncryption()
+    internal static Trycep CreateStorageAccountWithServiceEncryptionTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -515,7 +535,7 @@ public class BasicStorageTests(bool async)
                 infra.Add(storageAccountType);
 
                 StorageAccount sa =
-                    new(nameof(sa))
+                    new(nameof(sa), StorageAccount.ResourceVersions.V2024_01_01)
                     {
                         Sku = new StorageSku { Name = storageAccountType },
                         Kind = StorageKind.Storage,
@@ -536,8 +556,15 @@ public class BasicStorageTests(bool async)
                 infra.Add(new ProvisioningOutput("storageAccountId", typeof(string)) { Value = sa.Id });
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-service-encryption-create/main.bicep")]
+    public async Task CreateStorageAccountWithServiceEncryption()
+    {
+        await using Trycep test = CreateStorageAccountWithServiceEncryptionTest();
+        test.Compare(
             """
             @description('Storage Account type')
             param storageAccountType string = 'Standard_LRS'
@@ -567,17 +594,12 @@ public class BasicStorageTests(bool async)
             output storageAccountName string = sa.name
 
             output storageAccountId string = sa.id
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 
-    [Test]
-    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/main.bicep")]
-    public async Task CreateFileShare ()
+    internal static Trycep CreateFileShareTest()
     {
-        await using Trycep test = CreateBicepTest();
-        await test.Define(
+        return new Trycep().Define(
             ctx =>
             {
                 Infrastructure infra = new();
@@ -591,7 +613,7 @@ public class BasicStorageTests(bool async)
                     };
                 infra.Add(sa);
 
-                FileService files = new(nameof(files)) { Parent = sa };
+                FileService files = new(nameof(files), FileService.ResourceVersions.V2024_01_01) { Parent = sa };
                 infra.Add(files);
 
                 FileShare share =
@@ -603,8 +625,15 @@ public class BasicStorageTests(bool async)
                 infra.Add(share);
 
                 return infra;
-            })
-        .Compare(
+            });
+    }
+
+    [Test]
+    [Description("https://github.com/Azure/azure-quickstart-templates/blob/master/quickstarts/microsoft.storage/storage-account-create/main.bicep")]
+    public async Task CreateFileShare()
+    {
+        await using Trycep test = CreateFileShareTest();
+        test.Compare(
             """
             resource sa 'Microsoft.Storage/storageAccounts@2023-01-01' = {
               name: take('sa${uniqueString(resourceGroup().id)}', 24)
@@ -624,8 +653,6 @@ public class BasicStorageTests(bool async)
               name: 'photos'
               parent: files
             }
-            """)
-        .Lint()
-        .ValidateAndDeployAsync();
+            """);
     }
 }

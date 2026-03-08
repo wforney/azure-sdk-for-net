@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Azure.ResourceManager.ContainerService.Models
 {
-    /// <summary> See [AKS custom node configuration](https://docs.microsoft.com/azure/aks/custom-node-configuration) for more details. </summary>
+    /// <summary> Kubelet configurations of agent nodes. See [AKS custom node configuration](https://docs.microsoft.com/azure/aks/custom-node-configuration) for more details. </summary>
     public partial class KubeletConfig
     {
         /// <summary>
@@ -52,12 +52,12 @@ namespace Azure.ResourceManager.ContainerService.Models
         }
 
         /// <summary> Initializes a new instance of <see cref="KubeletConfig"/>. </summary>
-        /// <param name="cpuManagerPolicy"> The default is 'none'. See [Kubernetes CPU management policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies) for more information. Allowed values are 'none' and 'static'. </param>
-        /// <param name="isCpuCfsQuotaEnabled"> The default is true. </param>
-        /// <param name="cpuCfsQuotaPeriod"> The default is '100ms.' Valid values are a sequence of decimal numbers with an optional fraction and a unit suffix. For example: '300ms', '2h45m'. Supported units are 'ns', 'us', 'ms', 's', 'm', and 'h'. </param>
-        /// <param name="imageGcHighThreshold"> To disable image garbage collection, set to 100. The default is 85%. </param>
-        /// <param name="imageGcLowThreshold"> This cannot be set higher than imageGcHighThreshold. The default is 80%. </param>
-        /// <param name="topologyManagerPolicy"> For more information see [Kubernetes Topology Manager](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager). The default is 'none'. Allowed values are 'none', 'best-effort', 'restricted', and 'single-numa-node'. </param>
+        /// <param name="cpuManagerPolicy"> The CPU Manager policy to use. The default is 'none'. See [Kubernetes CPU management policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies) for more information. Allowed values are 'none' and 'static'. </param>
+        /// <param name="isCpuCfsQuotaEnabled"> If CPU CFS quota enforcement is enabled for containers that specify CPU limits. The default is true. </param>
+        /// <param name="cpuCfsQuotaPeriod"> The CPU CFS quota period value. The default is '100ms.' Valid values are a sequence of decimal numbers with an optional fraction and a unit suffix. For example: '300ms', '2h45m'. Supported units are 'ns', 'us', 'ms', 's', 'm', and 'h'. </param>
+        /// <param name="imageGcHighThreshold"> The percent of disk usage after which image garbage collection is always run. To disable image garbage collection, set to 100. The default is 85%. </param>
+        /// <param name="imageGcLowThreshold"> The percent of disk usage before which image garbage collection is never run. This cannot be set higher than imageGcHighThreshold. The default is 80%. </param>
+        /// <param name="topologyManagerPolicy"> The Topology Manager policy to use. For more information see [Kubernetes Topology Manager](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager). The default is 'none'. Allowed values are 'none', 'best-effort', 'restricted', and 'single-numa-node'. </param>
         /// <param name="allowedUnsafeSysctls"> Allowed list of unsafe sysctls or unsafe sysctl patterns (ending in `*`). </param>
         /// <param name="failStartWithSwapOn"> If set to true it will make the Kubelet fail to start if swap is enabled on the node. </param>
         /// <param name="containerLogMaxSizeInMB"> The maximum size (e.g. 10Mi) of container log file before it is rotated. </param>
@@ -80,22 +80,22 @@ namespace Azure.ResourceManager.ContainerService.Models
             _serializedAdditionalRawData = serializedAdditionalRawData;
         }
 
-        /// <summary> The default is 'none'. See [Kubernetes CPU management policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies) for more information. Allowed values are 'none' and 'static'. </summary>
+        /// <summary> The CPU Manager policy to use. The default is 'none'. See [Kubernetes CPU management policies](https://kubernetes.io/docs/tasks/administer-cluster/cpu-management-policies/#cpu-management-policies) for more information. Allowed values are 'none' and 'static'. </summary>
         [WirePath("cpuManagerPolicy")]
         public string CpuManagerPolicy { get; set; }
-        /// <summary> The default is true. </summary>
+        /// <summary> If CPU CFS quota enforcement is enabled for containers that specify CPU limits. The default is true. </summary>
         [WirePath("cpuCfsQuota")]
         public bool? IsCpuCfsQuotaEnabled { get; set; }
-        /// <summary> The default is '100ms.' Valid values are a sequence of decimal numbers with an optional fraction and a unit suffix. For example: '300ms', '2h45m'. Supported units are 'ns', 'us', 'ms', 's', 'm', and 'h'. </summary>
+        /// <summary> The CPU CFS quota period value. The default is '100ms.' Valid values are a sequence of decimal numbers with an optional fraction and a unit suffix. For example: '300ms', '2h45m'. Supported units are 'ns', 'us', 'ms', 's', 'm', and 'h'. </summary>
         [WirePath("cpuCfsQuotaPeriod")]
         public string CpuCfsQuotaPeriod { get; set; }
-        /// <summary> To disable image garbage collection, set to 100. The default is 85%. </summary>
+        /// <summary> The percent of disk usage after which image garbage collection is always run. To disable image garbage collection, set to 100. The default is 85%. </summary>
         [WirePath("imageGcHighThreshold")]
         public int? ImageGcHighThreshold { get; set; }
-        /// <summary> This cannot be set higher than imageGcHighThreshold. The default is 80%. </summary>
+        /// <summary> The percent of disk usage before which image garbage collection is never run. This cannot be set higher than imageGcHighThreshold. The default is 80%. </summary>
         [WirePath("imageGcLowThreshold")]
         public int? ImageGcLowThreshold { get; set; }
-        /// <summary> For more information see [Kubernetes Topology Manager](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager). The default is 'none'. Allowed values are 'none', 'best-effort', 'restricted', and 'single-numa-node'. </summary>
+        /// <summary> The Topology Manager policy to use. For more information see [Kubernetes Topology Manager](https://kubernetes.io/docs/tasks/administer-cluster/topology-manager). The default is 'none'. Allowed values are 'none', 'best-effort', 'restricted', and 'single-numa-node'. </summary>
         [WirePath("topologyManagerPolicy")]
         public string TopologyManagerPolicy { get; set; }
         /// <summary> Allowed list of unsafe sysctls or unsafe sysctl patterns (ending in `*`). </summary>

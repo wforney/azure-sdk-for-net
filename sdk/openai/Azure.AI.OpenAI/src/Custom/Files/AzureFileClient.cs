@@ -1,12 +1,12 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
-using OpenAI.Files;
 using System.ClientModel;
 using System.ClientModel.Primitives;
 using System.Data.SqlTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
+using OpenAI.Files;
 
 namespace Azure.AI.OpenAI.Files;
 
@@ -51,7 +51,6 @@ internal partial class AzureFileClient : OpenAIFileClient
 
         using MultiPartFormDataBinaryContent content = CreateMultiPartContentWithMimeType(file, filename, purpose);
         ClientResult clientResult = UploadFile(content, content.ContentType, new() { CancellationToken = cancellationToken });
-
         return GetAzureFileResult(clientResult);
     }
 
@@ -128,7 +127,7 @@ internal partial class AzureFileClient : OpenAIFileClient
 
         if (expirationOptions is not null)
         {
-            multipartFormDataBinaryContent.Add(ModelReaderWriter.Write(expirationOptions), "expires_after");
+            multipartFormDataBinaryContent.Add(ModelReaderWriter.Write(expirationOptions, ModelReaderWriterOptions.Json, AzureAIOpenAIContext.Default), "expires_after");
         }
 
         return multipartFormDataBinaryContent;
@@ -145,6 +144,6 @@ internal partial class AzureFileClient : OpenAIFileClient
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    private static ClientResult<OpenAIFile> GetAzureFileResult(ClientResult protocolResult)
+    internal static ClientResult<OpenAIFile> GetAzureFileResult(ClientResult protocolResult)
         => GetTypedResult<OpenAIFile, AzureOpenAIFile>(protocolResult, AzureOpenAIFile.FromResponse);
 }

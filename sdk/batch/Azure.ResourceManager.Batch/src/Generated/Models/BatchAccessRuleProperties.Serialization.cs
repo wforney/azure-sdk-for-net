@@ -8,6 +8,7 @@
 using System;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.Text;
 using System.Text.Json;
 using Azure.Core;
 using Azure.ResourceManager.Resources.Models;
@@ -40,7 +41,7 @@ namespace Azure.ResourceManager.Batch.Models
                 writer.WritePropertyName("direction"u8);
                 writer.WriteStringValue(Direction.Value.ToString());
             }
-            if (Optional.IsCollectionDefined(AddressPrefixes))
+            if (options.Format != "W" && Optional.IsCollectionDefined(AddressPrefixes))
             {
                 writer.WritePropertyName("addressPrefixes"u8);
                 writer.WriteStartArray();
@@ -50,17 +51,17 @@ namespace Azure.ResourceManager.Batch.Models
                 }
                 writer.WriteEndArray();
             }
-            if (Optional.IsCollectionDefined(Subscriptions))
+            if (options.Format != "W" && Optional.IsCollectionDefined(Subscriptions))
             {
                 writer.WritePropertyName("subscriptions"u8);
                 writer.WriteStartArray();
                 foreach (var item in Subscriptions)
                 {
-                    JsonSerializer.Serialize(writer, item);
+                    ((IJsonModel<SubResource>)item).Write(writer, options);
                 }
                 writer.WriteEndArray();
             }
-            if (Optional.IsCollectionDefined(NetworkSecurityPerimeters))
+            if (options.Format != "W" && Optional.IsCollectionDefined(NetworkSecurityPerimeters))
             {
                 writer.WritePropertyName("networkSecurityPerimeters"u8);
                 writer.WriteStartArray();
@@ -80,7 +81,7 @@ namespace Azure.ResourceManager.Batch.Models
                 }
                 writer.WriteEndArray();
             }
-            if (Optional.IsCollectionDefined(EmailAddresses))
+            if (options.Format != "W" && Optional.IsCollectionDefined(EmailAddresses))
             {
                 writer.WritePropertyName("emailAddresses"u8);
                 writer.WriteStartArray();
@@ -90,7 +91,7 @@ namespace Azure.ResourceManager.Batch.Models
                 }
                 writer.WriteEndArray();
             }
-            if (Optional.IsCollectionDefined(PhoneNumbers))
+            if (options.Format != "W" && Optional.IsCollectionDefined(PhoneNumbers))
             {
                 writer.WritePropertyName("phoneNumbers"u8);
                 writer.WriteStartArray();
@@ -180,7 +181,7 @@ namespace Azure.ResourceManager.Batch.Models
                     List<SubResource> array = new List<SubResource>();
                     foreach (var item in property.Value.EnumerateArray())
                     {
-                        array.Add(JsonSerializer.Deserialize<SubResource>(item.GetRawText()));
+                        array.Add(ModelReaderWriter.Read<SubResource>(new BinaryData(Encoding.UTF8.GetBytes(item.GetRawText())), options, AzureResourceManagerBatchContext.Default));
                     }
                     subscriptions = array;
                     continue;

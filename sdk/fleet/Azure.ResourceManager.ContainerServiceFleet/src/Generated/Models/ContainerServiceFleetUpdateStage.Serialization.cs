@@ -9,14 +9,60 @@ using System;
 using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.ResourceManager.ContainerServiceFleet;
 
 namespace Azure.ResourceManager.ContainerServiceFleet.Models
 {
-    public partial class ContainerServiceFleetUpdateStage : IUtf8JsonSerializable, IJsonModel<ContainerServiceFleetUpdateStage>
+    /// <summary> Defines a stage which contains the groups to update and the steps to take (e.g., wait for a time period) before starting the next stage. </summary>
+    public partial class ContainerServiceFleetUpdateStage : IJsonModel<ContainerServiceFleetUpdateStage>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer) => ((IJsonModel<ContainerServiceFleetUpdateStage>)this).Write(writer, ModelSerializationExtensions.WireOptions);
+        /// <summary> Initializes a new instance of <see cref="ContainerServiceFleetUpdateStage"/> for deserialization. </summary>
+        internal ContainerServiceFleetUpdateStage()
+        {
+        }
 
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual ContainerServiceFleetUpdateStage PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeContainerServiceFleetUpdateStage(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureResourceManagerContainerServiceFleetContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<ContainerServiceFleetUpdateStage>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        ContainerServiceFleetUpdateStage IPersistableModel<ContainerServiceFleetUpdateStage>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<ContainerServiceFleetUpdateStage>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
         void IJsonModel<ContainerServiceFleetUpdateStage>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
@@ -28,19 +74,18 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Models
         /// <param name="options"> The client options for reading and writing models. </param>
         protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
-            var format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
+            string format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
             if (format != "J")
             {
                 throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support writing '{format}' format.");
             }
-
             writer.WritePropertyName("name"u8);
             writer.WriteStringValue(Name);
             if (Optional.IsCollectionDefined(Groups))
             {
                 writer.WritePropertyName("groups"u8);
                 writer.WriteStartArray();
-                foreach (var item in Groups)
+                foreach (ContainerServiceFleetUpdateGroup item in Groups)
                 {
                     writer.WriteObjectValue(item, options);
                 }
@@ -51,15 +96,35 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Models
                 writer.WritePropertyName("afterStageWaitInSeconds"u8);
                 writer.WriteNumberValue(AfterStageWaitInSeconds.Value);
             }
-            if (options.Format != "W" && _serializedAdditionalRawData != null)
+            if (Optional.IsCollectionDefined(BeforeGates))
             {
-                foreach (var item in _serializedAdditionalRawData)
+                writer.WritePropertyName("beforeGates"u8);
+                writer.WriteStartArray();
+                foreach (ContainerServiceFleetGateConfiguration item in BeforeGates)
+                {
+                    writer.WriteObjectValue(item, options);
+                }
+                writer.WriteEndArray();
+            }
+            if (Optional.IsCollectionDefined(AfterGates))
+            {
+                writer.WritePropertyName("afterGates"u8);
+                writer.WriteStartArray();
+                foreach (ContainerServiceFleetGateConfiguration item in AfterGates)
+                {
+                    writer.WriteObjectValue(item, options);
+                }
+                writer.WriteEndArray();
+            }
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
                 {
                     writer.WritePropertyName(item.Key);
 #if NET6_0_OR_GREATER
-				writer.WriteRawValue(item.Value);
+                    writer.WriteRawValue(item.Value);
 #else
-                    using (JsonDocument document = JsonDocument.Parse(item.Value, ModelSerializationExtensions.JsonDocumentOptions))
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
                     {
                         JsonSerializer.Serialize(writer, document.RootElement);
                     }
@@ -68,22 +133,27 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Models
             }
         }
 
-        ContainerServiceFleetUpdateStage IJsonModel<ContainerServiceFleetUpdateStage>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        ContainerServiceFleetUpdateStage IJsonModel<ContainerServiceFleetUpdateStage>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual ContainerServiceFleetUpdateStage JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
         {
-            var format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
+            string format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
             if (format != "J")
             {
                 throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support reading '{format}' format.");
             }
-
             using JsonDocument document = JsonDocument.ParseValue(ref reader);
             return DeserializeContainerServiceFleetUpdateStage(document.RootElement, options);
         }
 
-        internal static ContainerServiceFleetUpdateStage DeserializeContainerServiceFleetUpdateStage(JsonElement element, ModelReaderWriterOptions options = null)
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static ContainerServiceFleetUpdateStage DeserializeContainerServiceFleetUpdateStage(JsonElement element, ModelReaderWriterOptions options)
         {
-            options ??= ModelSerializationExtensions.WireOptions;
-
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
@@ -91,76 +161,79 @@ namespace Azure.ResourceManager.ContainerServiceFleet.Models
             string name = default;
             IList<ContainerServiceFleetUpdateGroup> groups = default;
             int? afterStageWaitInSeconds = default;
-            IDictionary<string, BinaryData> serializedAdditionalRawData = default;
-            Dictionary<string, BinaryData> rawDataDictionary = new Dictionary<string, BinaryData>();
-            foreach (var property in element.EnumerateObject())
+            IList<ContainerServiceFleetGateConfiguration> beforeGates = default;
+            IList<ContainerServiceFleetGateConfiguration> afterGates = default;
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("name"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    name = property.Value.GetString();
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("groups"u8))
+                if (prop.NameEquals("groups"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
                     List<ContainerServiceFleetUpdateGroup> array = new List<ContainerServiceFleetUpdateGroup>();
-                    foreach (var item in property.Value.EnumerateArray())
+                    foreach (var item in prop.Value.EnumerateArray())
                     {
                         array.Add(ContainerServiceFleetUpdateGroup.DeserializeContainerServiceFleetUpdateGroup(item, options));
                     }
                     groups = array;
                     continue;
                 }
-                if (property.NameEquals("afterStageWaitInSeconds"u8))
+                if (prop.NameEquals("afterStageWaitInSeconds"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    afterStageWaitInSeconds = property.Value.GetInt32();
+                    afterStageWaitInSeconds = prop.Value.GetInt32();
+                    continue;
+                }
+                if (prop.NameEquals("beforeGates"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    List<ContainerServiceFleetGateConfiguration> array = new List<ContainerServiceFleetGateConfiguration>();
+                    foreach (var item in prop.Value.EnumerateArray())
+                    {
+                        array.Add(ContainerServiceFleetGateConfiguration.DeserializeContainerServiceFleetGateConfiguration(item, options));
+                    }
+                    beforeGates = array;
+                    continue;
+                }
+                if (prop.NameEquals("afterGates"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
+                    {
+                        continue;
+                    }
+                    List<ContainerServiceFleetGateConfiguration> array = new List<ContainerServiceFleetGateConfiguration>();
+                    foreach (var item in prop.Value.EnumerateArray())
+                    {
+                        array.Add(ContainerServiceFleetGateConfiguration.DeserializeContainerServiceFleetGateConfiguration(item, options));
+                    }
+                    afterGates = array;
                     continue;
                 }
                 if (options.Format != "W")
                 {
-                    rawDataDictionary.Add(property.Name, BinaryData.FromString(property.Value.GetRawText()));
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            serializedAdditionalRawData = rawDataDictionary;
-            return new ContainerServiceFleetUpdateStage(name, groups ?? new ChangeTrackingList<ContainerServiceFleetUpdateGroup>(), afterStageWaitInSeconds, serializedAdditionalRawData);
+            return new ContainerServiceFleetUpdateStage(
+                name,
+                groups ?? new ChangeTrackingList<ContainerServiceFleetUpdateGroup>(),
+                afterStageWaitInSeconds,
+                beforeGates ?? new ChangeTrackingList<ContainerServiceFleetGateConfiguration>(),
+                afterGates ?? new ChangeTrackingList<ContainerServiceFleetGateConfiguration>(),
+                additionalBinaryDataProperties);
         }
-
-        BinaryData IPersistableModel<ContainerServiceFleetUpdateStage>.Write(ModelReaderWriterOptions options)
-        {
-            var format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
-
-            switch (format)
-            {
-                case "J":
-                    return ModelReaderWriter.Write(this, options, AzureResourceManagerContainerServiceFleetContext.Default);
-                default:
-                    throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support writing '{options.Format}' format.");
-            }
-        }
-
-        ContainerServiceFleetUpdateStage IPersistableModel<ContainerServiceFleetUpdateStage>.Create(BinaryData data, ModelReaderWriterOptions options)
-        {
-            var format = options.Format == "W" ? ((IPersistableModel<ContainerServiceFleetUpdateStage>)this).GetFormatFromOptions(options) : options.Format;
-
-            switch (format)
-            {
-                case "J":
-                    {
-                        using JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions);
-                        return DeserializeContainerServiceFleetUpdateStage(document.RootElement, options);
-                    }
-                default:
-                    throw new FormatException($"The model {nameof(ContainerServiceFleetUpdateStage)} does not support reading '{options.Format}' format.");
-            }
-        }
-
-        string IPersistableModel<ContainerServiceFleetUpdateStage>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
     }
 }

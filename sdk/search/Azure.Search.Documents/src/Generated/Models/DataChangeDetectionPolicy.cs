@@ -5,23 +5,38 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary>
-    /// Base type for data change detection policies.
-    /// Please note <see cref="DataChangeDetectionPolicy"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-    /// The available derived classes include <see cref="HighWaterMarkChangeDetectionPolicy"/> and <see cref="SqlIntegratedChangeTrackingPolicy"/>.
-    /// </summary>
+    /// <summary> Base type for data change detection policies. </summary>
     public partial class DataChangeDetectionPolicy
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="DataChangeDetectionPolicy"/>. </summary>
-        /// <param name="oDataType"> A URI fragment specifying the type of data change detection policy. </param>
-        internal DataChangeDetectionPolicy(string oDataType)
+        /// <param name="odataType"> The discriminator for derived types. </param>
+        /// <exception cref="ArgumentNullException"> <paramref name="odataType"/> is null. </exception>
+        public DataChangeDetectionPolicy(string odataType)
         {
-            ODataType = oDataType;
+            Argument.AssertNotNull(odataType, nameof(odataType));
+
+            OdataType = odataType;
         }
 
-        /// <summary> A URI fragment specifying the type of data change detection policy. </summary>
-        internal string ODataType { get; set; }
+        /// <summary> Initializes a new instance of <see cref="DataChangeDetectionPolicy"/>. </summary>
+        /// <param name="odataType"> The discriminator for derived types. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal DataChangeDetectionPolicy(string odataType, IDictionary<string, BinaryData> additionalBinaryDataProperties)
+        {
+            OdataType = odataType;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
+        }
+
+        /// <summary> The discriminator for derived types. </summary>
+        internal string OdataType { get; set; }
     }
 }

@@ -88,6 +88,11 @@ public partial class SiteNetworkConfig : ProvisionableResource
     private ResourceReference<WebSite>? _parent;
 
     /// <summary>
+    /// Get the default value for the Name property.
+    /// </summary>
+    private partial BicepValue<string> GetNameDefaultValue();
+
+    /// <summary>
     /// Creates a new SiteNetworkConfig.
     /// </summary>
     /// <param name="bicepIdentifier">
@@ -98,7 +103,7 @@ public partial class SiteNetworkConfig : ProvisionableResource
     /// </param>
     /// <param name="resourceVersion">Version of the SiteNetworkConfig.</param>
     public SiteNetworkConfig(string bicepIdentifier, string? resourceVersion = default)
-        : base(bicepIdentifier, "Microsoft.Web/sites/networkConfig", resourceVersion ?? "2024-11-01")
+        : base(bicepIdentifier, "Microsoft.Web/sites/networkConfig", resourceVersion ?? "2025-03-01")
     {
     }
 
@@ -107,7 +112,8 @@ public partial class SiteNetworkConfig : ProvisionableResource
     /// </summary>
     protected override void DefineProvisionableProperties()
     {
-        _name = DefineProperty<string>("Name", ["name"], isOutput: true);
+        base.DefineProvisionableProperties();
+        _name = DefineProperty<string>("Name", ["name"], isOutput: true, defaultValue: GetNameDefaultValue());
         _isSwiftSupported = DefineProperty<bool>("IsSwiftSupported", ["properties", "swiftSupported"]);
         _kind = DefineProperty<string>("Kind", ["kind"]);
         _subnetResourceId = DefineProperty<ResourceIdentifier>("SubnetResourceId", ["properties", "subnetResourceId"]);
@@ -121,6 +127,11 @@ public partial class SiteNetworkConfig : ProvisionableResource
     /// </summary>
     public static class ResourceVersions
     {
+        /// <summary>
+        /// 2025-03-01.
+        /// </summary>
+        public static readonly string V2025_03_01 = "2025-03-01";
+
         /// <summary>
         /// 2024-11-01.
         /// </summary>

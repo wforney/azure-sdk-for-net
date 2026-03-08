@@ -5,26 +5,30 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
-using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Response from a list skillset request. If successful, it includes the full definitions of all skillsets. </summary>
     internal partial class ListSkillsetsResult
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ListSkillsetsResult"/>. </summary>
-        /// <param name="skillsets"> The skillsets defined in the Search service. </param>
-        internal ListSkillsetsResult(IEnumerable<SearchIndexerSkillset> skillsets)
+        internal ListSkillsetsResult()
         {
-            Skillsets = skillsets.ToList();
+            Skillsets = new ChangeTrackingList<SearchIndexerSkillset>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ListSkillsetsResult"/>. </summary>
         /// <param name="skillsets"> The skillsets defined in the Search service. </param>
-        internal ListSkillsetsResult(IReadOnlyList<SearchIndexerSkillset> skillsets)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ListSkillsetsResult(IReadOnlyList<SearchIndexerSkillset> skillsets, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Skillsets = skillsets;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The skillsets defined in the Search service. </summary>

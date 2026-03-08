@@ -6,12 +6,17 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Defines a mapping between a field in a data source and a target field in an index. </summary>
     public partial class FieldMapping
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="FieldMapping"/>. </summary>
         /// <param name="sourceFieldName"> The name of the field in the data source. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="sourceFieldName"/> is null. </exception>
@@ -26,17 +31,21 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="sourceFieldName"> The name of the field in the data source. </param>
         /// <param name="targetFieldName"> The name of the target field in the index. Same as the source field name by default. </param>
         /// <param name="mappingFunction"> A function to apply to each source field value before indexing. </param>
-        internal FieldMapping(string sourceFieldName, string targetFieldName, FieldMappingFunction mappingFunction)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal FieldMapping(string sourceFieldName, string targetFieldName, FieldMappingFunction mappingFunction, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             SourceFieldName = sourceFieldName;
             TargetFieldName = targetFieldName;
             MappingFunction = mappingFunction;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The name of the field in the data source. </summary>
         public string SourceFieldName { get; set; }
+
         /// <summary> The name of the target field in the index. Same as the source field name by default. </summary>
         public string TargetFieldName { get; set; }
+
         /// <summary> A function to apply to each source field value before indexing. </summary>
         public FieldMappingFunction MappingFunction { get; set; }
     }

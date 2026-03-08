@@ -5,56 +5,127 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class RescoringOptions : IUtf8JsonSerializable
+    /// <summary> Contains the options for rescoring. </summary>
+    public partial class RescoringOptions : IJsonModel<RescoringOptions>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual RescoringOptions PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<RescoringOptions>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeRescoringOptions(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(RescoringOptions)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<RescoringOptions>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(RescoringOptions)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<RescoringOptions>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        RescoringOptions IPersistableModel<RescoringOptions>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<RescoringOptions>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<RescoringOptions>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
-            if (Optional.IsDefined(EnableRescoring))
-            {
-                if (EnableRescoring != null)
-                {
-                    writer.WritePropertyName("enableRescoring"u8);
-                    writer.WriteBooleanValue(EnableRescoring.Value);
-                }
-                else
-                {
-                    writer.WriteNull("enableRescoring");
-                }
-            }
-            if (Optional.IsDefined(DefaultOversampling))
-            {
-                if (DefaultOversampling != null)
-                {
-                    writer.WritePropertyName("defaultOversampling"u8);
-                    writer.WriteNumberValue(DefaultOversampling.Value);
-                }
-                else
-                {
-                    writer.WriteNull("defaultOversampling");
-                }
-            }
-            if (Optional.IsDefined(RescoreStorageMethod))
-            {
-                if (RescoreStorageMethod != null)
-                {
-                    writer.WritePropertyName("rescoreStorageMethod"u8);
-                    writer.WriteStringValue(RescoreStorageMethod.Value.ToString());
-                }
-                else
-                {
-                    writer.WriteNull("rescoreStorageMethod");
-                }
-            }
+            JsonModelWriteCore(writer, options);
             writer.WriteEndObject();
         }
 
-        internal static RescoringOptions DeserializeRescoringOptions(JsonElement element)
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<RescoringOptions>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(RescoringOptions)} does not support writing '{format}' format.");
+            }
+            if (Optional.IsDefined(EnableRescoring))
+            {
+                writer.WritePropertyName("enableRescoring"u8);
+                writer.WriteBooleanValue(EnableRescoring.Value);
+            }
+            if (Optional.IsDefined(DefaultOversampling))
+            {
+                writer.WritePropertyName("defaultOversampling"u8);
+                writer.WriteNumberValue(DefaultOversampling.Value);
+            }
+            if (Optional.IsDefined(RescoreStorageMethod))
+            {
+                writer.WritePropertyName("rescoreStorageMethod"u8);
+                writer.WriteStringValue(RescoreStorageMethod.Value.ToString());
+            }
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        RescoringOptions IJsonModel<RescoringOptions>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual RescoringOptions JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<RescoringOptions>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(RescoringOptions)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeRescoringOptions(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static RescoringOptions DeserializeRescoringOptions(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -63,56 +134,45 @@ namespace Azure.Search.Documents.Indexes.Models
             bool? enableRescoring = default;
             double? defaultOversampling = default;
             VectorSearchCompressionRescoreStorageMethod? rescoreStorageMethod = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("enableRescoring"u8))
+                if (prop.NameEquals("enableRescoring"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         enableRescoring = null;
                         continue;
                     }
-                    enableRescoring = property.Value.GetBoolean();
+                    enableRescoring = prop.Value.GetBoolean();
                     continue;
                 }
-                if (property.NameEquals("defaultOversampling"u8))
+                if (prop.NameEquals("defaultOversampling"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         defaultOversampling = null;
                         continue;
                     }
-                    defaultOversampling = property.Value.GetDouble();
+                    defaultOversampling = prop.Value.GetDouble();
                     continue;
                 }
-                if (property.NameEquals("rescoreStorageMethod"u8))
+                if (prop.NameEquals("rescoreStorageMethod"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         rescoreStorageMethod = null;
                         continue;
                     }
-                    rescoreStorageMethod = new VectorSearchCompressionRescoreStorageMethod(property.Value.GetString());
+                    rescoreStorageMethod = new VectorSearchCompressionRescoreStorageMethod(prop.Value.GetString());
                     continue;
                 }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
+                }
             }
-            return new RescoringOptions(enableRescoring, defaultOversampling, rescoreStorageMethod);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static RescoringOptions FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeRescoringOptions(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal virtual RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
+            return new RescoringOptions(enableRescoring, defaultOversampling, rescoreStorageMethod, additionalBinaryDataProperties);
         }
     }
 }

@@ -1,7 +1,8 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License. See License.txt in the project root for license information.
 
-import { EmitContext, NoTarget } from "@typespec/compiler";
+import { EmitContext, NoTarget, resolvePath } from "@typespec/compiler";
+import { createSdkContext } from "@azure-tools/typespec-client-generator-core";
 
 import { $onEmit as $onMTGEmit } from "@typespec/http-client-csharp";
 import { AzureEmitterOptions } from "./options.js";
@@ -34,5 +35,66 @@ export async function $onEmit(context: EmitContext<AzureEmitterOptions>) {
     });
   }
 
+  // Generate metadata.json file
+  await generateMetadataFile(context);
+
   await $onMTGEmit(context);
+}
+
+/**
+ * Generates a metadata.json file containing API version information.
+ *
+ * The emitter automatically generates a `metadata.json` file in the `Generated/` folder.
+ * This file contains information such as the API versions and can be used for automation
+ * purposes like building a mapping of package version to supported API versions.
+ *
+ * The metadata file contains content such as:
+ * ```json
+ * {
+ *   "apiVersions": {
+ *     "Azure.Service": "2024-05-01"
+ *   }
+ * }
+ * ```
+ *
+ * For packages containing multiple services:
+ * ```json
+ * {
+ *   "apiVersions": {
+ *     "Azure.ServiceA": "2024-05-01",
+ *     "Azure.ServiceB": "2024-06-01"
+ *   }
+ * }
+ * ```
+ *
+ * If no API versions are specified, the value will be "not-specified".
+ * If the `apiVersions` property is undefined, the value will be "not-specified".
+ */
+async function generateMetadataFile(
+  context: EmitContext<AzureEmitterOptions>
+): Promise<void> {
+  // Create SDK context to access the API versions from the TypeSpec service definition
+  const sdkContext = await createSdkContext(
+    context,
+    "@azure-typespec/http-client-csharp",
+    context.options["sdk-context-options"] ?? {}
+  );
+
+  const apiVersionsMap = sdkContext.sdkPackage.metadata.apiVersions;
+
+  // Define the metadata schema we want to output.
+  // JSON.stringify does not natively serialize Maps, so we convert to a plain object.
+  // If apiVersions is undefined or empty, emit an empty object for a consistent Record<string, string> type.
+  const metadata = {
+    apiVersions:
+      apiVersionsMap && apiVersionsMap.size > 0
+        ? Object.fromEntries(apiVersionsMap)
+        : {}
+  };
+
+  const outputPath = resolvePath(context.emitterOutputDir, "metadata.json");
+  await context.program.host.writeFile(
+    outputPath,
+    JSON.stringify(metadata, null, 2)
+  );
 }

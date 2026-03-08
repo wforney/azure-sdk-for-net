@@ -5,19 +5,19 @@
 
 #nullable disable
 
-using Azure.Search.Documents.Indexes.Models;
+using System;
+using System.Collections.Generic;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Unknown version of VectorSearchAlgorithmConfiguration. </summary>
     internal partial class UnknownVectorSearchAlgorithmConfiguration : VectorSearchAlgorithmConfiguration
     {
         /// <summary> Initializes a new instance of <see cref="UnknownVectorSearchAlgorithmConfiguration"/>. </summary>
         /// <param name="name"> The name to associate with this particular configuration. </param>
-        /// <param name="kind"> The name of the kind of algorithm being configured for use with vector search. </param>
-        internal UnknownVectorSearchAlgorithmConfiguration(string name, VectorSearchAlgorithmKind kind) : base(name, kind)
+        /// <param name="kind"> Type of VectorSearchAlgorithmConfiguration. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal UnknownVectorSearchAlgorithmConfiguration(string name, VectorSearchAlgorithmKind kind, IDictionary<string, BinaryData> additionalBinaryDataProperties) : base(name, kind != default ? kind : "unknown", additionalBinaryDataProperties)
         {
-            Kind = kind;
         }
     }
 }

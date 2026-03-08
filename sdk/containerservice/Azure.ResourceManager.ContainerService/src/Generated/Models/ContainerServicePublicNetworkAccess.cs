@@ -10,7 +10,7 @@ using System.ComponentModel;
 
 namespace Azure.ResourceManager.ContainerService.Models
 {
-    /// <summary> Allow or deny public network access for AKS. </summary>
+    /// <summary> PublicNetworkAccess of the managedCluster. Allow or deny public network access for AKS. </summary>
     public readonly partial struct ContainerServicePublicNetworkAccess : IEquatable<ContainerServicePublicNetworkAccess>
     {
         private readonly string _value;

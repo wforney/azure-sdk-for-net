@@ -5,13 +5,134 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class IndexStatisticsSummary
+    /// <summary> Statistics for a given index. Statistics are collected periodically and are not guaranteed to always be up-to-date. </summary>
+    public partial class IndexStatisticsSummary : IJsonModel<IndexStatisticsSummary>
     {
-        internal static IndexStatisticsSummary DeserializeIndexStatisticsSummary(JsonElement element)
+        /// <summary> Initializes a new instance of <see cref="IndexStatisticsSummary"/> for deserialization. </summary>
+        internal IndexStatisticsSummary()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual IndexStatisticsSummary PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<IndexStatisticsSummary>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeIndexStatisticsSummary(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(IndexStatisticsSummary)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<IndexStatisticsSummary>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(IndexStatisticsSummary)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<IndexStatisticsSummary>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        IndexStatisticsSummary IPersistableModel<IndexStatisticsSummary>.Create(BinaryData data, ModelReaderWriterOptions options) => PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<IndexStatisticsSummary>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<IndexStatisticsSummary>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<IndexStatisticsSummary>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(IndexStatisticsSummary)} does not support writing '{format}' format.");
+            }
+            writer.WritePropertyName("name"u8);
+            writer.WriteStringValue(Name);
+            if (options.Format != "W")
+            {
+                writer.WritePropertyName("documentCount"u8);
+                writer.WriteNumberValue(DocumentCount);
+            }
+            if (options.Format != "W")
+            {
+                writer.WritePropertyName("storageSize"u8);
+                writer.WriteNumberValue(StorageSize);
+            }
+            if (options.Format != "W")
+            {
+                writer.WritePropertyName("vectorIndexSize"u8);
+                writer.WriteNumberValue(VectorIndexSize);
+            }
+            if (options.Format != "W" && _additionalBinaryDataProperties != null)
+            {
+                foreach (var item in _additionalBinaryDataProperties)
+                {
+                    writer.WritePropertyName(item.Key);
+#if NET6_0_OR_GREATER
+                    writer.WriteRawValue(item.Value);
+#else
+                    using (JsonDocument document = JsonDocument.Parse(item.Value))
+                    {
+                        JsonSerializer.Serialize(writer, document.RootElement);
+                    }
+#endif
+                }
+            }
+        }
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        IndexStatisticsSummary IJsonModel<IndexStatisticsSummary>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected virtual IndexStatisticsSummary JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<IndexStatisticsSummary>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(IndexStatisticsSummary)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeIndexStatisticsSummary(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static IndexStatisticsSummary DeserializeIndexStatisticsSummary(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
@@ -21,38 +142,35 @@ namespace Azure.Search.Documents.Indexes.Models
             long documentCount = default;
             long storageSize = default;
             long vectorIndexSize = default;
-            foreach (var property in element.EnumerateObject())
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("name"u8))
+                if (prop.NameEquals("name"u8))
                 {
-                    name = property.Value.GetString();
+                    name = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("documentCount"u8))
+                if (prop.NameEquals("documentCount"u8))
                 {
-                    documentCount = property.Value.GetInt64();
+                    documentCount = prop.Value.GetInt64();
                     continue;
                 }
-                if (property.NameEquals("storageSize"u8))
+                if (prop.NameEquals("storageSize"u8))
                 {
-                    storageSize = property.Value.GetInt64();
+                    storageSize = prop.Value.GetInt64();
                     continue;
                 }
-                if (property.NameEquals("vectorIndexSize"u8))
+                if (prop.NameEquals("vectorIndexSize"u8))
                 {
-                    vectorIndexSize = property.Value.GetInt64();
+                    vectorIndexSize = prop.Value.GetInt64();
                     continue;
+                }
+                if (options.Format != "W")
+                {
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
-            return new IndexStatisticsSummary(name, documentCount, storageSize, vectorIndexSize);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static IndexStatisticsSummary FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeIndexStatisticsSummary(document.RootElement);
+            return new IndexStatisticsSummary(name, documentCount, storageSize, vectorIndexSize, additionalBinaryDataProperties);
         }
     }
 }

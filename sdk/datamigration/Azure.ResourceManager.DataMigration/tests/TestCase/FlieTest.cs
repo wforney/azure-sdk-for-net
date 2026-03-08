@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.TestFramework;
-using Azure.ResourceManager.DataMigration.Tests.Helpers;
-using Azure.ResourceManager.Resources;
-using Azure.ResourceManager.Network;
-using NUnit.Framework;
 using Azure.ResourceManager.DataMigration.Models;
+using Azure.ResourceManager.DataMigration.Tests.Helpers;
+using Azure.ResourceManager.Network;
+using Azure.ResourceManager.Resources;
+using NUnit.Framework;
 
 namespace Azure.ResourceManager.DataMigration.Tests
 {
@@ -64,11 +64,11 @@ namespace Azure.ResourceManager.DataMigration.Tests
             var serviceInput = ResourceDataHelpers.GetServiceData(subnet.Id);
             var serviceResource = (await serviceCollection.CreateOrUpdateAsync(WaitUntil.Completed, serviceName, serviceInput)).Value;
             //Create Project
-            var projectCollection = serviceResource.GetProjects();
+            var projectCollection = serviceResource.GetDataMigrationProjects();
             var projectInput = ResourceDataHelpers.GetProject();
             var projectResource = (await projectCollection.CreateOrUpdateAsync(WaitUntil.Completed, projectName, projectInput)).Value;
             //Create
-            var collection = projectResource.GetProjectFiles();
+            var collection = projectResource.GetDataMigrationProjectFiles();
             var input = ResourceDataHelpers.GetProjectFileData();
             var resource = (await collection.CreateOrUpdateAsync(WaitUntil.Completed, fileName, input)).Value;
             Assert.AreEqual(fileName, resource.Data.Name);
@@ -94,9 +94,9 @@ namespace Azure.ResourceManager.DataMigration.Tests
             var resource3 = (await collection.GetAsync(fileName)).Value;
             ResourceDataHelpers.AssertFlieData(resource.Data, resource3.Data);
             //2.Update
-            var updateData = new ProjectFileData()
+            var updateData = new DataMigrationProjectFileData()
             {
-                Properties = new ProjectFileProperties()
+                Properties = new DataMigrationProjectFileProperties()
                 {
                     FilePath = "aad"
                 }

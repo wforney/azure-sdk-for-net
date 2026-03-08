@@ -5,27 +5,34 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> The SkillNames. </summary>
+    /// <summary> The type of the skill names. </summary>
     public partial class ResetSkillsOptions
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ResetSkillsOptions"/>. </summary>
         public ResetSkillsOptions()
         {
-            SkillNames = new ChangeTrackingList<string>();
+            SkillNameList = new ChangeTrackingList<string>();
         }
 
         /// <summary> Initializes a new instance of <see cref="ResetSkillsOptions"/>. </summary>
-        /// <param name="skillNames"> the names of skills to be reset. </param>
-        internal ResetSkillsOptions(IList<string> skillNames)
+        /// <param name="skillNameList"> the names of skills to be reset. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ResetSkillsOptions(IList<string> skillNameList, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
-            SkillNames = skillNames;
+            SkillNameList = skillNameList;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> the names of skills to be reset. </summary>
-        public IList<string> SkillNames { get; }
+        public IList<string> SkillNameList { get; }
     }
 }

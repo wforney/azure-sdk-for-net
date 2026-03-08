@@ -6,6 +6,7 @@
 #nullable disable
 
 using System;
+using System.Collections.Generic;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
@@ -13,15 +14,15 @@ namespace Azure.Search.Documents.Indexes.Models
     public partial class TagScoringFunction : ScoringFunction
     {
         /// <summary> Initializes a new instance of <see cref="TagScoringFunction"/>. </summary>
-        /// <param name="type"> Indicates the type of function to use. Valid values include magnitude, freshness, distance, and tag. The function type must be lower case. </param>
         /// <param name="fieldName"> The name of the field used as input to the scoring function. </param>
         /// <param name="boost"> A multiplier for the raw score. Must be a positive number not equal to 1.0. </param>
         /// <param name="interpolation"> A value indicating how boosting will be interpolated across document scores; defaults to "Linear". </param>
+        /// <param name="type"> Type of ScoringFunction. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
         /// <param name="parameters"> Parameter values for the tag scoring function. </param>
-        internal TagScoringFunction(string type, string fieldName, double boost, ScoringFunctionInterpolation? interpolation, TagScoringParameters parameters) : base(type, fieldName, boost, interpolation)
+        internal TagScoringFunction(string fieldName, double boost, ScoringFunctionInterpolation? interpolation, string @type, IDictionary<string, BinaryData> additionalBinaryDataProperties, TagScoringParameters parameters) : base(fieldName, boost, interpolation, @type, additionalBinaryDataProperties)
         {
             Parameters = parameters;
-            Type = type ?? "tag";
         }
 
         /// <summary> Parameter values for the tag scoring function. </summary>

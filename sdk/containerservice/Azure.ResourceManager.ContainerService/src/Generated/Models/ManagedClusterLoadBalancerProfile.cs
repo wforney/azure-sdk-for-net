@@ -105,10 +105,6 @@ namespace Azure.ResourceManager.ContainerService.Models
                 return OutboundIPs.PublicIPs;
             }
         }
-
-        /// <summary> The effective outbound IP resources of the cluster load balancer. </summary>
-        [WirePath("effectiveOutboundIPs")]
-        public IList<WritableSubResource> EffectiveOutboundIPs { get; }
         /// <summary> The desired number of allocated SNAT ports per VM. Allowed values are in the range of 0 to 64000 (inclusive). The default value is 0 which results in Azure dynamically allocating ports. </summary>
         [WirePath("allocatedOutboundPorts")]
         public int? AllocatedOutboundPorts { get; set; }

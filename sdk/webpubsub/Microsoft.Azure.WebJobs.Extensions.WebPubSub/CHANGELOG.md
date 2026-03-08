@@ -1,6 +1,6 @@
 # Release History
 
-## 1.9.0-beta.1 (Unreleased)
+## 1.11.0-beta.1 (Unreleased)
 
 ### Features Added
 
@@ -9,6 +9,17 @@
 ### Bugs Fixed
 
 ### Other Changes
+
+## 1.10.0 (2026-01-19)
+
+### Features Added
+- Support identity-based connection.
+
+## 1.9.0 (2025-07-29)
+
+### Other Changes
+- Upgrade dependency package `Microsoft.AspNetCore.Http` to 2.3.0.
+- Upgrade dependency package `Microsoft.Azure.WebPubSub.Common` to 1.4.0.
 
 ## 1.8.0 (2024-09-04)
 ### Features Added

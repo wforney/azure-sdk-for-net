@@ -1,24 +1,22 @@
 ﻿// Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
 
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization.Metadata;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Core;
 using Azure.Core.Serialization;
 
 #pragma warning disable SA1402 // File may only contain a single type
 
 namespace Azure.Search.Documents.Models
 {
-    // Hide the untyped SearchResult
-    [CodeGenModel("SearchResult")]
-    internal partial class SearchResult { }
-
     /// <summary>
     /// Contains a document found by a search query, plus associated metadata.
     /// </summary>
@@ -61,7 +59,7 @@ namespace Azure.Search.Documents.Models
         /// </summary>
         internal SearchResult() { }
 
-        #pragma warning disable CS1572 // Not all parameters will be used depending on feature flags
+#pragma warning disable CS1572 // Not all parameters will be used depending on feature flags
         /// <summary>
         /// Deserialize a SearchResult and its model.
         /// </summary>
@@ -77,15 +75,99 @@ namespace Azure.Search.Documents.Models
         /// that the operation should be canceled.
         /// </param>
         /// <returns>Deserialized SearchResults.</returns>
+        [RequiresUnreferencedCode(JsonSerialization.TrimWarning)]
         internal static async Task<SearchResult<T>> DeserializeAsync(
             JsonElement element,
             ObjectSerializer serializer,
             JsonSerializerOptions options,
             bool async,
             CancellationToken cancellationToken)
-        #pragma warning restore CS1572
+#pragma warning restore CS1572
         {
             Debug.Assert(options != null);
+            SearchResult<T> result = DeserializeEnvelope(element);
+
+            // Deserialize the model
+            if (serializer != null)
+            {
+                using Stream stream = element.ToStream();
+                T document = async ?
+                    (T)await serializer.DeserializeAsync(stream, typeof(T), cancellationToken).ConfigureAwait(false) :
+                    (T)serializer.Deserialize(stream, typeof(T), cancellationToken);
+                result.Document = document;
+            }
+            else
+            {
+                T document;
+                if (async)
+                {
+                    using Stream stream = element.ToStream();
+                    document = await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    document = JsonSerializer.Deserialize<T>(element.GetRawText(), options);
+                }
+                result.Document = document;
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Deserialize a SearchResult and its model.
+        /// </summary>
+        /// <param name="element">A JSON element.</param>
+        /// <param name="serializer">
+        /// Optional serializer that can be used to customize the serialization
+        /// of strongly typed models.
+        /// </param>
+        /// <param name="typeInfo">Metadata about the type to deserialize.</param>
+        /// <param name="async">Whether to execute sync or async.</param>
+        /// <param name="cancellationToken">
+        /// Optional <see cref="CancellationToken"/> to propagate notifications
+        /// that the operation should be canceled.
+        /// </param>
+        /// <returns>Deserialized SearchResults.</returns>
+        internal static async Task<SearchResult<T>> DeserializeAsync(
+            JsonElement element,
+            ObjectSerializer serializer,
+            JsonTypeInfo<T> typeInfo,
+            bool async,
+            CancellationToken cancellationToken)
+#pragma warning restore CS1572
+        {
+            Debug.Assert(typeInfo != null);
+            SearchResult<T> result = DeserializeEnvelope(element);
+            // Deserialize the model
+            if (serializer != null)
+            {
+                using Stream stream = element.ToStream();
+                T document = async ?
+                    (T)await serializer.DeserializeAsync(stream, typeof(T), cancellationToken).ConfigureAwait(false) :
+                    (T)serializer.Deserialize(stream, typeof(T), cancellationToken);
+                result.Document = document;
+            }
+            else
+            {
+                T document;
+                if (async)
+                {
+                    using Stream stream = element.ToStream();
+                    document = await JsonSerializer.DeserializeAsync<T>(stream, typeInfo, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    document = JsonSerializer.Deserialize<T>(element.GetRawText(), typeInfo);
+                }
+                result.Document = document;
+            }
+
+            return result;
+        }
+
+        private static SearchResult<T> DeserializeEnvelope(JsonElement element)
+        {
             SearchResult<T> result = new SearchResult<T>();
             result.SemanticSearch = new SemanticSearchResult();
             foreach (JsonProperty prop in element.EnumerateObject())
@@ -125,39 +207,15 @@ namespace Azure.Search.Documents.Models
                     List<QueryCaptionResult> captionResults = new List<QueryCaptionResult>();
                     foreach (JsonElement captionValue in prop.Value.EnumerateArray())
                     {
-                        captionResults.Add(QueryCaptionResult.DeserializeQueryCaptionResult(captionValue));
+                        captionResults.Add(QueryCaptionResult.DeserializeQueryCaptionResult(captionValue, ModelReaderWriterOptions.Json));
                     }
                     result.SemanticSearch.Captions = captionResults;
                 }
                 else if (prop.NameEquals(Constants.SearchDocumentDebugInfoKeyJson.EncodedUtf8Bytes) &&
                     prop.Value.ValueKind != JsonValueKind.Null)
                 {
-                    result.DocumentDebugInfo = DocumentDebugInfo.DeserializeDocumentDebugInfo(prop.Value);
+                    result.DocumentDebugInfo = DocumentDebugInfo.DeserializeDocumentDebugInfo(prop.Value, ModelReaderWriterOptions.Json);
                 }
-            }
-
-            // Deserialize the model
-            if (serializer != null)
-            {
-                using Stream stream = element.ToStream();
-                T document = async ?
-                    (T)await serializer.DeserializeAsync(stream, typeof(T), cancellationToken).ConfigureAwait(false) :
-                    (T)serializer.Deserialize(stream, typeof(T), cancellationToken);
-                result.Document = document;
-            }
-            else
-            {
-                T document;
-                if (async)
-                {
-                    using Stream stream = element.ToStream();
-                    document = await JsonSerializer.DeserializeAsync<T>(stream, options, cancellationToken).ConfigureAwait(false);
-                }
-                else
-                {
-                    document = JsonSerializer.Deserialize<T>(element.GetRawText(), options);
-                }
-                result.Document = document;
             }
 
             return result;

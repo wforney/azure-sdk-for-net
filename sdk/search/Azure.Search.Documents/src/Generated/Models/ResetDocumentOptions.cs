@@ -5,13 +5,18 @@
 
 #nullable disable
 
+using System;
 using System.Collections.Generic;
+using Azure.Search.Documents;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> The DocumentKeysOrIds. </summary>
+    /// <summary> The type of the keysOrIds. </summary>
     public partial class ResetDocumentOptions
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="ResetDocumentOptions"/>. </summary>
         public ResetDocumentOptions()
         {
@@ -22,13 +27,18 @@ namespace Azure.Search.Documents.Models
         /// <summary> Initializes a new instance of <see cref="ResetDocumentOptions"/>. </summary>
         /// <param name="documentKeys"> document keys to be reset. </param>
         /// <param name="dataSourceDocumentIds"> datasource document identifiers to be reset. </param>
-        internal ResetDocumentOptions(IList<string> documentKeys, IList<string> dataSourceDocumentIds)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal ResetDocumentOptions(IList<string> documentKeys, IList<string> dataSourceDocumentIds, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             DocumentKeys = documentKeys;
             DataSourceDocumentIds = dataSourceDocumentIds;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> document keys to be reset. </summary>
         public IList<string> DocumentKeys { get; }
+
+        /// <summary> datasource document identifiers to be reset. </summary>
+        public IList<string> DataSourceDocumentIds { get; }
     }
 }

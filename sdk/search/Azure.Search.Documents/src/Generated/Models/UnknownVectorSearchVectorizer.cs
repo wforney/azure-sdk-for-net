@@ -5,19 +5,19 @@
 
 #nullable disable
 
-using Azure.Search.Documents.Indexes.Models;
+using System;
+using System.Collections.Generic;
 
-namespace Azure.Search.Documents.Models
+namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> Unknown version of VectorSearchVectorizer. </summary>
     internal partial class UnknownVectorSearchVectorizer : VectorSearchVectorizer
     {
         /// <summary> Initializes a new instance of <see cref="UnknownVectorSearchVectorizer"/>. </summary>
         /// <param name="vectorizerName"> The name to associate with this particular vectorization method. </param>
-        /// <param name="kind"> The name of the kind of vectorization method being configured for use with vector search. </param>
-        internal UnknownVectorSearchVectorizer(string vectorizerName, VectorSearchVectorizerKind kind) : base(vectorizerName, kind)
+        /// <param name="kind"> Type of VectorSearchVectorizer. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal UnknownVectorSearchVectorizer(string vectorizerName, VectorSearchVectorizerKind kind, IDictionary<string, BinaryData> additionalBinaryDataProperties) : base(vectorizerName, kind != default ? kind : "unknown", additionalBinaryDataProperties)
         {
-            Kind = kind;
         }
     }
 }

@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Represents a resource's usage and quota. </summary>
     public partial class SearchResourceCounter
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchResourceCounter"/>. </summary>
         /// <param name="usage"> The resource usage amount. </param>
         internal SearchResourceCounter(long usage)
@@ -20,14 +26,17 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="SearchResourceCounter"/>. </summary>
         /// <param name="usage"> The resource usage amount. </param>
         /// <param name="quota"> The resource amount quota. </param>
-        internal SearchResourceCounter(long usage, long? quota)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchResourceCounter(long usage, long? quota, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Usage = usage;
             Quota = quota;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The resource usage amount. </summary>
         public long Usage { get; }
+
         /// <summary> The resource amount quota. </summary>
         public long? Quota { get; }
     }

@@ -8,12 +8,16 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
     /// <summary> Definition of additional projections to secondary search indexes. </summary>
     public partial class SearchIndexerIndexProjection
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchIndexerIndexProjection"/>. </summary>
         /// <param name="selectors"> A list of projections to be performed to secondary search indexes. </param>
         /// <exception cref="ArgumentNullException"> <paramref name="selectors"/> is null. </exception>
@@ -27,14 +31,17 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <summary> Initializes a new instance of <see cref="SearchIndexerIndexProjection"/>. </summary>
         /// <param name="selectors"> A list of projections to be performed to secondary search indexes. </param>
         /// <param name="parameters"> A dictionary of index projection-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type. </param>
-        internal SearchIndexerIndexProjection(IList<SearchIndexerIndexProjectionSelector> selectors, SearchIndexerIndexProjectionsParameters parameters)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchIndexerIndexProjection(IList<SearchIndexerIndexProjectionSelector> selectors, SearchIndexerIndexProjectionsParameters parameters, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Selectors = selectors;
             Parameters = parameters;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> A list of projections to be performed to secondary search indexes. </summary>
         public IList<SearchIndexerIndexProjectionSelector> Selectors { get; }
+
         /// <summary> A dictionary of index projection-specific configuration properties. Each name is the name of a specific property. Each value must be of a primitive type. </summary>
         public SearchIndexerIndexProjectionsParameters Parameters { get; set; }
     }

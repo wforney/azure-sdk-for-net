@@ -11,24 +11,25 @@ using System.Linq;
 
 namespace Azure.Search.Documents.Models
 {
-    /// <summary> Contains a batch of document write actions to send to the index. </summary>
     internal partial class IndexBatch
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="IndexBatch"/>. </summary>
         /// <param name="actions"> The actions in the batch. </param>
-        /// <exception cref="ArgumentNullException"> <paramref name="actions"/> is null. </exception>
         public IndexBatch(IEnumerable<IndexAction> actions)
         {
-            Argument.AssertNotNull(actions, nameof(actions));
-
             Actions = actions.ToList();
         }
 
         /// <summary> Initializes a new instance of <see cref="IndexBatch"/>. </summary>
         /// <param name="actions"> The actions in the batch. </param>
-        internal IndexBatch(IList<IndexAction> actions)
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal IndexBatch(IList<IndexAction> actions, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Actions = actions;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> The actions in the batch. </summary>

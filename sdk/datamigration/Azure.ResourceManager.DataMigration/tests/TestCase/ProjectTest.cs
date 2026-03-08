@@ -8,11 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Azure.Core;
 using Azure.Core.TestFramework;
-using Azure.ResourceManager.DataMigration.Tests.Helpers;
-using Azure.ResourceManager.Resources;
-using Azure.ResourceManager.Network;
-using NUnit.Framework;
 using Azure.ResourceManager.DataMigration.Models;
+using Azure.ResourceManager.DataMigration.Tests.Helpers;
+using Azure.ResourceManager.Network;
+using Azure.ResourceManager.Resources;
+using NUnit.Framework;
 
 namespace Azure.ResourceManager.DataMigration.Tests
 {
@@ -62,7 +62,7 @@ namespace Azure.ResourceManager.DataMigration.Tests
             var serviceInput = ResourceDataHelpers.GetServiceData(subnet.Id);
             var serviceResource = (await serviceCollection.CreateOrUpdateAsync(WaitUntil.Completed, serviceName, serviceInput)).Value;
             //Create
-            var collection = serviceResource.GetProjects();
+            var collection = serviceResource.GetDataMigrationProjects();
             var input = ResourceDataHelpers.GetProject();
             var resource = (await collection.CreateOrUpdateAsync(WaitUntil.Completed, projectName, input)).Value;
             Assert.AreEqual(projectName, resource.Data.Name);

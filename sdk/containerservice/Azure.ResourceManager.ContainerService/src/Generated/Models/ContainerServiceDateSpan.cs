@@ -10,7 +10,7 @@ using System.Collections.Generic;
 
 namespace Azure.ResourceManager.ContainerService.Models
 {
-    /// <summary> For example, between '2022-12-23' and '2023-01-05'. </summary>
+    /// <summary> A date range. For example, between '2022-12-23' and '2023-01-05'. </summary>
     public partial class ContainerServiceDateSpan
     {
         /// <summary>

@@ -5,16 +5,81 @@
 
 #nullable disable
 
+using System;
+using System.ClientModel.Primitives;
+using System.Collections.Generic;
 using System.Text.Json;
-using Azure.Core;
+using Azure.Search.Documents;
 
 namespace Azure.Search.Documents.Indexes.Models
 {
-    public partial class ShingleTokenFilter : IUtf8JsonSerializable
+    /// <summary> Creates combinations of tokens as a single token. This token filter is implemented using Apache Lucene. </summary>
+    public partial class ShingleTokenFilter : TokenFilter, IJsonModel<ShingleTokenFilter>
     {
-        void IUtf8JsonSerializable.Write(Utf8JsonWriter writer)
+        /// <summary> Initializes a new instance of <see cref="ShingleTokenFilter"/> for deserialization. </summary>
+        internal ShingleTokenFilter()
+        {
+        }
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter PersistableModelCreateCore(BinaryData data, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ShingleTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    using (JsonDocument document = JsonDocument.Parse(data, ModelSerializationExtensions.JsonDocumentOptions))
+                    {
+                        return DeserializeShingleTokenFilter(document.RootElement, options);
+                    }
+                default:
+                    throw new FormatException($"The model {nameof(ShingleTokenFilter)} does not support reading '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override BinaryData PersistableModelWriteCore(ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ShingleTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            switch (format)
+            {
+                case "J":
+                    return ModelReaderWriter.Write(this, options, AzureSearchDocumentsContext.Default);
+                default:
+                    throw new FormatException($"The model {nameof(ShingleTokenFilter)} does not support writing '{options.Format}' format.");
+            }
+        }
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        BinaryData IPersistableModel<ShingleTokenFilter>.Write(ModelReaderWriterOptions options) => PersistableModelWriteCore(options);
+
+        /// <param name="data"> The data to parse. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        ShingleTokenFilter IPersistableModel<ShingleTokenFilter>.Create(BinaryData data, ModelReaderWriterOptions options) => (ShingleTokenFilter)PersistableModelCreateCore(data, options);
+
+        /// <param name="options"> The client options for reading and writing models. </param>
+        string IPersistableModel<ShingleTokenFilter>.GetFormatFromOptions(ModelReaderWriterOptions options) => "J";
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        void IJsonModel<ShingleTokenFilter>.Write(Utf8JsonWriter writer, ModelReaderWriterOptions options)
         {
             writer.WriteStartObject();
+            JsonModelWriteCore(writer, options);
+            writer.WriteEndObject();
+        }
+
+        /// <param name="writer"> The JSON writer. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override void JsonModelWriteCore(Utf8JsonWriter writer, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ShingleTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(ShingleTokenFilter)} does not support writing '{format}' format.");
+            }
+            base.JsonModelWriteCore(writer, options);
             if (Optional.IsDefined(MaxShingleSize))
             {
                 writer.WritePropertyName("maxShingleSize"u8);
@@ -45,111 +110,115 @@ namespace Azure.Search.Documents.Indexes.Models
                 writer.WritePropertyName("filterToken"u8);
                 writer.WriteStringValue(FilterToken);
             }
-            writer.WritePropertyName("@odata.type"u8);
-            writer.WriteStringValue(ODataType);
-            writer.WritePropertyName("name"u8);
-            writer.WriteStringValue(Name);
-            writer.WriteEndObject();
         }
 
-        internal static ShingleTokenFilter DeserializeShingleTokenFilter(JsonElement element)
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        ShingleTokenFilter IJsonModel<ShingleTokenFilter>.Create(ref Utf8JsonReader reader, ModelReaderWriterOptions options) => (ShingleTokenFilter)JsonModelCreateCore(ref reader, options);
+
+        /// <param name="reader"> The JSON reader. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        protected override TokenFilter JsonModelCreateCore(ref Utf8JsonReader reader, ModelReaderWriterOptions options)
+        {
+            string format = options.Format == "W" ? ((IPersistableModel<ShingleTokenFilter>)this).GetFormatFromOptions(options) : options.Format;
+            if (format != "J")
+            {
+                throw new FormatException($"The model {nameof(ShingleTokenFilter)} does not support reading '{format}' format.");
+            }
+            using JsonDocument document = JsonDocument.ParseValue(ref reader);
+            return DeserializeShingleTokenFilter(document.RootElement, options);
+        }
+
+        /// <param name="element"> The JSON element to deserialize. </param>
+        /// <param name="options"> The client options for reading and writing models. </param>
+        internal static ShingleTokenFilter DeserializeShingleTokenFilter(JsonElement element, ModelReaderWriterOptions options)
         {
             if (element.ValueKind == JsonValueKind.Null)
             {
                 return null;
             }
+            string odataType = "#Microsoft.Azure.Search.ShingleTokenFilter";
+            string name = default;
+            IDictionary<string, BinaryData> additionalBinaryDataProperties = new ChangeTrackingDictionary<string, BinaryData>();
             int? maxShingleSize = default;
             int? minShingleSize = default;
             bool? outputUnigrams = default;
             bool? outputUnigramsIfNoShingles = default;
             string tokenSeparator = default;
             string filterToken = default;
-            string odataType = default;
-            string name = default;
-            foreach (var property in element.EnumerateObject())
+            foreach (var prop in element.EnumerateObject())
             {
-                if (property.NameEquals("maxShingleSize"u8))
+                if (prop.NameEquals("@odata.type"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    odataType = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("name"u8))
+                {
+                    name = prop.Value.GetString();
+                    continue;
+                }
+                if (prop.NameEquals("maxShingleSize"u8))
+                {
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    maxShingleSize = property.Value.GetInt32();
+                    maxShingleSize = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("minShingleSize"u8))
+                if (prop.NameEquals("minShingleSize"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    minShingleSize = property.Value.GetInt32();
+                    minShingleSize = prop.Value.GetInt32();
                     continue;
                 }
-                if (property.NameEquals("outputUnigrams"u8))
+                if (prop.NameEquals("outputUnigrams"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    outputUnigrams = property.Value.GetBoolean();
+                    outputUnigrams = prop.Value.GetBoolean();
                     continue;
                 }
-                if (property.NameEquals("outputUnigramsIfNoShingles"u8))
+                if (prop.NameEquals("outputUnigramsIfNoShingles"u8))
                 {
-                    if (property.Value.ValueKind == JsonValueKind.Null)
+                    if (prop.Value.ValueKind == JsonValueKind.Null)
                     {
                         continue;
                     }
-                    outputUnigramsIfNoShingles = property.Value.GetBoolean();
+                    outputUnigramsIfNoShingles = prop.Value.GetBoolean();
                     continue;
                 }
-                if (property.NameEquals("tokenSeparator"u8))
+                if (prop.NameEquals("tokenSeparator"u8))
                 {
-                    tokenSeparator = property.Value.GetString();
+                    tokenSeparator = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("filterToken"u8))
+                if (prop.NameEquals("filterToken"u8))
                 {
-                    filterToken = property.Value.GetString();
+                    filterToken = prop.Value.GetString();
                     continue;
                 }
-                if (property.NameEquals("@odata.type"u8))
+                if (options.Format != "W")
                 {
-                    odataType = property.Value.GetString();
-                    continue;
-                }
-                if (property.NameEquals("name"u8))
-                {
-                    name = property.Value.GetString();
-                    continue;
+                    additionalBinaryDataProperties.Add(prop.Name, BinaryData.FromString(prop.Value.GetRawText()));
                 }
             }
             return new ShingleTokenFilter(
                 odataType,
                 name,
+                additionalBinaryDataProperties,
                 maxShingleSize,
                 minShingleSize,
                 outputUnigrams,
                 outputUnigramsIfNoShingles,
                 tokenSeparator,
                 filterToken);
-        }
-
-        /// <summary> Deserializes the model from a raw response. </summary>
-        /// <param name="response"> The response to deserialize the model from. </param>
-        internal static new ShingleTokenFilter FromResponse(Response response)
-        {
-            using var document = JsonDocument.Parse(response.Content, ModelSerializationExtensions.JsonDocumentOptions);
-            return DeserializeShingleTokenFilter(document.RootElement);
-        }
-
-        /// <summary> Convert into a <see cref="RequestContent"/>. </summary>
-        internal override RequestContent ToRequestContent()
-        {
-            var content = new Utf8JsonRequestContent();
-            content.JsonWriter.WriteObjectValue(this);
-            return content;
         }
     }
 }

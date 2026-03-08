@@ -5,11 +5,17 @@
 
 #nullable disable
 
+using System;
+using System.Collections.Generic;
+
 namespace Azure.Search.Documents.Indexes.Models
 {
-    /// <summary> The SearchIndexerCache. </summary>
+    /// <summary> The type of the cache. </summary>
     public partial class SearchIndexerCache
     {
+        /// <summary> Keeps track of any properties unknown to the library. </summary>
+        private protected readonly IDictionary<string, BinaryData> _additionalBinaryDataProperties;
+
         /// <summary> Initializes a new instance of <see cref="SearchIndexerCache"/>. </summary>
         public SearchIndexerCache()
         {
@@ -19,28 +25,24 @@ namespace Azure.Search.Documents.Indexes.Models
         /// <param name="id"> A guid for the SearchIndexerCache. </param>
         /// <param name="storageConnectionString"> The connection string to the storage account where the cache data will be persisted. </param>
         /// <param name="enableReprocessing"> Specifies whether incremental reprocessing is enabled. </param>
-        /// <param name="identity">
-        /// The user-assigned managed identity used for connections to the enrichment cache.  If the connection string indicates an identity (ResourceId) and it's not specified, the system-assigned managed identity is used. On updates to the indexer, if the identity is unspecified, the value remains unchanged. If set to "none", the value of this property is cleared.
-        /// Please note <see cref="SearchIndexerDataIdentity"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="SearchIndexerDataNoneIdentity"/> and <see cref="SearchIndexerDataUserAssignedIdentity"/>.
-        /// </param>
-        internal SearchIndexerCache(string id, string storageConnectionString, bool? enableReprocessing, SearchIndexerDataIdentity identity)
+        /// <param name="identity"> The user-assigned managed identity used for connections to the enrichment cache.  If the connection string indicates an identity (ResourceId) and it's not specified, the system-assigned managed identity is used. On updates to the indexer, if the identity is unspecified, the value remains unchanged. If set to "none", the value of this property is cleared. </param>
+        /// <param name="additionalBinaryDataProperties"> Keeps track of any properties unknown to the library. </param>
+        internal SearchIndexerCache(string id, string storageConnectionString, bool? enableReprocessing, SearchIndexerDataIdentity identity, IDictionary<string, BinaryData> additionalBinaryDataProperties)
         {
             Id = id;
             StorageConnectionString = storageConnectionString;
             EnableReprocessing = enableReprocessing;
             Identity = identity;
+            _additionalBinaryDataProperties = additionalBinaryDataProperties;
         }
 
         /// <summary> A guid for the SearchIndexerCache. </summary>
         public string Id { get; set; }
+
         /// <summary> Specifies whether incremental reprocessing is enabled. </summary>
         public bool? EnableReprocessing { get; set; }
-        /// <summary>
-        /// The user-assigned managed identity used for connections to the enrichment cache.  If the connection string indicates an identity (ResourceId) and it's not specified, the system-assigned managed identity is used. On updates to the indexer, if the identity is unspecified, the value remains unchanged. If set to "none", the value of this property is cleared.
-        /// Please note <see cref="SearchIndexerDataIdentity"/> is the base class. According to the scenario, a derived class of the base class might need to be assigned here, or this property needs to be casted to one of the possible derived classes.
-        /// The available derived classes include <see cref="SearchIndexerDataNoneIdentity"/> and <see cref="SearchIndexerDataUserAssignedIdentity"/>.
-        /// </summary>
+
+        /// <summary> The user-assigned managed identity used for connections to the enrichment cache.  If the connection string indicates an identity (ResourceId) and it's not specified, the system-assigned managed identity is used. On updates to the indexer, if the identity is unspecified, the value remains unchanged. If set to "none", the value of this property is cleared. </summary>
         public SearchIndexerDataIdentity Identity { get; set; }
     }
 }
