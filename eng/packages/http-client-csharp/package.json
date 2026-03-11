@@ -58,7 +58,7 @@
     "@typespec/openapi": "1.9.0",
     "@typespec/rest": "0.79.0",
     "@typespec/spec-api": "0.1.0-alpha.12",
-    "@typespec/spector": "0.1.0-alpha.23",
+    "@typespec/spector": "0.1.0-dev.0",
     "@typespec/tspd": "0.74.0",
     "@typespec/versioning": "0.79.0",
     "@typespec/xml": "0.79.0",
